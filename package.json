@@ -1,0 +1,19 @@
+{
+  "name": "vayusetu-mumbai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mumbai ward-level air quality intelligence platform (full-stack capstone)",
+  "workspaces": [
+    "src/api",
+    "src/web"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w src/api\" \"npm run dev -w src/web\"",
+    "build": "npm run build -w src/api && npm run build -w src/web",
+    "test": "npm run test -w src/api && npm run test -w src/web",
+    "lint": "npm run lint -w src/api && npm run lint -w src/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
