@@ -239,10 +239,12 @@ React doesn't talk to the actual browser HTML (the DOM) directly because modifyi
 
 Engineering is about making compromises. Here are the three biggest technical trade-offs we made in VayuSetu:
 
-### 1. SQLite vs. PostgreSQL
-**The Decision:** We used SQLite (a local file-based database) instead of PostgreSQL (a dedicated database server).
-**The Trade-off:** PostgreSQL is significantly better for massive concurrent writes (thousands of users submitting pollution reports at the exact same millisecond). However, PostgreSQL requires spinning up a dedicated server instance, managing connection pools, and paying for external hosting.
-**The Justification:** For a capstone project monitoring 24 wards, the write-load is low. `better-sqlite3` can handle ~100,000 writes per second synchronously on a single thread. The massive benefit is deployment simplicity: the database is just a file (`vayusetu.sqlite`) that lives inside the server memory.
+### 1. SQLite vs. MongoDB (The Horizontal Scaling Defense)
+**The Decision:** We used SQLite (a local relational file-based database) instead of MongoDB (a distributed NoSQL document database).
+**The Trade-off Argument:** Evaluators will often argue: *"MongoDB scales better horizontally."* This is a classic trap. Horizontal scaling is required for massive concurrent *writes* across distributed clusters (like Facebook). VayuSetu is highly **Read-Heavy** and monitors exactly 24 wards in Mumbai. We do not have a "Big Data" problem.
+**The Justification:** 
+1. **Vertical vs Horizontal Scaling:** SQLite handles 100,000 read operations per second on a single thread. For a local, read-heavy dashboard, Vertical Scaling (a single powerful DB file) is infinitely faster and cheaper than the network latency of a horizontally sharded MongoDB cluster. Furthermore, our Node.js backend *is* horizontally scalable because we use stateless JWTs instead of server memory.
+2. **Absolute Data Integrity:** Mongoose uses `.populate()` to simulate relationships, but those rules only exist in Node.js (Application-Level constraints). If a bug occurs, MongoDB will happily save an orphaned incident. SQLite enforces **Foreign Keys** at the database engine level (C-code). It physically refuses to save data that points to a non-existent ward, guaranteeing absolute data integrity.
 
 ### 2. Event-Driven SSE vs. WebSockets
 **The Decision:** We used Server-Sent Events (SSE) via TCP instead of full-duplex WebSockets.
