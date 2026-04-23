@@ -1,98 +1,133 @@
 # VayuSetu Mumbai — Capstone Architecture & Viva Guide
 
-This document is your complete guide for the final Capstone (Mini Project) presentation and viva. It breaks down the architecture, explains how we met the Complex Engineering Problem (CEP) requirements, and provides answers to the mandatory viva questions.
+This document is your complete guide for the final Capstone (Mini Project) presentation and viva. It is written to clearly explain the core concepts of the project so you can easily understand and defend them.
 
 ---
 
-## 1. System Architecture & Data Flow
+## 1. Core Technical Concepts (Explained Simply)
 
-VayuSetu is a modern, modular Full Stack application utilizing the **MERN-equivalent ecosystem** (React + Express + Node + SQLite). It is designed to be highly scalable and API-first.
+Before the viva, you should understand these three major concepts that make your project a "Complex Engineering Problem."
 
-### Components
-1. **Frontend (React + Vite)**
-   - Single Page Application (SPA) providing a reactive, role-based dashboard.
-   - Communicates with the backend exclusively via RESTful JSON APIs.
-   - Real-time updates powered by Server-Sent Events (SSE).
+### A. What is SSE (Server-Sent Events)?
+Usually, when a website wants data, it has to ask the server ("Hey, is there new data?"). This is called polling. 
+**Server-Sent Events (SSE)** is a one-way street where the browser connects to the server once, and leaves the connection open. Whenever something happens on the backend (like new AQI data being ingested, or a new pollution report being filed), the server instantly pushes a message down that open connection. 
+* **Why it matters:** It makes your dashboard update instantly in real-time without the user having to refresh the page.
 
-2. **Backend (Node.js + Express)**
-   - Stateless REST API enforcing Role-Based Access Control (RBAC) via JWTs.
-   - **Risk Engine (`riskEngine.js`)**: A custom algorithm that calculates a composite AQI score using real-time pollutant levels, ward population density, and green cover percentage.
+### B. What is JWT (JSON Web Tokens) & Role-Based Access Control?
+Instead of saving user sessions in the database, when a user logs in, the server gives them a cryptographically signed token (the JWT). The frontend sends this token with every request.
+* **Role-Based Access Control (RBAC):** Inside the token, we store the user's role (`city_admin`, `zone_officer`, `health_advisor`, or `citizen`). When an API request comes in, the server checks this role. For example, the server will block a `citizen` from accessing the `POST /external/ingest-live-inputs` route, returning a `403 Forbidden` error.
 
-3. **Database (SQLite)**
-   - Relational database schema with 7 tables (`users`, `wards`, `risk_snapshots`, `incidents`, `advisories`, `audit_logs`).
-   - Easily swappable to PostgreSQL for production scaling without changing the application logic.
-
-4. **External Integrations**
-   - **Open-Meteo Air Quality API**: Fetches real-time PM2.5, PM10, NO₂, and O₃ for Mumbai.
-   - **Open-Meteo Weather API**: Fetches real-time temperature and wind speed.
-
-### Core Data Flow (The "Live Ingestion" Loop)
-1. **Admin** clicks "Ingest Live Data" on the dashboard.
-2. **Backend** fetches city-wide pollutant levels from Open-Meteo (`externalDataService.js`).
-3. **Backend** runs the Risk Engine, taking the city-wide AQI and applying ward-specific modifiers (density, green cover) to synthesize 24 unique ward scores.
-4. **Backend** saves the new snapshot to the database and broadcasts an `input.external.ingested` event via SSE.
-5. **Frontend** receives the SSE event and automatically re-fetches the latest dashboard data, updating the UI instantly without a page refresh.
+### C. The Custom Risk Engine
+External APIs only provide a single Air Quality reading for the *entire* city of Mumbai. We wanted ward-level data.
+Instead of faking the data, we use a custom algorithm in `riskEngine.js`:
+1. We take the real city-wide pollutant levels (PM2.5, NO2, etc.).
+2. We multiply them by a specific ward's **Density Index** (Dharavi has higher density than Malabar Hill, so its risk goes up).
+3. We reduce the risk based on the ward's **Tree Cover Percentage** (more trees = better air filtration).
+* **Why it matters:** It shows you didn't just display an API response on a screen; you engineered a custom algorithm to synthesize localized data using geographic characteristics.
 
 ---
 
-## 2. Deployment Plan (GitHub + Render + Vercel)
+## 2. Database Schema (ER Diagram)
 
-As per the Capstone requirements, the project must be deployed live. 
+The project uses SQLite with a highly normalized relational database design. 
 
-1. **GitHub Setup**
-   - Push this entire repository (`codex-land`) to a public GitHub repository.
+```mermaid
+erDiagram
+    users {
+        INTEGER id PK
+        TEXT name
+        TEXT email
+        TEXT password_hash
+        TEXT role "city_admin, zone_officer, citizen, etc."
+        TEXT ward_code FK "Nullable"
+    }
+    
+    wards {
+        TEXT code PK "e.g., G/N, L"
+        TEXT name "e.g., Dharavi, Kurla"
+        INTEGER population
+        REAL vulnerability_index
+        REAL density_index
+        REAL tree_cover_pct
+    }
 
-2. **Backend Deployment (Render - Free Tier)**
-   - Go to [Render.com](https://render.com) and create a new **Web Service**.
-   - Connect your GitHub repo and select the `src/api` directory as the Root Directory.
-   - Build Command: `npm install`
-   - Start Command: `node server.js`
-   - Render will give you a live URL (e.g., `https://vayusetu-api.onrender.com`).
+    incidents {
+        INTEGER id PK
+        TEXT title
+        TEXT description
+        TEXT type "waste_burning, construction_dust"
+        TEXT severity "low, moderate, high, hazardous"
+        TEXT status "open, investigating, resolved"
+        TEXT ward_code FK
+        INTEGER reported_by FK "users.id"
+        INTEGER assigned_to FK "users.id (Nullable)"
+    }
 
-3. **Frontend Deployment (Vercel - Free Tier)**
-   - Go to [Vercel.com](https://vercel.com) and import your GitHub repo.
-   - Set the Root Directory to `src/web`.
-   - In the **Environment Variables** section, add:
-     - Name: `VITE_API_URL`
-     - Value: `https://vayusetu-api.onrender.com/api` (The Render URL you just got).
-   - Click Deploy.
+    advisories {
+        INTEGER id PK
+        TEXT title
+        TEXT message
+        TEXT priority
+        TEXT ward_code FK "Nullable"
+        INTEGER author_id FK "users.id"
+    }
 
-You will now have a live, working URL to submit and demonstrate during the evaluation.
+    risk_snapshots {
+        INTEGER id PK
+        TEXT ward_code FK
+        REAL computed_score
+        TEXT computed_level
+        TEXT timestamp
+    }
+
+    users }o--o| wards : "assigned to"
+    incidents }o--|| wards : "occurs in"
+    incidents }o--|| users : "reported by"
+    incidents }o--o| users : "assigned to"
+    advisories }o--o| wards : "targets"
+    advisories }o--|| users : "written by"
+    risk_snapshots }o--|| wards : "measures"
+```
 
 ---
 
 ## 3. Viva Preparation: The 8 Mandatory Questions
 
-Use these answers to confidently defend your project during the evaluation.
+Use these plain-English answers to confidently defend your project.
 
 ### Q1: What is the problem your application is solving?
-**A:** Mumbai faces severe, localized air quality crises, but existing tools like SAFAR only provide broad, city-level data. VayuSetu solves this by providing **ward-level** air quality intelligence. It synthesizes real-time external pollutant data with local ward characteristics (population density, green cover) to create a highly localized risk score. It also provides a closed-loop system where citizens can report pollution sources (like waste burning) and ward officers can investigate them, which feeds back into the risk scoring.
+**A:** Mumbai faces severe, localized air quality crises. Existing tools like SAFAR only provide broad, city-level AQI data. VayuSetu solves this by providing **ward-level** air quality intelligence. It takes city-wide API data and synthesizes it with ward-specific characteristics like population density and green cover. Furthermore, it creates a feedback loop: citizens can report localized pollution (like waste burning), and ward officers can investigate it directly through the platform.
 
 ### Q2: Why did you choose your specific technology stack?
-**A:** We chose a Node.js/Express backend because its asynchronous, event-driven architecture is perfect for handling our real-time Server-Sent Events (SSE) and external API polling. React was chosen for the frontend to build a dynamic, stateful dashboard that can instantly reflect live AQI changes without page reloads. SQLite was chosen for rapid development and relational integrity, with a structure that can trivially migrate to PostgreSQL for enterprise scale.
+**A:** We chose the **MERN-equivalent stack (React + Express + Node + SQLite)**. 
+- **Node/Express** is perfect for our backend because its asynchronous nature handles our real-time Server-Sent Events (SSE) effortlessly. 
+- **React** allows us to build a dynamic dashboard that instantly updates when new live data arrives without refreshing the page. 
+- **SQLite** was chosen for fast relational database development, and because we used standard SQL, we can easily migrate to PostgreSQL if the city scaled this up.
 
 ### Q3: Explain your system architecture.
-**A:** We use a decoupled, API-first architecture. The frontend is a React SPA that acts purely as a presentation layer. The Express backend serves as the business logic hub, exposing a REST API protected by JWT authentication. The backend integrates with the Open-Meteo API for live environmental data, processes it through our custom Risk Engine, stores it in SQLite, and pushes real-time updates to connected clients using Server-Sent Events.
+**A:** The architecture is an API-first client-server model. 
+- The **Frontend (React)** is purely a presentation layer that talks to the backend via a RESTful API.
+- The **Backend (Express)** handles all business logic. It has a custom Risk Engine that fetches environmental data from the Open-Meteo API, calculates ward-level risk scores, and saves them to the SQLite Database. 
+- Finally, the backend uses **Server-Sent Events (SSE)** to push real-time alerts down to the React frontend the exact second the database changes.
 
 ### Q4: How does your backend communicate with the frontend?
-**A:** Communication happens via two channels:
-1. **Synchronous REST APIs:** The frontend uses standard HTTP GET/POST/PATCH requests with JSON payloads for data fetching and mutations (e.g., logging in, submitting a pollution report).
-2. **Asynchronous Server-Sent Events (SSE):** A persistent HTTP connection that allows the backend to push real-time notifications to the frontend when critical events happen (like new live data ingestion or a hazardous AQI alert).
+**A:** It communicates via two methods:
+1. **REST APIs (JSON):** The frontend makes standard HTTP GET, POST, and PATCH requests to fetch data, log in, or submit pollution reports.
+2. **Server-Sent Events (SSE):** The backend maintains an open, one-way HTTP connection to the browser. If an admin clicks "Recompute AQI", the backend pushes an event through the SSE stream, and the frontend instantly updates the graphs and tables.
 
 ### Q5: What challenges did you face during development?
-**A:** Our biggest challenge was data granularity. External APIs only give a single AQI reading for the whole of Mumbai, but we needed ward-level data. We solved this by creating a custom synthesis algorithm that takes the baseline city AQI and modifies it based on each specific ward's population density index and tree cover percentage, resulting in 24 accurate, localized risk scores. 
+**A:** Our biggest challenge was data granularity. The free external APIs only give a single AQI reading for the whole of Mumbai, but our problem statement required ward-level tracking. We solved this by creating a custom math algorithm (`riskEngine.js`). It takes the baseline city AQI and modifies it based on each specific ward's density index and tree cover percentage. This allowed us to generate 24 accurate, localized risk scores without needing physical sensors.
 
 ### Q6: How is your project scalable?
 **A:** 
-1. **Stateless Auth:** Because we use JWTs instead of session cookies, the Node server is entirely stateless and can be horizontally scaled across multiple instances.
-2. **Database:** Our SQLite schema uses standard relational patterns and parameterized queries, meaning we can point the ORM to a managed PostgreSQL cluster without changing our core business logic.
-3. **Data Ingestion:** The architecture decouples the fetching of external data from client requests. One admin triggers the ingestion, which updates the database, meaning thousands of citizens can view the dashboard without us hitting the Open-Meteo API rate limits.
+1. **Stateless Authentication:** Because we use JSON Web Tokens (JWT) instead of storing user sessions in the database, our Node server is completely stateless and can be scaled horizontally.
+2. **Decoupled API Polling:** Instead of thousands of users individually hitting the Open-Meteo API (which would hit rate limits immediately), our backend fetches the API data once, saves it to our database, and serves the data to users from our own database.
 
 ### Q7: Explain your database schema design.
-**A:** The database is highly normalized. The core entity is `wards`, which holds static characteristics (population, density, geo-coordinates). The `users` table holds accounts linked to specific roles and optionally tied to a `ward_code`. The `risk_snapshots` table is a time-series table storing historical and current AQI calculations for every ward. Finally, the `incidents` table (citizen reports) and `advisories` table map back to wards via foreign keys, creating a fully relational web of environmental data.
+**A:** We designed a highly normalized relational schema. The core table is `wards`, which holds static data like population and tree cover. The `users` table holds accounts linked to specific roles, and can be tied to a ward via a foreign key. The `incidents` table tracks citizen pollution reports and links to the user who reported it and the officer assigned to it. Finally, `risk_snapshots` tracks the historical AQI scores for every ward over time.
 
 ### Q8: What improvements would you make in future?
-**A:** Currently, our ward-level data is synthesized via an algorithm. In the future, we would integrate direct IoT sensor feeds from actual BMC CAAQMS monitoring stations installed in specific wards to provide raw, unsynthesized localization. We could also add predictive ML models to forecast AQI trends 24 hours in advance based on historical wind and temperature data.
+**A:** Currently, our ward-level data is synthesized via an algorithm. If this were deployed by the BMC, we would integrate direct IoT sensor feeds from actual CAAQMS monitoring stations installed in each ward. Additionally, we could add a machine learning model to predict what the AQI will be 24 hours in the future based on historical wind and temperature patterns.
 
 ---
 
@@ -102,10 +137,30 @@ If the evaluators ask how this qualifies as a "Complex Engineering Problem", ref
 
 | CEP Criteria | How VayuSetu Meets It |
 |--------------|-----------------------|
-| **WP1: Depth of Knowledge** | Custom risk engine algorithm, JWT stateless auth, and robust relational DB modeling. |
-| **WP2: Conflicting Requirements** | Balancing real-time data freshness vs. strict external API rate limits (solved via centralized backend ingestion). |
-| **WP3: Depth of Analysis** | Designing the synthesis logic to convert city-wide data into ward-level data using density and green cover math. |
-| **WP4: Familiarity of Issues** | Implementing persistent Server-Sent Events (SSE) for real-time dashboard updates across all connected clients. |
-| **WP5: Applicable Codes** | Strict REST conventions, Zod request validation, Bcrypt password hashing, and token-based RBAC. |
-| **WP6: Stakeholder Involvement** | Four distinct roles (Admin, Officer, Advisor, Citizen) each with tailored access levels and dashboard views. |
-| **WP7: Interdependence** | React UI reacting instantly to Express backend state changes triggered by external Python/Meteo APIs. |
+| **WP1: Depth of Knowledge** | Wrote a custom risk engine algorithm, implemented JWT stateless auth, and designed a robust relational DB. |
+| **WP2: Conflicting Requirements** | Solved the conflict of needing real-time data vs. strict external API rate limits by building a centralized ingestion system. |
+| **WP3: Depth of Analysis** | Engineered a mathematical model to synthesize ward-level data from city-wide data using density and green cover modifiers. |
+| **WP4: Familiarity of Issues** | Implemented persistent Server-Sent Events (SSE) for modern real-time dashboard updates. |
+| **WP5: Applicable Codes** | Adhered to strict REST API conventions, used Zod for request validation, and Bcrypt for secure password hashing. |
+| **WP6: Stakeholder Involvement** | Engineered a 4-role system (Admin, Officer, Advisor, Citizen), where citizen actions (pollution reports) dictate officer workflows. |
+| **WP7: Interdependence** | The React UI reacts instantly to Express backend state changes, which in turn are triggered by external Python/Meteo API data. |
+
+---
+
+## 5. Deployment Instructions (For Render & Vercel)
+
+### 1. Backend Deployment (Render)
+- Go to [Render.com](https://render.com) and click **New → Web Service**.
+- Connect your GitHub repository.
+- **Root Directory:** `src/api`
+- **Build Command:** `npm install`
+- **Start Command:** `node server.js`
+- Click Deploy. Copy the URL it gives you (e.g., `https://fsd-final-project-api.onrender.com`).
+
+### 2. Frontend Deployment (Vercel)
+- Go to [Vercel.com](https://vercel.com) and click **Add New → Project**.
+- Import the GitHub repository.
+- **Framework Preset:** `Vite`
+- **Root Directory:** `src/web`
+- **Environment Variables:** Add a new variable named `VITE_API_URL`. Set the value to your Render URL plus `/api` (e.g., `https://fsd-final-project-api.onrender.com/api`).
+- Click Deploy. Vercel will give you a live URL for your frontend.
