@@ -17,6 +17,34 @@ const resolveLiveSignal = async ({ db, fetchImpl }) => {
   }
 };
 
+export const runLiveIngestion = async ({ db, publishEvent, fetchImpl = fetch, actorId = null }) => {
+  const { live, degraded } = await resolveLiveSignal({ db, fetchImpl });
+  const wards = db.prepare("SELECT code, vulnerability_index, density_index, tree_cover_pct FROM wards").all();
+
+  const tx = db.transaction(() => {
+    for (const ward of wards) {
+      const payload = synthesizeWardLiveInput({ ward, mumbaiNow: live });
+      upsertLiveInput(db, payload);
+    }
+  });
+  tx();
+
+  const computedCount = recomputeAllWardRisks(db, publishEvent);
+  
+  if (actorId) {
+    insertAuditLog(db, {
+      actorId,
+      action: "external.live_inputs.ingest",
+      entityType: "ward_live_inputs",
+      entityId: null,
+      payload: { source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount }
+    });
+  }
+  
+  publishEvent("input.external.ingested", { source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount });
+  return { status: "ingested", source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount };
+};
+
 export const createExternalDataRouter = ({ db, publishEvent, fetchImpl }) => {
   const router = Router();
 
@@ -48,28 +76,8 @@ export const createExternalDataRouter = ({ db, publishEvent, fetchImpl }) => {
     requireRoles("city_admin"),
     async (request, response) => {
       try {
-        const { live, degraded } = await resolveLiveSignal({ db, fetchImpl });
-        const wards = db.prepare("SELECT code, vulnerability_index, density_index, tree_cover_pct FROM wards").all();
-
-        const tx = db.transaction(() => {
-          for (const ward of wards) {
-            const payload = synthesizeWardLiveInput({ ward, mumbaiNow: live });
-            upsertLiveInput(db, payload);
-          }
-        });
-        tx();
-
-        const computedCount = recomputeAllWardRisks(db, publishEvent);
-        insertAuditLog(db, {
-          actorId: request.auth.sub,
-          action: "external.live_inputs.ingest",
-          entityType: "ward_live_inputs",
-          entityId: null,
-          payload: { source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount }
-        });
-        publishEvent("input.external.ingested", { source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount });
-
-        response.json({ status: "ingested", source: live.source, degraded, observedAt: live.observedAt, wardsUpdated: wards.length, computedCount });
+        const result = await runLiveIngestion({ db, publishEvent, fetchImpl, actorId: request.auth.sub });
+        response.json(result);
       } catch (error) {
         response.status(502).json({ error: `Unable to ingest live external data: ${error.message}` });
       }
