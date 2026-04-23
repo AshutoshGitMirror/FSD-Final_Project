@@ -70,6 +70,33 @@ export const authRequired = (req, res, next) => {
 };
 ```
 
+### The Missing Link: Tying it back to the Database
+You might be wondering: *"Okay, the math checks out, but how does the server know this token belongs to the actual user in the database?"*
+
+The answer lies in **where the payload came from in the first place**, and **how we use it later**.
+
+**Step 1: The Initial Login (Database Read)**
+When the user types their email and password, the server does a `SELECT * FROM users WHERE email = ?`. It finds User Row #5.
+Because the server found them in the database, it takes their database Primary Key (`id: 5`) and puts it *inside* the payload: `const payload = { sub: 5, role: "citizen" }`.
+It signs it and hands it to the user.
+
+**Step 2: The Future Request (Database Write)**
+Ten minutes later, the user wants to submit a pollution report. They send the token.
+The `authRequired` middleware (above) verifies the token and says: *"The math is perfect. I trust this payload. I am attaching `{ sub: 5 }` to the request."*
+
+Now, the code moves to the actual route handler in `incidentRoutes.js`. 
+Because the middleware mathematically proved this request came from User #5, the server confidently runs this SQL query:
+
+```javascript
+db.prepare(`
+  INSERT INTO incidents (title, reported_by) 
+  VALUES (?, ?)
+`).run("Burning Garbage", req.auth.sub); // It uses the ID from the trusted token!
+```
+
+This is how the link is made: 
+We don't need to check the `users` database table to verify the token, because the token **contains the database ID**. We trust the ID inside the token because the cryptography proves nobody tampered with it since the moment the server originally generated it during login.
+
 ---
 
 ## Chapter 2: The Physics of Server-Sent Events (TCP & HTTP)
