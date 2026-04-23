@@ -202,8 +202,6 @@ export const App = () => {
                 mumbaiLive={data.mumbaiLive}
                 loading={busy}
                 onRecompute={() => runMutation(() => apiClient.recomputeRisk(token))}
-                onIngestExternal={() => runMutation(() => apiClient.ingestExternalLiveInputs(token))}
-                canIngestExternal={canIngest}
               />
             )}
             {tab === "map" && <MumbaiMapPanel wards={data.wards} />}
@@ -231,7 +229,6 @@ export const App = () => {
                 users={data.users}
                 wards={data.wards}
                 onUpdateRole={(id, body) => runMutation(() => apiClient.updateUserRole(token, id, body))}
-                onIngestLive={() => runMutation(() => apiClient.ingestExternalLiveInputs(token))}
               />
             )}
           </section>

@@ -71,9 +71,6 @@ export const OverviewPanel = ({ riskOverview, mumbaiLive, loading, onRecompute, 
       {/* Actions */}
       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.2rem" }}>
         <button className="btn btn-accent" onClick={onRecompute} disabled={loading}>⟳ Recompute AQI</button>
-        {canIngestExternal && (
-          <button className="btn btn-outline" onClick={onIngestExternal} disabled={loading}>↓ Ingest Live Data</button>
-        )}
       </div>
 
       {/* Top Risk Wards — with names, no top drivers */}
