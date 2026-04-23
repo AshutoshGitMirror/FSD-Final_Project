@@ -29,11 +29,19 @@ We use `better-sqlite3`, which is a synchronous, extremely fast SQLite library f
 - Open `src/api/db.js`. You will see `db.exec(...)` which creates all our tables (`users`, `wards`, `incidents`, etc.) if they don't exist.
 - It uses standard SQL. For example, `CREATE TABLE IF NOT EXISTS users (...)`.
 
-### C. Authentication & Role-Based Access Control (RBAC): `auth.js`
-This is how we verify who a user is without storing their session in the database.
-- **JWT (JSON Web Tokens):** When a user logs in, we use `jsonwebtoken` to create a signed string (the token) containing their `id`, `role`, and `ward_code`.
-- **`authRequired` Middleware:** Every protected route uses this function. It grabs the token from the `Authorization: Bearer <token>` header, verifies the signature using `JWT_SECRET`, and attaches the decoded user data to `request.auth`.
-- **`requireRoles` Middleware:** This function checks `request.auth.role`. If a `citizen` tries to hit an endpoint protected by `requireRoles("zone_officer")`, this middleware instantly returns a `403 Forbidden` error.
+### C. Authentication & Role-Based Access Control: `auth.js` (Explained Simply)
+
+**The Problem:** HTTP is "stateless." Every time React asks Express for data, Express has total amnesia. It has no idea who you are or if you logged in 5 seconds ago.
+
+**The Old Way (Sessions):** Express gives you a "Session ID" cookie and saves a file in its memory saying "Session 123 = Admin". But if we host this on Render, Render deletes memory every time it goes to sleep!
+
+**The Modern Way (JWT - JSON Web Tokens):**
+Think of JWT like an **amusement park wristband**. 
+1. **Login:** You show the ticket counter (Express) your ID and password. They verify it, and put a tamper-proof wristband on your arm (the JWT). Written on the wristband in sharpie is: `{"id": 5, "role": "zone_officer"}`. The ticket counter signs the wristband with an invisible UV ink signature (`JWT_SECRET`).
+2. **Making Requests:** When you want to go on a ride (make an API request), you just show your wristband in the HTTP Header (`Authorization: Bearer <token>`).
+3. **The Bouncer (`authRequired` middleware):** Express doesn't need to check the database! The Bouncer just shines a UV light on your wristband to check the signature (`JWT_SECRET`). If the signature is valid, the Bouncer reads the sharpie (`role: zone_officer`) and lets you in. If you try to forge a wristband, the signature will be invalid, and the Bouncer throws a `401 Unauthorized`.
+
+This happens in `src/api/auth.js`. We use the `jsonwebtoken` library to create and verify these wristbands.
 
 ---
 
@@ -53,27 +61,29 @@ Open **`src/api/riskEngine.js`**.
 
 This is the most impressive technical feature of the app. It's how the frontend updates instantly without you refreshing the page.
 
-### The Problem with Polling
-Normally, a React app uses `setInterval` to ask the server every 5 seconds, *"Hey, is there new data?"* This is called polling. It spams the server with thousands of useless HTTP requests.
+### The Problem with Polling (The "Are we there yet?" method)
+Normally, if React wants live data, it uses a timer to ask Express every 5 seconds: *"Hey, is there new data?"* Express says *"No."* 5 seconds later: *"Hey, new data?"* Express says *"No."* 
+This is called **polling**. It's like a kid in the backseat asking "Are we there yet?" It wastes tons of server energy and network bandwidth.
 
-### The SSE Solution
-**Server-Sent Events (SSE)** opens a single, permanent TCP connection between the browser and the server. The server holds this connection open and pushes data down the pipe whenever it wants.
+### The SSE Solution (The Live Radio Station method)
+**Server-Sent Events (SSE)** changes the game. Instead of the browser constantly asking questions, the browser simply "tunes in" to the server's radio station and leaves the radio on. When the server has news, it broadcasts it over the airwaves.
 
-Here is exactly how it is implemented in the code:
+Here is exactly how it is implemented in our code:
 
-1. **The Event Bus (`src/api/eventBus.js`):** 
-   This is an internal Node.js `EventEmitter`. It acts as a post office. Whenever a route does something important (like inserting a new risk snapshot into the DB), it calls `publishEvent("aqi.recomputed", data)`.
+1. **The Post Office / News Desk (`src/api/eventBus.js`):** 
+   We use an internal Node.js feature called `EventEmitter`. Whenever a user creates a new Pollution Report in the database, the database tells the Post Office: `publishEvent("incident.created", newReportData)`.
 
-2. **The Alert Router (`src/api/routes/alertRoutes.js`):**
-   When the frontend connects to `GET /api/alerts/stream`, the Express server **does not call `res.send()`** (which would close the connection). 
-   Instead, it sets the headers to `Content-Type: text/event-stream` and `Connection: keep-alive`. 
-   It then adds this `res` object to a `clients` Set. 
-   When the `eventBus` receives a message, this router loops through every connected client and writes to their open stream: `res.write(\`data: ${jsonData}\n\n\`)`.
+2. **The Radio Tower (`src/api/routes/alertRoutes.js`):**
+   When the React frontend first loads, it connects to `GET /api/alerts/stream`. 
+   Normally, Express responds with `res.send("Hello")` and **hangs up the phone**. 
+   But for SSE, we do a magic trick! We tell Express to set the header `Connection: keep-alive` and **never hang up**. We add this open connection (`res`) to a big list of `clients`. 
+   When the Post Office gets a message, the Radio Tower loops through every open connection and writes the message directly into the open pipe: `res.write(\`data: ${jsonData}\n\n\`)`.
 
-3. **The Frontend Listener (`src/web/App.jsx`):**
-   In React, we use the native browser `EventSource` API. 
+3. **The Radio Receiver (`src/web/App.jsx`):**
+   In React, we use the browser's built-in `EventSource` object (our radio receiver). 
    `const sse = new EventSource("http://localhost:4000/api/alerts/stream")`. 
-   We attach an `sse.onmessage` listener. Whenever the server pushes data, React catches it and triggers `loadAll()` to fetch the new DB data and update the UI instantly.
+   We write a function that says: *"If the radio broadcasts an `incident.created` message, immediately fetch the new data from the database and update the screen."* 
+   Because the connection is already open, the data arrives in **milliseconds**.
 
 ---
 
