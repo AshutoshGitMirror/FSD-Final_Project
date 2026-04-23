@@ -14,9 +14,10 @@ const ROLE_COLORS = {
   citizen: "good"
 };
 
-export const UserManagementPanel = ({ users, wards, onUpdateRole }) => {
+export const UserManagementPanel = ({ users, wards, onUpdateRole, onIngestLive }) => {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ role: "", wardCode: "" });
+  const [isIngesting, setIsIngesting] = useState(false);
 
   const startEdit = (user) => {
     setEditing(user.id);
@@ -28,11 +29,29 @@ export const UserManagementPanel = ({ users, wards, onUpdateRole }) => {
     setEditing(null);
   };
 
+  const handleIngest = async () => {
+    setIsIngesting(true);
+    try {
+      await onIngestLive();
+    } finally {
+      setIsIngesting(false);
+    }
+  };
+
   return (
     <div>
-      <div className="panel-header">
-        <h2>User Management</h2>
-        <span className="sub">{users.length} registered users</span>
+      <div className="panel-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2>User Management & Data Sync</h2>
+          <span className="sub">{users.length} registered users</span>
+        </div>
+        <button 
+          className="btn btn-accent" 
+          onClick={handleIngest} 
+          disabled={isIngesting}
+        >
+          {isIngesting ? "Fetching..." : "Fetch Live External AQI Data"}
+        </button>
       </div>
 
       <div className="panel">

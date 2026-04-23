@@ -12,20 +12,6 @@ const server = app.listen(config.port, () => {
   logger.info(`${config.appName} listening`, { port: config.port });
 });
 
-// Automated Background Ingestion (Every 5 minutes)
-const INGEST_INTERVAL_MS = 5 * 60 * 1000;
-const ingestionInterval = setInterval(async () => {
-  try {
-    const result = await runLiveIngestion({ db, publishEvent });
-    logger.info("Background AQI Ingestion Complete", { updated: result.wardsUpdated });
-  } catch (error) {
-    logger.error("Background AQI Ingestion Failed", { error: error.message });
-  }
-}, INGEST_INTERVAL_MS);
-
-// Trigger initial ingestion after 5 seconds to ensure server is fully booted
-setTimeout(() => runLiveIngestion({ db, publishEvent }).catch(e => logger.error("Initial Ingest Failed", { e: e.message })), 5000);
-
 let isShuttingDown = false;
 const shutdown = (reason = "signal") => {
   if (isShuttingDown) {
@@ -33,7 +19,6 @@ const shutdown = (reason = "signal") => {
   }
   isShuttingDown = true;
   logger.info("Closing services", { reason });
-  clearInterval(ingestionInterval);
   server.close(() => {
     db.close();
     process.exit(reason === "signal" ? 0 : 1);

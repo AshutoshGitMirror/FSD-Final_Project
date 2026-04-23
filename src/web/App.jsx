@@ -231,6 +231,7 @@ export const App = () => {
                 users={data.users}
                 wards={data.wards}
                 onUpdateRole={(id, body) => runMutation(() => apiClient.updateUserRole(token, id, body))}
+                onIngestLive={() => runMutation(() => apiClient.ingestExternalLiveInputs(token))}
               />
             )}
           </section>
