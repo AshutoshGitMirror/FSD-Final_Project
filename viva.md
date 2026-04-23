@@ -1,35 +1,41 @@
 # VayuSetu Mumbai — Capstone Architecture & Viva Guide
 
-This document is your complete guide for the final Capstone (Mini Project) presentation and viva. It is written to clearly explain the core concepts of the project so you can easily understand and defend them.
+This document provides a deep, technically rigorous breakdown of the VayuSetu Mumbai application architecture. Use this to demonstrate a profound understanding of the codebase, internal execution flows, and engineering trade-offs during your Capstone viva.
 
 ---
 
-## 1. Core Technical Concepts (Explained Simply)
+## 1. Core Technical Implementation & Execution Flow
 
-Before the viva, you should understand these three major concepts that make your project a "Complex Engineering Problem."
+### A. The "Live Ingestion to UI" Execution Pipeline
+The most complex flow in the application is how external data is ingested, processed, and pushed to the client. This touches almost every layer of the MERN-equivalent stack.
 
-### A. What is SSE (Server-Sent Events)?
-Usually, when a website wants data, it has to ask the server ("Hey, is there new data?"). This is called polling. 
-**Server-Sent Events (SSE)** is a one-way street where the browser connects to the server once, and leaves the connection open. Whenever something happens on the backend (like new AQI data being ingested, or a new pollution report being filed), the server instantly pushes a message down that open connection. 
-* **Why it matters:** It makes your dashboard update instantly in real-time without the user having to refresh the page.
+1. **Trigger (`src/web/App.jsx`):** An admin clicks "Ingest Live Data". A `POST /api/external/ingest-live-inputs` request is fired.
+2. **Controller (`src/api/routes/externalDataRoutes.js`):** The Express router validates the JWT and RBAC (`requireRoles("city_admin")`).
+3. **External Fetch (`src/api/services/externalDataService.js`):** Makes asynchronous HTTP requests to the Open-Meteo Air Quality and Weather APIs to get baseline Mumbai data (PM2.5, PM10, NO₂, O₃, Wind, Temp).
+4. **Processing (`src/api/services/riskService.js` & `src/api/riskEngine.js`):** 
+   - The system maps over all 24 wards defined in `src/api/wardCatalog.js`.
+   - The `riskEngine.js` algorithm takes the baseline city AQI and applies a mathematical synthesis: `(CityAQI * DensityIndex) - (TreeCoverPct * MitigationFactor)`.
+5. **Persistence (`src/api/db.js`):** The synthesized scores are bulk-inserted into the `risk_snapshots` SQLite table.
+6. **Event Bus (`src/api/eventBus.js`):** The backend publishes an `input.external.ingested` event to the internal Node `EventEmitter`.
+7. **SSE Broadcast (`src/api/routes/alertRoutes.js`):** The Alert router, which holds open `response` objects for all connected clients, intercepts the internal event and writes it to the TCP stream using `res.write(\`data: ${payload}\n\n\`)`.
+8. **Client Reactivity (`src/web/App.jsx`):** The `useEffect` hook listening to the `EventSource` receives the message and triggers `loadAll()`, causing React to diff the Virtual DOM and update the UI instantly without a full page reload.
 
-### B. What is JWT (JSON Web Tokens) & Role-Based Access Control?
-Instead of saving user sessions in the database, when a user logs in, the server gives them a cryptographically signed token (the JWT). The frontend sends this token with every request.
-* **Role-Based Access Control (RBAC):** Inside the token, we store the user's role (`city_admin`, `zone_officer`, `health_advisor`, or `citizen`). When an API request comes in, the server checks this role. For example, the server will block a `citizen` from accessing the `POST /external/ingest-live-inputs` route, returning a `403 Forbidden` error.
+### B. Server-Sent Events (SSE) Implementation
+We explicitly chose SSE over WebSockets (like Socket.io) because our data flow is strictly **unidirectional** (Server -> Client). 
+- **Backend:** In `src/api/routes/alertRoutes.js`, the `GET /alerts/stream` endpoint sets headers `Content-Type: text/event-stream` and `Connection: keep-alive`. It pushes the `response` object into a `clients` Set. The `eventBus.js` acts as a PubSub broker; when `publishEvent()` is called anywhere in the app, it iterates through the `clients` Set and pushes the JSON payload.
+- **Frontend:** In `src/web/App.jsx`, the native browser `EventSource` API connects to the endpoint. We attach event listeners to specific event types (e.g., `incident.created`, `aqi.hazardous`).
 
-### C. The Custom Risk Engine
-External APIs only provide a single Air Quality reading for the *entire* city of Mumbai. We wanted ward-level data.
-Instead of faking the data, we use a custom algorithm in `riskEngine.js`:
-1. We take the real city-wide pollutant levels (PM2.5, NO2, etc.).
-2. We multiply them by a specific ward's **Density Index** (Dharavi has higher density than Malabar Hill, so its risk goes up).
-3. We reduce the risk based on the ward's **Tree Cover Percentage** (more trees = better air filtration).
-* **Why it matters:** It shows you didn't just display an API response on a screen; you engineered a custom algorithm to synthesize localized data using geographic characteristics.
+### C. JWT Authentication & RBAC Middleware
+- **Auth Flow (`src/api/auth.js`):** We use stateless `jsonwebtoken`. The `signAccessToken` function serializes the user's `id`, `role`, and `ward_code` into the payload.
+- **Middleware (`src/api/auth.js`):** 
+  - `authRequired`: Extracts the Bearer token, verifies the signature using `JWT_SECRET`, and attaches the decoded payload to `request.auth`.
+  - `requireRoles(...roles)`: A higher-order function that checks if `request.auth.role` exists within the permitted roles array. If not, it returns a `403 Forbidden` response instantly, short-circuiting the Express middleware chain.
 
 ---
 
-## 2. Database Schema (ER Diagram)
+## 2. Database Schema (SQLite Relational Model)
 
-The project uses SQLite with a highly normalized relational database design. 
+The project utilizes SQLite with a strictly normalized relational database design, implemented in `src/api/db.js`.
 
 ```mermaid
 erDiagram
@@ -38,8 +44,8 @@ erDiagram
         TEXT name
         TEXT email
         TEXT password_hash
-        TEXT role "city_admin, zone_officer, citizen, etc."
-        TEXT ward_code FK "Nullable"
+        TEXT role "city_admin, zone_officer, health_advisor, citizen"
+        TEXT ward_code FK "Nullable (Links to wards.code)"
     }
     
     wards {
@@ -57,7 +63,7 @@ erDiagram
         TEXT description
         TEXT type "waste_burning, construction_dust"
         TEXT severity "low, moderate, high, hazardous"
-        TEXT status "open, investigating, resolved"
+        TEXT status "open, investigating, assigned, resolved, closed"
         TEXT ward_code FK
         INTEGER reported_by FK "users.id"
         INTEGER assigned_to FK "users.id (Nullable)"
@@ -80,7 +86,7 @@ erDiagram
         TEXT timestamp
     }
 
-    users }o--o| wards : "assigned to"
+    users }o--o| wards : "assigned to (if officer)"
     incidents }o--|| wards : "occurs in"
     incidents }o--|| users : "reported by"
     incidents }o--o| users : "assigned to"
@@ -93,57 +99,49 @@ erDiagram
 
 ## 3. Viva Preparation: The 8 Mandatory Questions
 
-Use these plain-English answers to confidently defend your project.
+Use these deeply technical answers to demonstrate your engineering competence.
 
 ### Q1: What is the problem your application is solving?
-**A:** Mumbai faces severe, localized air quality crises. Existing tools like SAFAR only provide broad, city-level AQI data. VayuSetu solves this by providing **ward-level** air quality intelligence. It takes city-wide API data and synthesizes it with ward-specific characteristics like population density and green cover. Furthermore, it creates a feedback loop: citizens can report localized pollution (like waste burning), and ward officers can investigate it directly through the platform.
+**A:** Mumbai's CAAQMS infrastructure provides city-level AQI, which masks hyper-local pollution crises. VayuSetu solves this by synthesizing granular, **ward-level** air quality intelligence. It combines Open-Meteo API data with deterministic ward characteristics (density, green cover) via our `riskEngine.js`. Furthermore, it implements a closed-loop citizen reporting system (`src/api/routes/incidentRoutes.js`) where localized pollution reports directly impact the ward's composite risk score.
 
 ### Q2: Why did you choose your specific technology stack?
-**A:** We chose the **MERN-equivalent stack (React + Express + Node + SQLite)**. 
-- **Node/Express** is perfect for our backend because its asynchronous nature handles our real-time Server-Sent Events (SSE) effortlessly. 
-- **React** allows us to build a dynamic dashboard that instantly updates when new live data arrives without refreshing the page. 
-- **SQLite** was chosen for fast relational database development, and because we used standard SQL, we can easily migrate to PostgreSQL if the city scaled this up.
+**A:** We chose the **Node.js/Express** runtime specifically for its non-blocking, event-driven architecture, which is fundamental for implementing our `EventEmitter`-based PubSub system and SSE streams in `alertRoutes.js`. **React (Vite)** was selected for the frontend because its Virtual DOM allows us to patch the UI reactively when the `EventSource` receives live updates. **SQLite** was chosen because its single-file architecture drastically simplifies deployment to ephemeral containers (like Render), while maintaining strict ACID compliance and standard SQL syntax for an eventual PostgreSQL migration.
 
 ### Q3: Explain your system architecture.
-**A:** The architecture is an API-first client-server model. 
-- The **Frontend (React)** is purely a presentation layer that talks to the backend via a RESTful API.
-- The **Backend (Express)** handles all business logic. It has a custom Risk Engine that fetches environmental data from the Open-Meteo API, calculates ward-level risk scores, and saves them to the SQLite Database. 
-- Finally, the backend uses **Server-Sent Events (SSE)** to push real-time alerts down to the React frontend the exact second the database changes.
+**A:** The system follows a decoupled, API-first Client-Server architecture. The React SPA (`src/web`) acts as a thin presentation layer, communicating via a centralized Axios-like wrapper (`apiClient.js`). The Express backend (`src/api`) utilizes controller-based routing (`routes/`), business logic services (`services/`), and a core algorithmic engine (`riskEngine.js`). Real-time capabilities are handled by an internal Node `EventEmitter` (`eventBus.js`) that bridges database mutations to the TCP streams held open by `alertRoutes.js`.
 
 ### Q4: How does your backend communicate with the frontend?
-**A:** It communicates via two methods:
-1. **REST APIs (JSON):** The frontend makes standard HTTP GET, POST, and PATCH requests to fetch data, log in, or submit pollution reports.
-2. **Server-Sent Events (SSE):** The backend maintains an open, one-way HTTP connection to the browser. If an admin clicks "Recompute AQI", the backend pushes an event through the SSE stream, and the frontend instantly updates the graphs and tables.
+**A:** We implemented a hybrid transport layer:
+1. **Synchronous REST (JSON):** Standard HTTP GET/POST/PATCH requests with Zod schema validation (`src/api/http/schemas.js`) for CRUD operations and state mutations.
+2. **Asynchronous SSE (Server-Sent Events):** Implemented in `alertRoutes.js`, the server maintains `keep-alive` HTTP connections. When a mutation occurs (e.g., an officer is assigned a report), the `publishEvent` hook serializes the JSON payload and writes it directly to the open TCP stream, allowing the React `useEffect` hooks to trigger state updates instantly.
 
 ### Q5: What challenges did you face during development?
-**A:** Our biggest challenge was data granularity. The free external APIs only give a single AQI reading for the whole of Mumbai, but our problem statement required ward-level tracking. We solved this by creating a custom math algorithm (`riskEngine.js`). It takes the baseline city AQI and modifies it based on each specific ward's density index and tree cover percentage. This allowed us to generate 24 accurate, localized risk scores without needing physical sensors.
+**A:** Our primary engineering constraint was deriving ward-level granularity from a city-level external API. We engineered around this by building a deterministic synthesis algorithm (`riskEngine.js`). It extracts the base pollutants (PM2.5, NO₂, etc.) from the Open-Meteo payload, computes a baseline AQI, and then applies a mathematical modifier using the `vulnerability_index`, `density_index`, and `tree_cover_pct` stored in `wardCatalog.js`. This allows us to scale horizontally without hardware sensor dependencies.
 
 ### Q6: How is your project scalable?
-**A:** 
-1. **Stateless Authentication:** Because we use JSON Web Tokens (JWT) instead of storing user sessions in the database, our Node server is completely stateless and can be scaled horizontally.
-2. **Decoupled API Polling:** Instead of thousands of users individually hitting the Open-Meteo API (which would hit rate limits immediately), our backend fetches the API data once, saves it to our database, and serves the data to users from our own database.
+**A:** The architecture scales primarily through its **stateless design**. By implementing JWTs in `auth.js`, the Express server maintains zero session state, meaning it can be horizontally scaled behind a load balancer. Furthermore, we decoupled external API fetching from client requests; instead of passthrough proxying (which would hit Open-Meteo rate limits), the backend ingests data asynchronously, stores it in SQLite, and serves client requests directly from the database memory cache.
 
 ### Q7: Explain your database schema design.
-**A:** We designed a highly normalized relational schema. The core table is `wards`, which holds static data like population and tree cover. The `users` table holds accounts linked to specific roles, and can be tied to a ward via a foreign key. The `incidents` table tracks citizen pollution reports and links to the user who reported it and the officer assigned to it. Finally, `risk_snapshots` tracks the historical AQI scores for every ward over time.
+**A:** The schema (`src/api/db.js`) is normalized to 3NF. The foundational entity is `wards`. The `users` table handles authentication and RBAC, with a nullable foreign key `ward_code` to restrict a `zone_officer`'s authorization scope. The `incidents` table (citizen reports) utilizes compound foreign keys linking the `reported_by` citizen, the `assigned_to` officer, and the geographic `ward_code`. Finally, `risk_snapshots` serves as an append-only time-series ledger for historical AQI calculations.
 
 ### Q8: What improvements would you make in future?
-**A:** Currently, our ward-level data is synthesized via an algorithm. If this were deployed by the BMC, we would integrate direct IoT sensor feeds from actual CAAQMS monitoring stations installed in each ward. Additionally, we could add a machine learning model to predict what the AQI will be 24 hours in the future based on historical wind and temperature patterns.
+**A:** Architecturally, I would migrate the internal `EventEmitter` in `eventBus.js` to a dedicated Redis Pub/Sub instance to allow for multi-node clustering of the Express backend. At the data layer, I would replace the `riskEngine.js` synthesis algorithm with direct API ingestion from decentralized, ward-specific IoT particulate sensors. 
 
 ---
 
 ## 4. Complex Engineering Problem (CEP) Matrix
 
-If the evaluators ask how this qualifies as a "Complex Engineering Problem", reference this matrix:
+Reference this matrix if asked how VayuSetu meets the CEP requirements:
 
 | CEP Criteria | How VayuSetu Meets It |
 |--------------|-----------------------|
-| **WP1: Depth of Knowledge** | Wrote a custom risk engine algorithm, implemented JWT stateless auth, and designed a robust relational DB. |
-| **WP2: Conflicting Requirements** | Solved the conflict of needing real-time data vs. strict external API rate limits by building a centralized ingestion system. |
-| **WP3: Depth of Analysis** | Engineered a mathematical model to synthesize ward-level data from city-wide data using density and green cover modifiers. |
-| **WP4: Familiarity of Issues** | Implemented persistent Server-Sent Events (SSE) for modern real-time dashboard updates. |
-| **WP5: Applicable Codes** | Adhered to strict REST API conventions, used Zod for request validation, and Bcrypt for secure password hashing. |
-| **WP6: Stakeholder Involvement** | Engineered a 4-role system (Admin, Officer, Advisor, Citizen), where citizen actions (pollution reports) dictate officer workflows. |
-| **WP7: Interdependence** | The React UI reacts instantly to Express backend state changes, which in turn are triggered by external Python/Meteo API data. |
+| **WP1: Depth of Knowledge** | Implemented custom cryptographic auth (`bcrypt` + JWT), a custom PubSub event bus (`eventBus.js`), and a deterministic risk algorithm (`riskEngine.js`). |
+| **WP2: Conflicting Requirements** | Reconciled the requirement for real-time dashboard data with strict external API rate limits by building a centralized, asynchronous ingestion service. |
+| **WP3: Depth of Analysis** | Engineered a mathematical model to accurately synthesize ward-level data from broad city-wide data using density and green cover modifiers. |
+| **WP4: Familiarity of Issues** | Solved real-time UI synchronization by dropping traditional polling in favor of persistent Server-Sent Events (SSE) via open TCP streams. |
+| **WP5: Applicable Codes** | Enforced strict REST API verb conventions, implemented comprehensive Zod input validation (`schemas.js`), and utilized Bcrypt for secure password hashing. |
+| **WP6: Stakeholder Involvement** | Engineered a 4-tier RBAC system (Admin, Officer, Advisor, Citizen), where citizen actions directly dictate officer workflows via the `incidents` pipeline. |
+| **WP7: Interdependence** | The React UI (`App.jsx`) reacts instantly to Express backend state mutations (`incidentRoutes.js`), which trigger the event bus, pushing via SSE back to the client. |
 
 ---
 
