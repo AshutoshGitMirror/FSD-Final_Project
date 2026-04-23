@@ -29,19 +29,44 @@ We use `better-sqlite3`, which is a synchronous, extremely fast SQLite library f
 - Open `src/api/db.js`. You will see `db.exec(...)` which creates all our tables (`users`, `wards`, `incidents`, etc.) if they don't exist.
 - It uses standard SQL. For example, `CREATE TABLE IF NOT EXISTS users (...)`.
 
-### C. Authentication & Role-Based Access Control: `auth.js` (Explained Simply)
+### C. Authentication & Role-Based Access Control: `auth.js`
 
-**The Problem:** HTTP is "stateless." Every time React asks Express for data, Express has total amnesia. It has no idea who you are or if you logged in 5 seconds ago.
+**The Technical Flow of JWT:**
+HTTP is stateless. To maintain identity without server-side sessions, we use JWTs (JSON Web Tokens).
 
-**The Old Way (Sessions):** Express gives you a "Session ID" cookie and saves a file in its memory saying "Session 123 = Admin". But if we host this on Render, Render deletes memory every time it goes to sleep!
+**1. Token Generation (`src/api/auth.js`):**
+When a user POSTs valid credentials to `/login`, we sign a payload using the `jsonwebtoken` library:
+```javascript
+const token = jwt.sign(
+  { sub: user.id, role: user.role, ward: user.ward_code },
+  JWT_SECRET,
+  { expiresIn: "12h" }
+);
+```
+The server returns this `token` string to the React client.
 
-**The Modern Way (JWT - JSON Web Tokens):**
-Think of JWT like an **amusement park wristband**. 
-1. **Login:** You show the ticket counter (Express) your ID and password. They verify it, and put a tamper-proof wristband on your arm (the JWT). Written on the wristband in sharpie is: `{"id": 5, "role": "zone_officer"}`. The ticket counter signs the wristband with an invisible UV ink signature (`JWT_SECRET`).
-2. **Making Requests:** When you want to go on a ride (make an API request), you just show your wristband in the HTTP Header (`Authorization: Bearer <token>`).
-3. **The Bouncer (`authRequired` middleware):** Express doesn't need to check the database! The Bouncer just shines a UV light on your wristband to check the signature (`JWT_SECRET`). If the signature is valid, the Bouncer reads the sharpie (`role: zone_officer`) and lets you in. If you try to forge a wristband, the signature will be invalid, and the Bouncer throws a `401 Unauthorized`.
+**2. Client Storage & Transmission (`src/web/apiClient.js`):**
+React saves this token in `localStorage`. Every time React makes an API request, it injects the token into the headers:
+```javascript
+headers: { "Authorization": `Bearer ${token}` }
+```
 
-This happens in `src/api/auth.js`. We use the `jsonwebtoken` library to create and verify these wristbands.
+**3. Server Validation (`src/api/auth.js`):**
+Before an Express route handler executes, the `authRequired` middleware intercepts the request. It extracts the token from the header and verifies the cryptographic signature:
+```javascript
+const payload = jwt.verify(token, JWT_SECRET);
+request.auth = payload; // Attaches { sub: 5, role: "citizen" } to the request
+```
+If the signature is invalid (forged or expired), `jwt.verify` throws an error, and the middleware returns `401 Unauthorized`. 
+
+**4. Role Enforcement (`requireRoles`):**
+```javascript
+export const requireRoles = (...roles) => (req, res, next) => {
+  if (!roles.includes(req.auth.role)) return res.status(403).json({ error: "Forbidden" });
+  next();
+};
+```
+This is chained onto routes: `router.post("/incidents", authRequired, requireRoles("citizen"), ...)` ensuring only the permitted roles can execute the controller logic.
 
 ---
 
@@ -61,29 +86,53 @@ Open **`src/api/riskEngine.js`**.
 
 This is the most impressive technical feature of the app. It's how the frontend updates instantly without you refreshing the page.
 
-### The Problem with Polling (The "Are we there yet?" method)
-Normally, if React wants live data, it uses a timer to ask Express every 5 seconds: *"Hey, is there new data?"* Express says *"No."* 5 seconds later: *"Hey, new data?"* Express says *"No."* 
-This is called **polling**. It's like a kid in the backseat asking "Are we there yet?" It wastes tons of server energy and network bandwidth.
+### The Problem with Polling
+Standard HTTP is request-response. If React needs live data, it must use `setInterval` to repeatedly ping the server (polling). This causes massive network overhead and server CPU spikes, as 99% of requests return unchanged data.
 
-### The SSE Solution (The Live Radio Station method)
-**Server-Sent Events (SSE)** changes the game. Instead of the browser constantly asking questions, the browser simply "tunes in" to the server's radio station and leaves the radio on. When the server has news, it broadcasts it over the airwaves.
+### The SSE Solution
+**Server-Sent Events (SSE)** uses a long-lived HTTP connection. The client opens the connection once, and the server pushes data incrementally over a TCP stream.
 
-Here is exactly how it is implemented in our code:
+**1. The Event Broker (`src/api/eventBus.js`):**
+We utilize the native Node.js `EventEmitter` to act as an internal PubSub broker, decoupling route controllers from the networking layer.
+```javascript
+import { EventEmitter } from "events";
+export const eventBus = new EventEmitter();
+export const publishEvent = (type, payload) => {
+  eventBus.emit("system.event", { type, payload });
+};
+```
 
-1. **The Post Office / News Desk (`src/api/eventBus.js`):** 
-   We use an internal Node.js feature called `EventEmitter`. Whenever a user creates a new Pollution Report in the database, the database tells the Post Office: `publishEvent("incident.created", newReportData)`.
+**2. The Stream Controller (`src/api/routes/alertRoutes.js`):**
+When the frontend connects, the server modifies the HTTP headers to prevent closing the connection. It pushes the Express `response` object into a `Set`.
+```javascript
+router.get("/alerts/stream", (req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection": "keep-alive"
+  });
+  clients.add(res);
+});
+```
+When `eventBus.emit` fires, a listener iterates over the `clients` Set and writes directly to the open TCP pipes:
+```javascript
+eventBus.on("system.event", (evt) => {
+  const dataString = `data: ${JSON.stringify(evt)}\n\n`;
+  clients.forEach(client => client.write(dataString));
+});
+```
 
-2. **The Radio Tower (`src/api/routes/alertRoutes.js`):**
-   When the React frontend first loads, it connects to `GET /api/alerts/stream`. 
-   Normally, Express responds with `res.send("Hello")` and **hangs up the phone**. 
-   But for SSE, we do a magic trick! We tell Express to set the header `Connection: keep-alive` and **never hang up**. We add this open connection (`res`) to a big list of `clients`. 
-   When the Post Office gets a message, the Radio Tower loops through every open connection and writes the message directly into the open pipe: `res.write(\`data: ${jsonData}\n\n\`)`.
-
-3. **The Radio Receiver (`src/web/App.jsx`):**
-   In React, we use the browser's built-in `EventSource` object (our radio receiver). 
-   `const sse = new EventSource("http://localhost:4000/api/alerts/stream")`. 
-   We write a function that says: *"If the radio broadcasts an `incident.created` message, immediately fetch the new data from the database and update the screen."* 
-   Because the connection is already open, the data arrives in **milliseconds**.
+**3. The React Consumer (`src/web/App.jsx` & `usePolling.js`):**
+React uses the native browser `EventSource` API to consume the stream.
+```javascript
+const sse = new EventSource("http://localhost:4000/api/alerts/stream");
+sse.onmessage = (msg) => {
+  const event = JSON.parse(msg.data);
+  if (event.type === "incident.created") {
+    fetchIncidents(); // Instantly triggers a React state update
+  }
+};
+```
 
 ---
 
