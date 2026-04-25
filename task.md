@@ -1,0 +1,18 @@
+- `[/]` Phase 1: Project Initialization & UI Basics
+  - `[ ]` Create Vite+React app and Node+Express backend.
+  - `[ ]` Setup Tailwind for Neubrutalism styling.
+  - `[ ]` Build Landing, Login, and Signup pages.
+- `[ ]` Phase 2: Database & Backend Core
+  - `[ ]` Set up MongoDB and Mongoose schemas (User, Curriculum, Progress, Leaderboard, SavedLinks).
+  - `[ ]` Implement User signup logic to capture `std` and `board`.
+  - `[ ]` **Update Python Backend:** Dynamic `std` requirement on `/ytlinks` and `/shaalaalinks`.
+- `[ ]` Phase 3: Dashboard & Student Analytics
+  - `[ ]` Build `/dashboard/topic` for subject and chapter selection.
+  - `[ ]` Implement `/dashboard/quiz` and save logic into Progress.
+  - `[ ]` Build `/dashboard/progress` with metric graphs and AI insight feature.
+  - `[ ]` Develop `/dashboard/leaderboard` for average score tracking.
+- `[ ]` Phase 4: AI Chat Interface
+  - `[ ]` Build chat UI at `/dashboard/learn`.
+  - `[ ]` Add custom input box (Speech-to-text, Submit btn, Thinking toggle, Link toggle).
+  - `[ ]` Integrate Google Gemini API stream.
+  - `[ ]` Combine with `LinksBackend` to process images automatically and fetch other links on toggle.
