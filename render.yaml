@@ -29,8 +29,9 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.9
 
-  - type: static
+  - type: web
     name: fsd-final-frontend
+    env: static
     plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
