@@ -32,7 +32,6 @@ services:
   - type: web
     name: fsd-final-frontend
     env: static
-    plan: free
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
