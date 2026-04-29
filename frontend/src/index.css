@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-neo-yellow: #FFD500;
+  --color-neo-pink: #FF66A1;
+  --color-neo-blue: #A2D2FF;
+  --color-neo-bg: #F4F4F0;
+  --color-neo-bg-dark: #EAEAE4;
+  
+  --shadow-neo: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-neo-hover: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+}
+
+body {
+  background-color: var(--color-neo-bg);
+  /* Polka dot pattern */
+  background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+  color: black;
+  font-family: 'Outfit', 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@layer utilities {
+  .border-neo {
+    @apply border-2 border-black sm:border-4;
+  }
+  
+  .btn-neo {
+    @apply border-2 border-black sm:border-4 shadow-neo bg-neo-yellow text-black font-bold uppercase transition-transform active:translate-y-1 active:translate-x-1 active:shadow-none hover:shadow-neo-hover;
+  }
+  
+  .card-neo {
+    @apply border-2 border-black sm:border-4 shadow-neo bg-white text-black;
+  }
+  
+  .input-neo {
+    @apply border-2 border-black sm:border-4 focus:outline-none focus:ring-4 focus:ring-neo-pink/50 p-3 bg-white text-black placeholder:text-gray-500;
+  }
+}
