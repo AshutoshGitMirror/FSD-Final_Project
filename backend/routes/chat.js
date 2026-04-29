@@ -4,6 +4,7 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { prompt, isThinking, subject, chapter } = req.body;
+    const wantsStream = req.get('x-chat-stream') === '1';
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required." });
     }
@@ -23,11 +24,13 @@ router.post('/', async (req, res) => {
     // Retry up to the number of keys we have, or at least 5 times
     const MAX_RETRIES = Math.max(5, apiKeys.length);
 
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('Connection', 'keep-alive');
-    if (typeof res.flushHeaders === 'function') {
-      res.flushHeaders();
+    if (wantsStream) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      if (typeof res.flushHeaders === 'function') {
+        res.flushHeaders();
+      }
     }
     
     while (attempt < MAX_RETRIES) {
@@ -45,19 +48,40 @@ router.post('/', async (req, res) => {
             configObj.thinkingConfig = { thinkingLevel: 'high', includeThoughts: true };
           }
 
-          const response = await ai.models.generateContentStream({
+          if (wantsStream) {
+            const response = await ai.models.generateContentStream({
+              model: "gemini-3-flash-preview",
+              contents: `Student: ${prompt}`,
+              config: configObj
+            });
+
+            for await (const chunk of response) {
+              if (chunk?.text) {
+                res.write(chunk.text);
+              }
+            }
+
+            return res.end();
+          }
+
+          const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: `Student: ${prompt}`,
             config: configObj
           });
 
-          for await (const chunk of response) {
-            if (chunk?.text) {
-              res.write(chunk.text);
+          let finalReply = "";
+          let thoughtsSummary = "";
+          if (response.candidates && response.candidates[0] && response.candidates[0].content) {
+            for (const part of response.candidates[0].content.parts) {
+              if (!part.text) continue;
+              if (part.thought) thoughtsSummary += part.text + "\n";
+              else finalReply += part.text;
             }
+          } else {
+            finalReply = response.text || "";
           }
-
-          return res.end();
+          return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
         } catch (newSdkError) {
           console.warn(`[Attempt ${attempt} - Key ${((attempt - 1) % apiKeys.length) + 1}] New SDK failed, falling back to legacy...`, newSdkError.message);
           // Fallback to legacy SDK if streaming path fails
@@ -66,8 +90,11 @@ router.post('/', async (req, res) => {
           const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
           const result = await model.generateContent(`${systemContext}\n\nStudent: ${prompt}`);
           const response = await result.response;
-          res.write(response.text() || "");
-          return res.end();
+          if (wantsStream) {
+            res.write(response.text() || "");
+            return res.end();
+          }
+          return res.json({ reply: response.text() || "" });
         }
       } catch (error) {
         console.error(`[Attempt ${attempt} - Key ${((attempt - 1) % apiKeys.length) + 1}] Gemini Error:`, error.message);
@@ -77,14 +104,23 @@ router.post('/', async (req, res) => {
             ? "Gemini 3 Quota Exceeded on all available keys. Please add more keys or try again later."
             : `AI Failed after ${MAX_RETRIES} attempts. Last error: ${error.message}`;
 
-          if (!res.writableEnded) {
-            res.write(message);
-            res.end();
+          if (wantsStream) {
+            if (!res.writableEnded) {
+              res.write(message);
+              res.end();
+            }
+            return;
           }
-
-          if (error.status === 429 || error.message.includes('Quota')) {
-             return;
-          }
+          const statusCode = (error.status === 429 || error.message.includes('Quota')) ? 429 : 500;
+          return res.status(statusCode).json({ error: message });
+        }
+        if (!wantsStream && (error.status === 429 || error.message.includes('Quota'))) {
+          return res.status(429).json({ error: "Gemini 3 Quota Exceeded on all available keys. Please add more keys or try again later." });
+        }
+        if (!wantsStream && attempt >= MAX_RETRIES) {
+          return res.status(500).json({ error: `AI Failed after ${MAX_RETRIES} attempts. Last error: ${error.message}` });
+        }
+        if (wantsStream && attempt >= MAX_RETRIES) {
           return;
         }
         // Wait 1 second before retrying next key
