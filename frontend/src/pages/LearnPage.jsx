@@ -110,12 +110,55 @@ const LearnPage = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let streamedText = '';
+      let sseBuffer = '';
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        streamedText += decoder.decode(value, { stream: true });
-        updateLatestAiMessage(streamedText);
+        const decoded = decoder.decode(value, { stream: true });
+
+        if (contentType.includes('text/event-stream')) {
+          sseBuffer += decoded;
+
+          let boundaryIndex = sseBuffer.indexOf('\n\n');
+          while (boundaryIndex !== -1) {
+            const rawEvent = sseBuffer.slice(0, boundaryIndex);
+            sseBuffer = sseBuffer.slice(boundaryIndex + 2);
+
+            let eventType = 'message';
+            const dataLines = [];
+            for (const line of rawEvent.split('\n')) {
+              if (line.startsWith('event:')) {
+                eventType = line.slice(6).trim();
+              } else if (line.startsWith('data:')) {
+                dataLines.push(line.slice(5).trimStart());
+              }
+            }
+
+            const rawData = dataLines.join('\n');
+            let payload = {};
+            if (rawData) {
+              try {
+                payload = JSON.parse(rawData);
+              } catch {
+                payload = { text: rawData };
+              }
+            }
+
+            if (eventType === 'token' && payload.text) {
+              streamedText += payload.text;
+              updateLatestAiMessage(streamedText);
+            } else if (eventType === 'error') {
+              updateLatestAiMessage(payload.message || 'Error connecting to Gemini API.');
+              return;
+            }
+
+            boundaryIndex = sseBuffer.indexOf('\n\n');
+          }
+        } else {
+          streamedText += decoded;
+          updateLatestAiMessage(streamedText);
+        }
       }
 
       streamedText += decoder.decode();

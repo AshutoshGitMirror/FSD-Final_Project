@@ -1,6 +1,42 @@
 const express = require('express');
 const router = express.Router();
 
+function extractChunkText(chunk) {
+  if (!chunk) return '';
+  if (typeof chunk.text === 'string') return chunk.text;
+  if (typeof chunk.text === 'function') {
+    try {
+      return chunk.text() || '';
+    } catch {
+      return '';
+    }
+  }
+  return '';
+}
+
+function writeSse(res, event, payload) {
+  res.write(`event: ${event}\n`);
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+async function streamChunksToSse(asyncIterable, res) {
+  let emittedSoFar = '';
+  for await (const chunk of asyncIterable) {
+    const rawText = extractChunkText(chunk);
+    if (!rawText) continue;
+
+    // Some SDK chunks are cumulative; convert to incremental delta.
+    let delta = rawText;
+    if (rawText.startsWith(emittedSoFar)) {
+      delta = rawText.slice(emittedSoFar.length);
+    }
+    if (!delta) continue;
+
+    emittedSoFar += delta;
+    writeSse(res, 'token', { text: delta });
+  }
+}
+
 router.post('/', async (req, res) => {
   try {
     const { prompt, isThinking, subject, chapter } = req.body;
@@ -25,9 +61,10 @@ router.post('/', async (req, res) => {
     const MAX_RETRIES = Math.max(5, apiKeys.length);
 
     if (wantsStream) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
       res.setHeader('Cache-Control', 'no-cache, no-transform');
       res.setHeader('Connection', 'keep-alive');
+      res.setHeader('X-Accel-Buffering', 'no');
       if (typeof res.flushHeaders === 'function') {
         res.flushHeaders();
       }
@@ -55,12 +92,8 @@ router.post('/', async (req, res) => {
               config: configObj
             });
 
-            for await (const chunk of response) {
-              if (chunk?.text) {
-                res.write(chunk.text);
-              }
-            }
-
+            await streamChunksToSse(response, res);
+            writeSse(res, 'done', {});
             return res.end();
           }
 
@@ -84,16 +117,20 @@ router.post('/', async (req, res) => {
           return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
         } catch (newSdkError) {
           console.warn(`[Attempt ${attempt} - Key ${((attempt - 1) % apiKeys.length) + 1}] New SDK failed, falling back to legacy...`, newSdkError.message);
-          // Fallback to legacy SDK if streaming path fails
+          // Fallback to legacy SDK if new SDK fails
           const { GoogleGenerativeAI } = require("@google/generative-ai");
           const genAI = new GoogleGenerativeAI(currentKey);
           const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-          const result = await model.generateContent(`${systemContext}\n\nStudent: ${prompt}`);
-          const response = await result.response;
           if (wantsStream) {
-            res.write(response.text() || "");
+            const streamResult = await model.generateContentStream(`${systemContext}\n\nStudent: ${prompt}`);
+            const stream = streamResult.stream || streamResult;
+            await streamChunksToSse(stream, res);
+            writeSse(res, 'done', {});
             return res.end();
           }
+
+          const result = await model.generateContent(`${systemContext}\n\nStudent: ${prompt}`);
+          const response = await result.response;
           return res.json({ reply: response.text() || "" });
         }
       } catch (error) {
@@ -106,7 +143,7 @@ router.post('/', async (req, res) => {
 
           if (wantsStream) {
             if (!res.writableEnded) {
-              res.write(message);
+              writeSse(res, 'error', { message });
               res.end();
             }
             return;
@@ -133,7 +170,7 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: "A critical error occurred." });
     }
     if (!res.writableEnded) {
-      res.write("A critical error occurred.");
+      writeSse(res, 'error', { message: "A critical error occurred." });
       res.end();
     }
   }
