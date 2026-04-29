@@ -31,7 +31,7 @@ const LearnPage = () => {
     
     setIsLoading(true);
     const userMessage = { role: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage, { role: 'ai', text: '' }]);
     const currentInput = input;
     setInput('');
     
@@ -54,16 +54,72 @@ const LearnPage = () => {
         .catch(console.error);
     }
 
+    const updateLatestAiMessage = (text, thoughts) => {
+      setMessages(prev => {
+        const next = [...prev];
+        for (let i = next.length - 1; i >= 0; i--) {
+          if (next[i].role === 'ai') {
+            next[i] = {
+              ...next[i],
+              text,
+              thoughts: thoughts ?? next[i].thoughts
+            };
+            break;
+          }
+        }
+        return next;
+      });
+    };
+
     try {
       const response = await fetch(backendUrl('/api/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: currentInput, isThinking, subject, chapter })
       });
-      const data = await response.json();
-      setMessages(prev => [...prev, { role: 'ai', text: data.reply || data.error, thoughts: data.thoughts }]);
-    } catch (err) {
-      setMessages(prev => [...prev, { role: 'ai', text: 'Error connecting to Gemini API.' }]);
+
+      const contentType = response.headers.get('content-type') || '';
+
+      if (!response.ok) {
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          updateLatestAiMessage(data.error || 'Error connecting to Gemini API.');
+        } else {
+          const text = await response.text();
+          updateLatestAiMessage(text || 'Error connecting to Gemini API.');
+        }
+        return;
+      }
+
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        updateLatestAiMessage(data.reply || data.error || '', data.thoughts);
+        return;
+      }
+
+      if (!response.body) {
+        const text = await response.text();
+        updateLatestAiMessage(text || 'No response from Gemini API.');
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let streamedText = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        streamedText += decoder.decode(value, { stream: true });
+        updateLatestAiMessage(streamedText);
+      }
+
+      streamedText += decoder.decode();
+      if (!streamedText.trim()) {
+        updateLatestAiMessage('No response from Gemini API.');
+      }
+    } catch {
+      updateLatestAiMessage('Error connecting to Gemini API.');
     } finally {
       setIsLoading(false);
     }
