@@ -31,7 +31,7 @@ const LearnPage = () => {
     
     setIsLoading(true);
     const userMessage = { role: 'user', text: input };
-    setMessages(prev => [...prev, userMessage, { role: 'ai', text: '' }]);
+    setMessages(prev => [...prev, userMessage, { role: 'ai', text: 'Thinking…', isPlaceholder: true }]);
     const currentInput = input;
     setInput('');
     
@@ -62,7 +62,8 @@ const LearnPage = () => {
             next[i] = {
               ...next[i],
               text,
-              thoughts: thoughts ?? next[i].thoughts
+              thoughts: thoughts ?? next[i].thoughts,
+              isPlaceholder: false
             };
             break;
           }
@@ -173,12 +174,16 @@ const LearnPage = () => {
                 )}
                 <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none">
                   {msg.role === 'ai' ? (
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkMath]}
-                      rehypePlugins={[rehypeKatex]}
-                    >
-                      {msg.text}
-                    </ReactMarkdown>
+                    msg.isPlaceholder ? (
+                      <span className="italic opacity-70">{msg.text}</span>
+                    ) : (
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                      >
+                        {msg.text}
+                      </ReactMarkdown>
+                    )
                   ) : (
                     msg.text
                   )}
