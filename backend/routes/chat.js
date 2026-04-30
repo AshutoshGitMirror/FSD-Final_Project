@@ -220,15 +220,20 @@ async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wa
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 25000);
     try {
+      const body = {
+        model,
+        prompt: fullPrompt,
+        stream: true
+      };
+      if (isThinking && /deepseek/i.test(model)) {
+        body.think = true;
+      }
+
       const response = await fetch(`${base}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({
-          model,
-          prompt: fullPrompt,
-          stream: true
-        })
+        body: JSON.stringify(body)
       });
 
       if (!response.ok || !response.body) {
@@ -239,6 +244,7 @@ async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wa
       const decoder = new TextDecoder();
       let ndjson = '';
       let full = '';
+      let fullThoughts = '';
 
       while (true) {
         const { value, done } = await reader.read();
@@ -254,11 +260,17 @@ async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wa
             if (parsed.error) {
               throw new Error(parsed.error);
             }
-            const token = parsed.response || '';
-            if (token) {
-              full += token;
+            const { text, thoughtText } = extractOllamaStreamParts(parsed);
+            if (thoughtText) {
+              fullThoughts += thoughtText;
               if (wantsStream) {
-                writeSse(res, 'token', { text: token });
+                writeSse(res, 'thought', { text: thoughtText });
+              }
+            }
+            if (text) {
+              full += text;
+              if (wantsStream) {
+                writeSse(res, 'token', { text });
               }
             }
           }
@@ -270,20 +282,30 @@ async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wa
       if (ndjson.trim()) {
         const parsed = JSON.parse(ndjson.trim());
         if (parsed.error) throw new Error(parsed.error);
-        const token = parsed.response || '';
-        if (token) {
-          full += token;
+        const { text, thoughtText } = extractOllamaStreamParts(parsed);
+        if (thoughtText) {
+          fullThoughts += thoughtText;
           if (wantsStream) {
-            writeSse(res, 'token', { text: token });
+            writeSse(res, 'thought', { text: thoughtText });
+          }
+        }
+        if (text) {
+          full += text;
+          if (wantsStream) {
+            writeSse(res, 'token', { text });
           }
         }
       }
 
-      if (!full.trim()) {
+      if (!full.trim() && !fullThoughts.trim()) {
         throw new Error(`Ollama model ${model} returned empty output`);
       }
 
-      return { reply: full, model };
+      return {
+        reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
+        thoughts: fullThoughts.trim() || undefined,
+        model
+      };
     } catch (err) {
       failures.push(`${model}: ${err.message}`);
     } finally {
