@@ -38,24 +38,29 @@ async function streamChunksToSse(asyncIterable, res) {
 }
 
 function pickOllamaModels(prompt = '', isThinking = false) {
-  const fromEnv = (process.env.OLLAMA_MODELS || '')
-    .split(',')
-    .map((m) => m.trim())
-    .filter(Boolean);
-  if (fromEnv.length > 0) return fromEnv;
-
   if (isThinking) {
+    const thinkingModels = (process.env.OLLAMA_MODELS_THINKING || process.env.OLLAMA_MODELS || '')
+      .split(',')
+      .map((m) => m.trim())
+      .filter(Boolean);
+    if (thinkingModels.length > 0) return thinkingModels;
     return ['deepseek-r1:latest', 'llama3.1:8b', 'gemma3:12b'];
   }
 
+  const defaultModels = (process.env.OLLAMA_MODELS_DEFAULT || process.env.OLLAMA_MODELS || '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  if (defaultModels.length > 0) return defaultModels;
+
   const text = String(prompt).toLowerCase();
   if (/(summari|list|define|solve)/.test(text)) {
-    return ['gemma3:12b', 'llama3.1:8b', 'deepseek-r1:latest'];
+    return ['gemma3:12b', 'llama3.1:8b'];
   }
   if (/(why|how|explain|reason)/.test(text)) {
-    return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+    return ['llama3.1:8b', 'gemma3:12b'];
   }
-  return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+  return ['llama3.1:8b', 'gemma3:12b'];
 }
 
 async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
@@ -158,9 +163,8 @@ router.post('/', async (req, res) => {
       systemContext += `Please show your step-by-step reasoning before providing the final answer, acting as a deep thinker. `;
     }
 
-    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(5, apiKeys.length) : 0;
-    let attempt = 0;
     let lastGeminiError = '';
+    let lastOllamaError = '';
 
     if (wantsStream) {
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
@@ -172,6 +176,33 @@ router.post('/', async (req, res) => {
       }
     }
     
+    // Primary path:
+    // - DeepThink: deepseek-r1 first (then optional local model fallbacks)
+    // - Non-DeepThink: ollama/gemma local models first
+    try {
+      const ollama = await runOllamaFallback({
+        prompt,
+        systemContext,
+        isThinking,
+        wantsStream,
+        res
+      });
+
+      if (wantsStream) {
+        writeSse(res, 'meta', { provider: 'ollama', model: ollama.model });
+        writeSse(res, 'done', {});
+        return res.end();
+      }
+
+      return res.json({ reply: ollama.reply, provider: 'ollama', model: ollama.model });
+    } catch (ollamaError) {
+      lastOllamaError = ollamaError.message || 'Ollama request failed';
+      console.warn('Ollama primary path failed; falling back to Gemini:', lastOllamaError);
+    }
+
+    // Pure fallback: Gemini (only used if local model chain fails)
+    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(5, apiKeys.length) : 0;
+    let attempt = 0;
     while (attempt < MAX_RETRIES) {
       attempt++;
       const keyIndex = (attempt - 1) % apiKeys.length;
@@ -243,37 +274,20 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Gemini exhausted/unavailable -> try Ollama/Gemma/DeepSeek fallback chain.
-    try {
-      const ollama = await runOllamaFallback({
-        prompt,
-        systemContext,
-        isThinking,
-        wantsStream,
-        res
-      });
+    const message = apiKeys.length > 0
+      ? `Ollama primary failed: ${lastOllamaError || 'unknown error'}. Gemini fallback failed: ${lastGeminiError || 'unknown error'}`
+      : `Ollama primary failed: ${lastOllamaError || 'unknown error'}. Gemini fallback unavailable: API keys not configured.`;
 
-      if (wantsStream) {
-        writeSse(res, 'meta', { provider: 'ollama', model: ollama.model });
-        writeSse(res, 'done', {});
-        return res.end();
+    if (wantsStream) {
+      if (!res.writableEnded) {
+        writeSse(res, 'error', { message });
+        res.end();
       }
-
-      return res.json({ reply: ollama.reply, provider: 'ollama', model: ollama.model });
-    } catch (ollamaError) {
-      const message = apiKeys.length > 0
-        ? `Gemini failed: ${lastGeminiError || 'unknown error'}. Ollama fallback failed: ${ollamaError.message}`
-        : `Gemini keys not configured. Ollama fallback failed: ${ollamaError.message}`;
-
-      if (wantsStream) {
-        if (!res.writableEnded) {
-          writeSse(res, 'error', { message });
-          res.end();
-        }
-        return;
-      }
-      return res.status(500).json({ error: message });
+      return;
     }
+
+    const isQuotaError = /quota|429/i.test(lastGeminiError || '');
+    return res.status(isQuotaError ? 429 : 500).json({ error: message });
   } catch (error) {
     console.error("Critical Chat Route Error:", error);
     if (!res.headersSent) {
