@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUser } from '../utils/auth';
+import { authFetch, getUser } from '../utils/auth';
 import { backendUrl, linksUrl } from '../config/api';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -21,6 +21,28 @@ const LearnPage = () => {
   const [extraLinks, setExtraLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef(null);
+
+  const persistYoutubeLinks = async (videos) => {
+    const seen = new Set();
+    const uniqueVideos = videos.filter((v) => {
+      if (!v.url || seen.has(v.url)) return false;
+      seen.add(v.url);
+      return true;
+    });
+
+    await Promise.allSettled(
+      uniqueVideos.map((video) =>
+        authFetch(backendUrl('/api/links'), {
+          method: 'POST',
+          body: JSON.stringify({
+            url: video.url,
+            title: video.title || 'YouTube Resource',
+            source: 'youtube'
+          })
+        })
+      )
+    );
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,7 +67,27 @@ const LearnPage = () => {
     if (showLinks) {
        fetch(linksUrl(`/ytlinks?std=${std}&query=${encodeURIComponent(currentInput)}`))
         .then(res => res.json())
-        .then(data => { if(data.videos) setExtraLinks(prev => [...prev, ...data.videos.map(v => ({ type: 'yt', url: v }))]); })
+        .then(async (data) => {
+          if (!data.videos) return;
+
+          const videos = data.videos
+            .map((v) => {
+              if (typeof v === 'string') {
+                return { url: v, title: 'YouTube Resource' };
+              }
+              return {
+                url: v?.url || v?.content || '',
+                title: v?.title || 'YouTube Resource'
+              };
+            })
+            .filter((v) => v.url);
+
+          setExtraLinks(prev => [
+            ...prev,
+            ...videos.map((v) => ({ type: 'yt', url: v.url, title: v.title }))
+          ]);
+          await persistYoutubeLinks(videos);
+        })
         .catch(console.error);
 
        fetch(linksUrl(`/shaalaalinks?std=${std}&query=${encodeURIComponent(currentInput)}`))

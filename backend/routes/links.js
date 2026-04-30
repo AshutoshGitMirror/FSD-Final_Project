@@ -18,7 +18,31 @@ router.get('/', async (req, res) => {
 // POST save a new link
 router.post('/', async (req, res) => {
   try {
-    const link = new SavedLinks({ ...req.body, userId: req.user.userId });
+    const { url, title, source } = req.body || {};
+    if (!url) {
+      return res.status(400).json({ error: 'url is required' });
+    }
+
+    const normalizedSource = source === 'shaalaa' ? 'shaalaa' : 'youtube';
+    const normalizedTitle =
+      (title && String(title).trim()) ||
+      (normalizedSource === 'youtube' ? 'YouTube Resource' : 'Shaalaa Resource');
+
+    const existing = await SavedLinks.findOne({
+      userId: req.user.userId,
+      url,
+      source: normalizedSource
+    });
+    if (existing) {
+      return res.status(200).json(existing);
+    }
+
+    const link = new SavedLinks({
+      userId: req.user.userId,
+      url,
+      title: normalizedTitle,
+      source: normalizedSource
+    });
     await link.save();
     res.status(201).json(link);
   } catch (err) {
