@@ -63,12 +63,13 @@ function pickOllamaModels(prompt = '', isThinking = false) {
   return ['llama3.1:8b', 'gemma3:12b'];
 }
 
-async function runOllamaChatEndpoint({ prompt, isThinking, wantsStream, res }) {
+async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsStream, res }) {
   const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
   const chatPath = process.env.OLLAMA_CHAT_PATH || '/chat';
   const sessionId = `chat-${Date.now()}`;
+  const query = `${systemContext}\n\nStudent: ${prompt}`;
   const url =
-    `${base}${chatPath}?query=${encodeURIComponent(prompt)}` +
+    `${base}${chatPath}?query=${encodeURIComponent(query)}` +
     `&session_id=${encodeURIComponent(sessionId)}` +
     `&deep_research=${isThinking ? 'true' : 'false'}`;
 
@@ -228,7 +229,7 @@ async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wa
 async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
   const failures = [];
   try {
-    return await runOllamaChatEndpoint({ prompt, isThinking, wantsStream, res });
+    return await runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsStream, res });
   } catch (chatError) {
     failures.push(`/chat: ${chatError.message}`);
   }
@@ -258,7 +259,12 @@ router.post('/', async (req, res) => {
 
     let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
     if (isThinking) {
-      systemContext += `Please show your step-by-step reasoning before providing the final answer, acting as a deep thinker. `;
+      systemContext += `For deep-thinking mode, format output exactly as:
+<think>
+step-by-step reasoning
+</think>
+final student-facing answer
+Do not skip the <think>...</think> block. `;
     }
 
     let lastGeminiError = '';
