@@ -227,8 +227,9 @@ const LearnPage = () => {
         }
 
         const parsed = splitThoughtAndReply(data.reply || '', isThinking);
-        const finalReply = parsed.reply || (parsed.thoughts ? 'See thought process below.' : '');
-        updateLatestAiMessage(finalReply, data.thoughts ?? parsed.thoughts);
+        const mergedThoughts = data.thoughts ?? parsed.thoughts;
+        const finalReply = parsed.reply || (mergedThoughts ? 'See thought process below.' : '');
+        updateLatestAiMessage(finalReply, mergedThoughts);
         return;
       }
 
@@ -243,6 +244,7 @@ const LearnPage = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let streamedText = '';
+      let streamedThoughts = '';
       let sseBuffer = '';
 
       while (true) {
@@ -281,7 +283,12 @@ const LearnPage = () => {
             if (eventType === 'token' && payload.text) {
               streamedText += payload.text;
               const parsed = splitThoughtAndReply(streamedText, isThinking);
-              updateLatestAiMessage(parsed.reply || 'Thinking…', parsed.thoughts);
+              const thoughtText = [streamedThoughts, parsed.thoughts].filter(Boolean).join('\n\n').trim() || undefined;
+              updateLatestAiMessage(parsed.reply || 'Thinking…', thoughtText);
+            } else if (eventType === 'thought' && payload.text) {
+              streamedThoughts += payload.text;
+              const parsed = splitThoughtAndReply(streamedText, isThinking);
+              updateLatestAiMessage(parsed.reply || 'Thinking…', streamedThoughts.trim());
             } else if (eventType === 'error') {
               updateLatestAiMessage(payload.message || 'Error connecting to AI API.');
               return;
@@ -298,10 +305,11 @@ const LearnPage = () => {
 
       streamedText += decoder.decode();
       const parsed = splitThoughtAndReply(streamedText, isThinking);
-      if (!parsed.reply && !parsed.thoughts) {
+      const finalThoughts = [streamedThoughts, parsed.thoughts].filter(Boolean).join('\n\n').trim() || undefined;
+      if (!parsed.reply && !finalThoughts) {
         updateLatestAiMessage('No response from AI API.');
       } else {
-        updateLatestAiMessage(parsed.reply || 'See thought process below.', parsed.thoughts);
+        updateLatestAiMessage(parsed.reply || 'See thought process below.', finalThoughts);
       }
     } catch {
       updateLatestAiMessage('Error connecting to AI API.');

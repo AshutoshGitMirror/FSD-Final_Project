@@ -63,6 +63,47 @@ function pickOllamaModels(prompt = '', isThinking = false) {
   return ['llama3.1:8b', 'gemma3:12b'];
 }
 
+function extractOllamaStreamParts(parsed) {
+  const typeHint = String(parsed?.type || parsed?.channel || '').toLowerCase();
+  const hasThinkingFlag =
+    parsed?.is_thinking === true ||
+    parsed?.thinking === true ||
+    parsed?.thought === true ||
+    typeHint === 'thinking' ||
+    typeHint === 'thought';
+
+  let text = '';
+  if (typeof parsed?.response === 'string') {
+    text = parsed.response;
+  } else if (typeof parsed?.message?.content === 'string') {
+    text = parsed.message.content;
+  } else if (typeof parsed?.content === 'string') {
+    text = parsed.content;
+  } else if (typeof parsed?.text === 'string') {
+    text = parsed.text;
+  }
+
+  let thoughtText = '';
+  if (typeof parsed?.thought === 'string') {
+    thoughtText = parsed.thought;
+  } else if (typeof parsed?.thinking === 'string') {
+    thoughtText = parsed.thinking;
+  } else if (typeof parsed?.reasoning === 'string') {
+    thoughtText = parsed.reasoning;
+  } else if (typeof parsed?.reasoning_content === 'string') {
+    thoughtText = parsed.reasoning_content;
+  } else if (typeof parsed?.think === 'string') {
+    thoughtText = parsed.think;
+  }
+
+  if (!thoughtText && hasThinkingFlag && text) {
+    thoughtText = text;
+    text = '';
+  }
+
+  return { text, thoughtText };
+}
+
 async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsStream, res }) {
   const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
   const chatPath = process.env.OLLAMA_CHAT_PATH || '/chat';
@@ -88,6 +129,7 @@ async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsS
   const decoder = new TextDecoder();
   let ndjson = '';
   let full = '';
+  let fullThoughts = '';
   let modelName = '';
 
   while (true) {
@@ -103,15 +145,23 @@ async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsS
         const parsed = JSON.parse(line);
         if (parsed.error) throw new Error(parsed.error);
 
-        if (!modelName && parsed.model_name) {
-          modelName = parsed.model_name;
+        if (!modelName && (parsed.model_name || parsed.model)) {
+          modelName = parsed.model_name || parsed.model;
         }
 
-        const token = parsed.response || '';
-        if (token) {
-          full += token;
+        const { text, thoughtText } = extractOllamaStreamParts(parsed);
+
+        if (thoughtText) {
+          fullThoughts += thoughtText;
           if (wantsStream) {
-            writeSse(res, 'token', { text: token });
+            writeSse(res, 'thought', { text: thoughtText });
+          }
+        }
+
+        if (text) {
+          full += text;
+          if (wantsStream) {
+            writeSse(res, 'token', { text });
           }
         }
       }
@@ -123,23 +173,33 @@ async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsS
   if (ndjson.trim()) {
     const parsed = JSON.parse(ndjson.trim());
     if (parsed.error) throw new Error(parsed.error);
-    if (!modelName && parsed.model_name) {
-      modelName = parsed.model_name;
+    if (!modelName && (parsed.model_name || parsed.model)) {
+      modelName = parsed.model_name || parsed.model;
     }
-    const token = parsed.response || '';
-    if (token) {
-      full += token;
+    const { text, thoughtText } = extractOllamaStreamParts(parsed);
+    if (thoughtText) {
+      fullThoughts += thoughtText;
       if (wantsStream) {
-        writeSse(res, 'token', { text: token });
+        writeSse(res, 'thought', { text: thoughtText });
+      }
+    }
+    if (text) {
+      full += text;
+      if (wantsStream) {
+        writeSse(res, 'token', { text });
       }
     }
   }
 
-  if (!full.trim()) {
+  if (!full.trim() && !fullThoughts.trim()) {
     throw new Error('Ollama /chat returned empty output');
   }
 
-  return { reply: full, model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b') };
+  return {
+    reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
+    thoughts: fullThoughts.trim() || undefined,
+    model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b')
+  };
 }
 
 async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
@@ -298,7 +358,12 @@ Do not skip the <think>...</think> block. `;
         return res.end();
       }
 
-      return res.json({ reply: ollama.reply, provider: 'ollama', model: ollama.model });
+      return res.json({
+        reply: ollama.reply,
+        thoughts: ollama.thoughts,
+        provider: 'ollama',
+        model: ollama.model
+      });
     } catch (ollamaError) {
       lastOllamaError = ollamaError.message || 'Ollama request failed';
       console.warn('Ollama primary path failed; falling back to Gemini:', lastOllamaError);
