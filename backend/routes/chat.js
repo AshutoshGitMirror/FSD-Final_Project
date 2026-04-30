@@ -101,6 +101,14 @@ function extractOllamaStreamParts(parsed) {
     text = '';
   }
 
+  // Some DeepSeek wrappers emit boolean thinking flags with token text in `response`.
+  if (!thoughtText && typeof parsed?.thinking === 'boolean' && text) {
+    if (parsed.thinking) {
+      thoughtText = text;
+      text = '';
+    }
+  }
+
   return { text, thoughtText };
 }
 
