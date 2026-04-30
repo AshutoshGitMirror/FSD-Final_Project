@@ -63,7 +63,85 @@ function pickOllamaModels(prompt = '', isThinking = false) {
   return ['llama3.1:8b', 'gemma3:12b'];
 }
 
-async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
+async function runOllamaChatEndpoint({ prompt, isThinking, wantsStream, res }) {
+  const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
+  const chatPath = process.env.OLLAMA_CHAT_PATH || '/chat';
+  const sessionId = `chat-${Date.now()}`;
+  const url =
+    `${base}${chatPath}?query=${encodeURIComponent(prompt)}` +
+    `&session_id=${encodeURIComponent(sessionId)}` +
+    `&deep_research=${isThinking ? 'true' : 'false'}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/x-ndjson'
+    }
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error(`Ollama /chat HTTP ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let ndjson = '';
+  let full = '';
+  let modelName = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    ndjson += decoder.decode(value, { stream: true });
+
+    let lineBreak = ndjson.indexOf('\n');
+    while (lineBreak !== -1) {
+      const line = ndjson.slice(0, lineBreak).trim();
+      ndjson = ndjson.slice(lineBreak + 1);
+      if (line) {
+        const parsed = JSON.parse(line);
+        if (parsed.error) throw new Error(parsed.error);
+
+        if (!modelName && parsed.model_name) {
+          modelName = parsed.model_name;
+        }
+
+        const token = parsed.response || '';
+        if (token) {
+          full += token;
+          if (wantsStream) {
+            writeSse(res, 'token', { text: token });
+          }
+        }
+      }
+      lineBreak = ndjson.indexOf('\n');
+    }
+  }
+
+  ndjson += decoder.decode();
+  if (ndjson.trim()) {
+    const parsed = JSON.parse(ndjson.trim());
+    if (parsed.error) throw new Error(parsed.error);
+    if (!modelName && parsed.model_name) {
+      modelName = parsed.model_name;
+    }
+    const token = parsed.response || '';
+    if (token) {
+      full += token;
+      if (wantsStream) {
+        writeSse(res, 'token', { text: token });
+      }
+    }
+  }
+
+  if (!full.trim()) {
+    throw new Error('Ollama /chat returned empty output');
+  }
+
+  return { reply: full, model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b') };
+}
+
+async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
   const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
   const models = pickOllamaModels(prompt, isThinking);
   const fullPrompt = `${systemContext}\n\nStudent: ${prompt}`;
@@ -85,7 +163,7 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
       });
 
       if (!response.ok || !response.body) {
-        throw new Error(`Ollama HTTP ${response.status}`);
+        throw new Error(`Ollama /api/generate HTTP ${response.status}`);
       }
 
       const reader = response.body.getReader();
@@ -141,6 +219,26 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
       failures.push(`${model}: ${err.message}`);
     } finally {
       clearTimeout(timeout);
+    }
+  }
+
+  throw new Error(`Ollama fallback failed (${failures.join(' | ')})`);
+}
+
+async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
+  const failures = [];
+  try {
+    return await runOllamaChatEndpoint({ prompt, isThinking, wantsStream, res });
+  } catch (chatError) {
+    failures.push(`/chat: ${chatError.message}`);
+  }
+
+  const allowGenerateFallback = process.env.OLLAMA_ALLOW_GENERATE_FALLBACK !== '0';
+  if (allowGenerateFallback) {
+    try {
+      return await runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res });
+    } catch (generateError) {
+      failures.push(`/api/generate: ${generateError.message}`);
     }
   }
 
