@@ -350,15 +350,9 @@ const LearnPage = () => {
                 {msg.thoughts && (
                   <blockquote className="bg-gray-200 border-l-4 border-gray-500 p-3 text-xs font-mono text-gray-700 rounded-sm">
                     <p className="font-black uppercase mb-1 flex items-center gap-1"><span>🧠</span> Thought Process</p>
-                    <div className="opacity-80">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkMath]}
-                        rehypePlugins={[rehypeKatex]}
-                        components={markdownComponents}
-                      >
-                        {msg.thoughts}
-                      </ReactMarkdown>
-                    </div>
+                    <pre className="opacity-90 bg-gray-100 border border-gray-400 rounded p-2 overflow-x-auto whitespace-pre-wrap">
+                      <code>{msg.thoughts}</code>
+                    </pre>
                   </blockquote>
                 )}
                 <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none">
