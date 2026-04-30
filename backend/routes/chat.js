@@ -349,12 +349,7 @@ router.post('/', async (req, res) => {
 
     let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
     if (isThinking) {
-      systemContext += `For deep-thinking mode, format output exactly as:
-<think>
-step-by-step reasoning
-</think>
-final student-facing answer
-Do not skip the <think>...</think> block. `;
+      systemContext += `Think carefully before providing the final student-facing answer. `;
     }
 
     let lastGeminiError = '';
