@@ -3,9 +3,73 @@ import { useParams } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl, linksUrl } from '../config/api';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // `rehype-katex` does not import the CSS for you
+
+const splitThoughtAndReply = (rawText = '') => {
+  const source = String(rawText || '');
+  const openTag = '<think>';
+  const closeTag = '</think>';
+
+  const thoughts = [];
+  let reply = '';
+  let cursor = 0;
+
+  while (cursor < source.length) {
+    const openIndex = source.indexOf(openTag, cursor);
+    if (openIndex === -1) {
+      reply += source.slice(cursor);
+      break;
+    }
+
+    reply += source.slice(cursor, openIndex);
+    const thoughtStart = openIndex + openTag.length;
+    const closeIndex = source.indexOf(closeTag, thoughtStart);
+
+    if (closeIndex === -1) {
+      thoughts.push(source.slice(thoughtStart).trim());
+      cursor = source.length;
+      break;
+    }
+
+    thoughts.push(source.slice(thoughtStart, closeIndex).trim());
+    cursor = closeIndex + closeTag.length;
+  }
+
+  const finalReply = reply.trim() || source.trim();
+  const finalThoughts = thoughts.filter(Boolean).join('\n\n').trim();
+
+  return {
+    reply: finalReply,
+    thoughts: finalThoughts || undefined
+  };
+};
+
+const markdownComponents = {
+  a: ({ href, children, ...props }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="underline font-semibold break-all"
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+  img: ({ src, alt, ...props }) => (
+    <a href={src} target="_blank" rel="noreferrer" className="inline-block my-2">
+      <img
+        src={src}
+        alt={alt || 'visual'}
+        className="card-neo max-h-64 object-contain"
+        {...props}
+      />
+    </a>
+  )
+};
 
 const LearnPage = () => {
   const { subject, chapter } = useParams();
@@ -139,13 +203,20 @@ const LearnPage = () => {
 
       if (contentType.includes('application/json')) {
         const data = await response.json();
-        updateLatestAiMessage(data.reply || data.error || '', data.thoughts);
+        if (data.error) {
+          updateLatestAiMessage(data.error);
+          return;
+        }
+
+        const parsed = splitThoughtAndReply(data.reply || '');
+        updateLatestAiMessage(parsed.reply, data.thoughts ?? parsed.thoughts);
         return;
       }
 
       if (!response.body) {
         const text = await response.text();
-        updateLatestAiMessage(text || 'No response from Gemini API.');
+        const parsed = splitThoughtAndReply(text || '');
+        updateLatestAiMessage(parsed.reply || 'No response from AI API.', parsed.thoughts);
         return;
       }
 
@@ -189,9 +260,10 @@ const LearnPage = () => {
 
             if (eventType === 'token' && payload.text) {
               streamedText += payload.text;
-              updateLatestAiMessage(streamedText);
+              const parsed = splitThoughtAndReply(streamedText);
+              updateLatestAiMessage(parsed.reply || 'Thinking…', parsed.thoughts);
             } else if (eventType === 'error') {
-              updateLatestAiMessage(payload.message || 'Error connecting to Gemini API.');
+              updateLatestAiMessage(payload.message || 'Error connecting to AI API.');
               return;
             }
 
@@ -199,16 +271,20 @@ const LearnPage = () => {
           }
         } else {
           streamedText += decoded;
-          updateLatestAiMessage(streamedText);
+          const parsed = splitThoughtAndReply(streamedText);
+          updateLatestAiMessage(parsed.reply || 'Thinking…', parsed.thoughts);
         }
       }
 
       streamedText += decoder.decode();
-      if (!streamedText.trim()) {
-        updateLatestAiMessage('No response from Gemini API.');
+      const parsed = splitThoughtAndReply(streamedText);
+      if (!parsed.reply && !parsed.thoughts) {
+        updateLatestAiMessage('No response from AI API.');
+      } else {
+        updateLatestAiMessage(parsed.reply || 'Thinking…', parsed.thoughts);
       }
     } catch {
-      updateLatestAiMessage('Error connecting to Gemini API.');
+      updateLatestAiMessage('Error connecting to AI API.');
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +297,9 @@ const LearnPage = () => {
         <h2 className="text-2xl font-black uppercase bg-neo-pink text-white px-4 py-2 border-4 border-black inline-block">Visuals & Links</h2>
         <div className="space-y-4">
           {images.map((img, i) => (
-             <img key={i} src={img} alt="concept visual" className="card-neo w-full object-cover max-h-48" onError={(e) => e.target.style.display='none'} />
+             <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
+               <img src={img} alt="concept visual" className="card-neo w-full object-cover max-h-48 hover:opacity-90 transition-opacity" onError={(e) => e.target.style.display='none'} />
+             </a>
           ))}
           {extraLinks.map((link, i) => (
              <a key={i} href={link.url} target="_blank" rel="noreferrer" className={`block card-neo p-4 font-bold text-sm text-black hover:underline break-words ${link.type === 'yt' ? 'bg-neo-blue' : 'bg-neo-yellow'}`}>
@@ -250,12 +328,18 @@ const LearnPage = () => {
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] p-4 border-4 border-black font-medium leading-relaxed ${msg.role === 'user' ? 'bg-neo-blue shadow-[4px_4px_0_0_#000]' : 'bg-gray-100 shadow-[4px_4px_0_0_#000] rounded-tl-none flex flex-col gap-3'}`}>
                 {msg.thoughts && (
-                  <div className="bg-gray-200 border-l-4 border-gray-400 p-3 text-xs font-mono text-gray-600 rounded-sm">
+                  <blockquote className="bg-gray-200 border-l-4 border-gray-500 p-3 text-xs font-mono text-gray-700 rounded-sm">
                     <p className="font-black uppercase mb-1 flex items-center gap-1"><span>🧠</span> Thought Process</p>
                     <div className="opacity-80">
-                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{msg.thoughts}</ReactMarkdown>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        components={markdownComponents}
+                      >
+                        {msg.thoughts}
+                      </ReactMarkdown>
                     </div>
-                  </div>
+                  </blockquote>
                 )}
                 <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none">
                   {msg.role === 'ai' ? (
@@ -263,8 +347,9 @@ const LearnPage = () => {
                       <span className="italic opacity-70">{msg.text}</span>
                     ) : (
                       <ReactMarkdown 
-                        remarkPlugins={[remarkMath]}
+                        remarkPlugins={[remarkGfm, remarkMath]}
                         rehypePlugins={[rehypeKatex]}
+                        components={markdownComponents}
                       >
                         {msg.text}
                       </ReactMarkdown>
