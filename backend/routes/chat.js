@@ -37,6 +37,111 @@ async function streamChunksToSse(asyncIterable, res) {
   }
 }
 
+function pickOllamaModels(prompt = '', isThinking = false) {
+  const fromEnv = (process.env.OLLAMA_MODELS || '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  if (fromEnv.length > 0) return fromEnv;
+
+  if (isThinking) {
+    return ['deepseek-r1:latest', 'llama3.1:8b', 'gemma3:12b'];
+  }
+
+  const text = String(prompt).toLowerCase();
+  if (/(summari|list|define|solve)/.test(text)) {
+    return ['gemma3:12b', 'llama3.1:8b', 'deepseek-r1:latest'];
+  }
+  if (/(why|how|explain|reason)/.test(text)) {
+    return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+  }
+  return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+}
+
+async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
+  const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
+  const models = pickOllamaModels(prompt, isThinking);
+  const fullPrompt = `${systemContext}\n\nStudent: ${prompt}`;
+  const failures = [];
+
+  for (const model of models) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 25000);
+    try {
+      const response = await fetch(`${base}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model,
+          prompt: fullPrompt,
+          stream: true
+        })
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`Ollama HTTP ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let ndjson = '';
+      let full = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        ndjson += decoder.decode(value, { stream: true });
+
+        let lineBreak = ndjson.indexOf('\n');
+        while (lineBreak !== -1) {
+          const line = ndjson.slice(0, lineBreak).trim();
+          ndjson = ndjson.slice(lineBreak + 1);
+          if (line) {
+            const parsed = JSON.parse(line);
+            if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+            const token = parsed.response || '';
+            if (token) {
+              full += token;
+              if (wantsStream) {
+                writeSse(res, 'token', { text: token });
+              }
+            }
+          }
+          lineBreak = ndjson.indexOf('\n');
+        }
+      }
+
+      ndjson += decoder.decode();
+      if (ndjson.trim()) {
+        const parsed = JSON.parse(ndjson.trim());
+        if (parsed.error) throw new Error(parsed.error);
+        const token = parsed.response || '';
+        if (token) {
+          full += token;
+          if (wantsStream) {
+            writeSse(res, 'token', { text: token });
+          }
+        }
+      }
+
+      if (!full.trim()) {
+        throw new Error(`Ollama model ${model} returned empty output`);
+      }
+
+      return { reply: full, model };
+    } catch (err) {
+      failures.push(`${model}: ${err.message}`);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  throw new Error(`Ollama fallback failed (${failures.join(' | ')})`);
+}
+
 router.post('/', async (req, res) => {
   try {
     const { prompt, isThinking, subject, chapter } = req.body;
@@ -45,10 +150,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: "Prompt is required." });
     }
     
-    const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY;
-    if (!rawKeys) {
-      return res.status(500).json({ error: "API Key not configured." });
-    }
+    const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(k => k);
 
     let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
@@ -56,9 +158,9 @@ router.post('/', async (req, res) => {
       systemContext += `Please show your step-by-step reasoning before providing the final answer, acting as a deep thinker. `;
     }
 
+    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(5, apiKeys.length) : 0;
     let attempt = 0;
-    // Retry up to the number of keys we have, or at least 5 times
-    const MAX_RETRIES = Math.max(5, apiKeys.length);
+    let lastGeminiError = '';
 
     if (wantsStream) {
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
@@ -72,55 +174,53 @@ router.post('/', async (req, res) => {
     
     while (attempt < MAX_RETRIES) {
       attempt++;
+      const keyIndex = (attempt - 1) % apiKeys.length;
+      const currentKey = apiKeys[keyIndex];
       try {
-        const currentKey = apiKeys[(attempt - 1) % apiKeys.length];
+        const { GoogleGenAI } = require("@google/genai");
+        const ai = new GoogleGenAI({ apiKey: currentKey });
         
-        // Primary path: stream token chunks via the new GenAI SDK
-        try {
-          const { GoogleGenAI } = require("@google/genai");
-          const ai = new GoogleGenAI({ apiKey: currentKey });
-          
-          const configObj = { systemInstruction: systemContext };
-          if (isThinking) {
-            configObj.thinkingConfig = { thinkingLevel: 'high', includeThoughts: true };
-          }
+        const configObj = { systemInstruction: systemContext };
+        if (isThinking) {
+          configObj.thinkingConfig = { thinkingLevel: 'high', includeThoughts: true };
+        }
 
-          if (wantsStream) {
-            const response = await ai.models.generateContentStream({
-              model: "gemini-3-flash-preview",
-              contents: `Student: ${prompt}`,
-              config: configObj
-            });
-
-            await streamChunksToSse(response, res);
-            writeSse(res, 'done', {});
-            return res.end();
-          }
-
-          const response = await ai.models.generateContent({
+        if (wantsStream) {
+          const response = await ai.models.generateContentStream({
             model: "gemini-3-flash-preview",
             contents: `Student: ${prompt}`,
             config: configObj
           });
 
-          let finalReply = "";
-          let thoughtsSummary = "";
-          if (response.candidates && response.candidates[0] && response.candidates[0].content) {
-            for (const part of response.candidates[0].content.parts) {
-              if (!part.text) continue;
-              if (part.thought) thoughtsSummary += part.text + "\n";
-              else finalReply += part.text;
-            }
-          } else {
-            finalReply = response.text || "";
+          await streamChunksToSse(response, res);
+          writeSse(res, 'done', {});
+          return res.end();
+        }
+
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `Student: ${prompt}`,
+          config: configObj
+        });
+
+        let finalReply = "";
+        let thoughtsSummary = "";
+        if (response.candidates && response.candidates[0] && response.candidates[0].content) {
+          for (const part of response.candidates[0].content.parts) {
+            if (!part.text) continue;
+            if (part.thought) thoughtsSummary += part.text + "\n";
+            else finalReply += part.text;
           }
-          return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
-        } catch (newSdkError) {
-          console.warn(`[Attempt ${attempt} - Key ${((attempt - 1) % apiKeys.length) + 1}] New SDK failed, falling back to legacy...`, newSdkError.message);
-          // Fallback to legacy SDK if new SDK fails
+        } else {
+          finalReply = response.text || "";
+        }
+        return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
+      } catch (newSdkError) {
+        try {
           const { GoogleGenerativeAI } = require("@google/generative-ai");
           const genAI = new GoogleGenerativeAI(currentKey);
           const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+
           if (wantsStream) {
             const streamResult = await model.generateContentStream(`${systemContext}\n\nStudent: ${prompt}`);
             const stream = streamResult.stream || streamResult;
@@ -132,37 +232,47 @@ router.post('/', async (req, res) => {
           const result = await model.generateContent(`${systemContext}\n\nStudent: ${prompt}`);
           const response = await result.response;
           return res.json({ reply: response.text() || "" });
+        } catch (legacyError) {
+          lastGeminiError = legacyError.message || newSdkError.message || 'Gemini request failed';
+          console.error(`[Attempt ${attempt} - Key ${keyIndex + 1}] Gemini Error:`, lastGeminiError);
         }
-      } catch (error) {
-        console.error(`[Attempt ${attempt} - Key ${((attempt - 1) % apiKeys.length) + 1}] Gemini Error:`, error.message);
-        
-        if (attempt >= MAX_RETRIES) {
-          const message = (error.status === 429 || error.message.includes('Quota'))
-            ? "Gemini 3 Quota Exceeded on all available keys. Please add more keys or try again later."
-            : `AI Failed after ${MAX_RETRIES} attempts. Last error: ${error.message}`;
-
-          if (wantsStream) {
-            if (!res.writableEnded) {
-              writeSse(res, 'error', { message });
-              res.end();
-            }
-            return;
-          }
-          const statusCode = (error.status === 429 || error.message.includes('Quota')) ? 429 : 500;
-          return res.status(statusCode).json({ error: message });
-        }
-        if (!wantsStream && (error.status === 429 || error.message.includes('Quota'))) {
-          return res.status(429).json({ error: "Gemini 3 Quota Exceeded on all available keys. Please add more keys or try again later." });
-        }
-        if (!wantsStream && attempt >= MAX_RETRIES) {
-          return res.status(500).json({ error: `AI Failed after ${MAX_RETRIES} attempts. Last error: ${error.message}` });
-        }
-        if (wantsStream && attempt >= MAX_RETRIES) {
-          return;
-        }
-        // Wait 1 second before retrying next key
-        await new Promise(resolve => setTimeout(resolve, 1000));
       }
+
+      if (attempt < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    // Gemini exhausted/unavailable -> try Ollama/Gemma/DeepSeek fallback chain.
+    try {
+      const ollama = await runOllamaFallback({
+        prompt,
+        systemContext,
+        isThinking,
+        wantsStream,
+        res
+      });
+
+      if (wantsStream) {
+        writeSse(res, 'meta', { provider: 'ollama', model: ollama.model });
+        writeSse(res, 'done', {});
+        return res.end();
+      }
+
+      return res.json({ reply: ollama.reply, provider: 'ollama', model: ollama.model });
+    } catch (ollamaError) {
+      const message = apiKeys.length > 0
+        ? `Gemini failed: ${lastGeminiError || 'unknown error'}. Ollama fallback failed: ${ollamaError.message}`
+        : `Gemini keys not configured. Ollama fallback failed: ${ollamaError.message}`;
+
+      if (wantsStream) {
+        if (!res.writableEnded) {
+          writeSse(res, 'error', { message });
+          res.end();
+        }
+        return;
+      }
+      return res.status(500).json({ error: message });
     }
   } catch (error) {
     console.error("Critical Chat Route Error:", error);
