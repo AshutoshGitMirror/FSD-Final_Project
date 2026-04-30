@@ -8,7 +8,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css'; // `rehype-katex` does not import the CSS for you
 
-const splitThoughtAndReply = (rawText = '', treatAllAsThought = false) => {
+const splitThoughtAndReply = (rawText = '') => {
   const source = String(rawText || '')
     .replace(/&lt;\s*think\s*&gt;/gi, '<think>')
     .replace(/&lt;\s*\/\s*think\s*&gt;/gi, '</think>');
@@ -45,16 +45,8 @@ const splitThoughtAndReply = (rawText = '', treatAllAsThought = false) => {
   const finalThoughts = thoughts.filter(Boolean).join('\n\n').trim();
 
   if (!hasThinkTags) {
-    const plain = source.trim();
-    if (treatAllAsThought && plain) {
-      return {
-        reply: '',
-        thoughts: plain
-      };
-    }
-
     return {
-      reply: plain,
+      reply: source.trim(),
       thoughts: undefined
     };
   }
@@ -226,7 +218,7 @@ const LearnPage = () => {
           return;
         }
 
-        const parsed = splitThoughtAndReply(data.reply || '', isThinking);
+        const parsed = splitThoughtAndReply(data.reply || '');
         const mergedThoughts = data.thoughts ?? parsed.thoughts;
         const finalReply = parsed.reply || (mergedThoughts ? 'See thought process below.' : '');
         updateLatestAiMessage(finalReply, mergedThoughts);
@@ -235,7 +227,7 @@ const LearnPage = () => {
 
       if (!response.body) {
         const text = await response.text();
-        const parsed = splitThoughtAndReply(text || '', isThinking);
+        const parsed = splitThoughtAndReply(text || '');
         const finalReply = parsed.reply || (parsed.thoughts ? 'See thought process below.' : 'No response from AI API.');
         updateLatestAiMessage(finalReply, parsed.thoughts);
         return;
@@ -282,12 +274,12 @@ const LearnPage = () => {
 
             if (eventType === 'token' && payload.text) {
               streamedText += payload.text;
-              const parsed = splitThoughtAndReply(streamedText, isThinking);
+              const parsed = splitThoughtAndReply(streamedText);
               const thoughtText = [streamedThoughts, parsed.thoughts].filter(Boolean).join('\n\n').trim() || undefined;
               updateLatestAiMessage(parsed.reply || 'Thinking…', thoughtText);
             } else if (eventType === 'thought' && payload.text) {
               streamedThoughts += payload.text;
-              const parsed = splitThoughtAndReply(streamedText, isThinking);
+              const parsed = splitThoughtAndReply(streamedText);
               updateLatestAiMessage(parsed.reply || 'Thinking…', streamedThoughts.trim());
             } else if (eventType === 'error') {
               updateLatestAiMessage(payload.message || 'Error connecting to AI API.');
@@ -298,13 +290,13 @@ const LearnPage = () => {
           }
         } else {
           streamedText += decoded;
-          const parsed = splitThoughtAndReply(streamedText, isThinking);
+          const parsed = splitThoughtAndReply(streamedText);
           updateLatestAiMessage(parsed.reply || 'Thinking…', parsed.thoughts);
         }
       }
 
       streamedText += decoder.decode();
-      const parsed = splitThoughtAndReply(streamedText, isThinking);
+      const parsed = splitThoughtAndReply(streamedText);
       const finalThoughts = [streamedThoughts, parsed.thoughts].filter(Boolean).join('\n\n').trim() || undefined;
       if (!parsed.reply && !finalThoughts) {
         updateLatestAiMessage('No response from AI API.');

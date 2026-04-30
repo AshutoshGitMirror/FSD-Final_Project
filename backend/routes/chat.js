@@ -64,13 +64,11 @@ function pickOllamaModels(prompt = '', isThinking = false) {
 }
 
 function extractOllamaStreamParts(parsed) {
-  const typeHint = String(parsed?.type || parsed?.channel || '').toLowerCase();
-  const hasThinkingFlag =
-    parsed?.is_thinking === true ||
-    parsed?.thinking === true ||
-    parsed?.thought === true ||
-    typeHint === 'thinking' ||
-    typeHint === 'thought';
+  const typeHint = String(parsed?.type || parsed?.channel || parsed?.event || '').toLowerCase();
+  const phaseHint = String(parsed?.phase || parsed?.stage || parsed?.stream_type || '').toLowerCase();
+  const isThoughtChunk =
+    ['thinking', 'thought', 'reasoning', 'analysis'].includes(typeHint) ||
+    ['thinking', 'thought', 'reasoning', 'analysis'].includes(phaseHint);
 
   let text = '';
   if (typeof parsed?.response === 'string') {
@@ -92,11 +90,13 @@ function extractOllamaStreamParts(parsed) {
     thoughtText = parsed.reasoning;
   } else if (typeof parsed?.reasoning_content === 'string') {
     thoughtText = parsed.reasoning_content;
+  } else if (typeof parsed?.thinking_text === 'string') {
+    thoughtText = parsed.thinking_text;
   } else if (typeof parsed?.think === 'string') {
     thoughtText = parsed.think;
   }
 
-  if (!thoughtText && hasThinkingFlag && text) {
+  if (!thoughtText && isThoughtChunk && text) {
     thoughtText = text;
     text = '';
   }
