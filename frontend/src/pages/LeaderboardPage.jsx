@@ -36,7 +36,7 @@ const LeaderboardPage = () => {
             No leaderboard data yet.
           </div>
         )}
-        {leaders.map((user, idx) => {
+        {leaders.map((entry, idx) => {
           const rank = idx + 1;
           let rankLabel = `#${rank}`;
           let cardBg = 'bg-white';
@@ -59,23 +59,23 @@ const LeaderboardPage = () => {
           }
 
           return (
-            <div key={user._id} className={`card-neo p-6 flex items-center justify-between transition-transform hover:-translate-y-1 ${cardBg} ${shadowClass}`}>
+            <div key={entry._id || idx} className={`card-neo p-6 flex items-center justify-between transition-transform hover:-translate-y-1 ${cardBg} ${shadowClass}`}>
               <div className="flex items-center gap-6">
                 <div className={`px-4 py-2 border-4 border-black font-black text-xl flex items-center justify-center ${badgeBg} shadow-[2px_2px_0_0_#000]`}>
                   {rankLabel}
                 </div>
                 <div>
-                  <h2 className={`text-2xl font-black uppercase tracking-tight ${rank === 1 ? 'drop-shadow-[2px_2px_0_px_#000]' : ''}`}>
-                    {user.userName}
+                  <h2 className={`text-2xl font-black uppercase tracking-tight ${rank === 1 ? 'drop-shadow-[2px_2px_0px_#000]' : ''}`}>
+                    {entry.userName}
                   </h2>
                   <p className="font-bold opacity-80 text-sm italic">
-                    {user.totalChaptersCompleted} Chapters Mastered
+                    {entry.totalChaptersCompleted} Chapters Mastered
                   </p>
                 </div>
               </div>
               <div className="text-right border-l-4 border-black pl-8 hidden sm:block bg-white text-black py-2 px-6 shadow-[4px_4px_0_0_#000]">
                 <span className="block text-xs font-black uppercase text-gray-500">Overall Avg</span>
-                <span className="text-4xl font-black">{user.averageScore}%</span>
+                <span className="text-4xl font-black">{entry.averageScore}%</span>
               </div>
             </div>
           );

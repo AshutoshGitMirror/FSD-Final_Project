@@ -36,14 +36,16 @@ const KnowledgeGraphPage = () => {
     if (!selectedSubject) return;
 
     Promise.all([
-      fetch(backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`)).then(r => r.json()),
-      authFetch(backendUrl('/api/progress')).then(r => r.json())
+      fetch(backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`))
+        .then(r => r.ok ? r.json() : { nodes: [] }),
+      authFetch(backendUrl('/api/progress'))
+        .then(r => r.ok ? r.json() : [])
     ]).then(([graph, progress]) => {
       setGraphData(graph);
 
       // Build progress map: chapterName -> best score %
       const pMap = {};
-      progress.forEach(p => {
+      (Array.isArray(progress) ? progress : []).forEach(p => {
         if (p.subjectName === selectedSubject) {
           const pct = p.totalQuestions > 0 ? Math.round((p.quizScore / p.totalQuestions) * 100) : 0;
           if (!pMap[p.chapterName] || pct > pMap[p.chapterName]) {

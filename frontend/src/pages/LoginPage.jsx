@@ -111,7 +111,7 @@ const LoginPage = () => {
       </main>
 
       <footer className="py-6 text-center text-xs font-bold uppercase tracking-wider">
-        © 2024 AI TUTOR ACADEMY • MADE FOR CREATORS
+        © {new Date().getFullYear()} AI TUTOR ACADEMY • MADE FOR CREATORS
       </footer>
     </div>
   );

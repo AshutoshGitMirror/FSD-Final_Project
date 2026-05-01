@@ -3,7 +3,6 @@ const router = express.Router();
 const SpacedRepetition = require('../models/SpacedRepetition');
 const KnowledgeGraph = require('../models/KnowledgeGraph');
 const authMiddleware = require('../middleware/auth');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // All SR routes require authentication
 router.use(authMiddleware);
@@ -294,15 +293,11 @@ router.post('/generate-question', async (req, res) => {
       return null;
     };
 
-    // ── Try Gemini first ────────────────────────────────────────
+    // ── Try Gemini with key rotation ─────────────────────────────
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY;
     const apiKeys = (rawKeys || '').split(',').map(k => k.trim()).filter(Boolean);
-    if (apiKeys.length > 0) {
-      try {
-        const { GoogleGenAI } = require('@google/genai');
-        const ai = new GoogleGenAI({ apiKey: apiKeys[0] });
 
-        const prompt = `You are creating a spaced repetition review question for a Class ${std} student studying ${subjectName}.
+    const prompt = `You are creating a spaced repetition review question for a Class ${std} student studying ${subjectName}.
 
 The specific concept to test is: "${concept}" from the chapter "${chapterName}".
 
@@ -313,13 +308,20 @@ Respond in this exact JSON format (no markdown, no code blocks):
 
 The question should be clear, age-appropriate for Class ${std}, and test genuine understanding, not rote memorization.`;
 
+    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(3, apiKeys.length) : 0;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const currentKey = apiKeys[attempt % apiKeys.length];
+      try {
+        const { GoogleGenAI } = require('@google/genai');
+        const ai = new GoogleGenAI({ apiKey: currentKey });
+
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: prompt
         });
-        
-        const text = response.text.trim();
-        const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+        const text = (typeof response.text === 'function' ? response.text() : response.text) || '';
+        const cleanText = text.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
         const parsed = JSON.parse(cleanText);
 
         return res.json({
@@ -331,7 +333,8 @@ The question should be clear, age-appropriate for Class ${std}, and test genuine
           fallback: false
         });
       } catch (aiErr) {
-        console.warn('Gemini failed, falling back to DB quiz:', aiErr.message);
+        console.warn(`[SR Q-Gen Attempt ${attempt + 1} Key ${(attempt % apiKeys.length) + 1}] Gemini failed:`, aiErr.message);
+        if (attempt < MAX_RETRIES - 1) await new Promise(r => setTimeout(r, 800));
       }
     }
 

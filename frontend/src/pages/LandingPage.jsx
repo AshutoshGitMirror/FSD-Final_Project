@@ -6,8 +6,8 @@ const LandingPage = () => {
       <nav className="flex justify-between items-center p-6 border-b-4 border-black bg-white">
         <div className="font-black text-2xl tracking-tighter">AI TUTOR</div>
         <div className="space-x-6 font-bold text-sm">
-          <Link to="#" className="hover:underline">FEATURES</Link>
-          <Link to="#" className="hover:underline">PRICING</Link>
+          <a href="#features" className="hover:underline">FEATURES</a>
+          <a href="#pricing" className="hover:underline">PRICING</a>
           <Link to="/login" className="hover:underline">LOGIN</Link>
           <Link to="/signup">
             <button className="btn-neo px-4 py-2 text-xs">SIGNUP</button>
@@ -67,7 +67,7 @@ const LandingPage = () => {
       </main>
 
       <footer className="border-t-4 border-black p-6 bg-white flex justify-between items-center text-sm font-bold">
-        <div>© 2024 AI TUTOR LABS. ALL RIGHTS RESERVED.</div>
+        <div>© {new Date().getFullYear()} AI TUTOR LABS. ALL RIGHTS RESERVED.</div>
         <div className="flex gap-4 text-xl">
           <span>🔊</span>
           <span>🌍</span>
