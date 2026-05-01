@@ -1,5 +1,7 @@
-# Presentation Link : https://github.com/AshutoshGitMirror/FSD-Final_Project/blob/master/slides-export.pdf
-
+### Presentation Link : https://github.com/AshutoshGitMirror/FSD-Final_Project/blob/master/slides-export.pdf
+### Video Demo Link : https://youtu.be/e7rPOPC6jXA
+### Deployment Link : https://fsd-final-frontend-7kof.onrender.com/  
+Note: Render can take 50 seconds for services to startup on free plan so first call to backend services may take time. 
 
 # FSD Final Project (3-Service Deployment)
 
