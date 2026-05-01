@@ -8,7 +8,7 @@ router.use(authMiddleware);
 // GET saved YT links for logged-in user only
 router.get('/', async (req, res) => {
   try {
-    const links = await SavedLinks.find({ userId: req.user.userId, source: 'youtube' });
+    const links = await SavedLinks.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     res.json(links);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch saved links' });

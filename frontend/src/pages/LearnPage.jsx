@@ -96,22 +96,22 @@ const LearnPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef(null);
 
-  const persistYoutubeLinks = async (videos) => {
+  const persistLinks = async (linksArray, source) => {
     const seen = new Set();
-    const uniqueVideos = videos.filter((v) => {
-      if (!v.url || seen.has(v.url)) return false;
-      seen.add(v.url);
+    const uniqueLinks = linksArray.filter((l) => {
+      if (!l.url || seen.has(l.url)) return false;
+      seen.add(l.url);
       return true;
     });
 
     await Promise.allSettled(
-      uniqueVideos.map((video) =>
+      uniqueLinks.map((link) =>
         authFetch(backendUrl('/api/links'), {
           method: 'POST',
           body: JSON.stringify({
-            url: video.url,
-            title: video.title || 'YouTube Resource',
-            source: 'youtube'
+            url: link.url,
+            title: link.title || (source === 'youtube' ? 'YouTube Resource' : 'Shaalaa Resource'),
+            source: source
           })
         })
       )
@@ -160,13 +160,19 @@ const LearnPage = () => {
             ...prev,
             ...videos.map((v) => ({ type: 'yt', url: v.url, title: v.title }))
           ]);
-          await persistYoutubeLinks(videos);
+          await persistLinks(videos, 'youtube');
         })
         .catch(console.error);
 
        fetch(linksUrl(`/shaalaalinks?std=${std}&query=${encodeURIComponent(currentInput)}`))
         .then(res => res.json())
-        .then(data => { if(data.links) setExtraLinks(prev => [...prev, ...data.links.map(l => ({ type: 'shaalaa', url: l }))]); })
+        .then(async data => { 
+          if(data.links) {
+            const sLinks = data.links.map(l => ({ type: 'shaalaa', url: l, title: 'Shaalaa Resource' }));
+            setExtraLinks(prev => [...prev, ...sLinks]); 
+            await persistLinks(sLinks, 'shaalaa');
+          }
+        })
         .catch(console.error);
     }
 

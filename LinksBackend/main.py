@@ -81,7 +81,7 @@ async def get_links(std: int, query: str = "", limit: int = 2):
     links = ddgs_links(query, std, limit) or []
 
     # build relevant fallback
-    encoded_query = quote_plus(f"{query} english class {std}")
+    encoded_query = quote_plus(f"{query} class {std}")
     fallback_link = f"https://www.shaalaa.com/search?q={encoded_query}"
 
     # fill until limit

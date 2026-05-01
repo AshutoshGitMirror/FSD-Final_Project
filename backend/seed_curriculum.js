@@ -2449,7 +2449,32 @@ async function seedAll() {
     ]
   });
 
-  console.log('✅ Knowledge Graphs seeded!');
+  // ── AUTO-GENERATE MISSING KNOWLEDGE GRAPHS ──
+  console.log('🧠 Generating missing Knowledge Graphs...');
+  const allCurriculums = await Curriculum.find({});
+  let generatedCount = 0;
+  for (const curr of allCurriculums) {
+    const existing = await KnowledgeGraph.findOne({ std: curr.std, board: curr.board, subjectName: curr.subjectName });
+    if (!existing) {
+      const nodes = curr.chapters.map((chap, index) => {
+        return {
+          chapterName: chap.chapterName,
+          concepts: [chap.chapterName + ' - Core Concepts', chap.chapterName + ' - Application'],
+          prerequisites: index > 0 ? [curr.chapters[index - 1].chapterName] : [],
+          difficulty: 3
+        };
+      });
+      await upsertGraph({
+        subjectName: curr.subjectName,
+        std: curr.std,
+        board: curr.board,
+        nodes: nodes
+      });
+      generatedCount++;
+    }
+  }
+  console.log(`✅ Generated ${generatedCount} missing Knowledge Graphs!`);
+  console.log('✅ All Knowledge Graphs seeded!');
 
   await mongoose.disconnect();
   console.log('🎉 Comprehensive seed complete! Disconnected from MongoDB.');
