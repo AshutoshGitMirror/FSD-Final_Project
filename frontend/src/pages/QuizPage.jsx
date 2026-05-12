@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { authFetch, getUser } from '../utils/auth';
+import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
-  const user = getUser();
 
   const [quizBank, setQuizBank] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,16 +52,15 @@ const QuizPage = () => {
   useEffect(() => {
     if (finished || isLocked || loading || quizBank.length === 0) return;
 
-    if (timeLeft <= 0) {
-      handleNext();
-      return;
-    }
-
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
+      if (timeLeft <= 0) {
+        handleNext();
+        return;
+      }
       setTimeLeft(prev => prev - 1);
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [timeLeft, finished, isLocked, handleNext, loading, quizBank.length]);
 
   // Persistence Effect
