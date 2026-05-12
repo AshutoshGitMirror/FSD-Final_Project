@@ -1,17 +1,27 @@
 const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
 const cors = require('cors');
 const { connectDatabase } = require('./config/database');
 const { registerRoutes, routeRegistry } = require('./routes');
+const { authLimiter } = require('./middleware/rateLimiter');
 
 const createApp = () => {
   const app = express();
 
-  app.use(cors());
+  app.use(helmet({ frameguard: false }));
+  app.use(morgan('short'));
+  app.use(cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',').map(s => s.trim()) || 'http://localhost:5173',
+    credentials: true
+  }));
   app.use(express.json());
 
   app.get('/', (req, res) => {
     res.send('AI Tutor Backend is running with curriculum, quiz, progress, graph, review, links, and Feynman APIs.');
   });
+
+  app.use('/api/auth', authLimiter);
 
   registerRoutes(app);
 

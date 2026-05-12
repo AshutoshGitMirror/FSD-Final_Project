@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const ragService = require('../services/ragService');
 
 function extractChunkText(chunk) {
   if (!chunk) return '';
@@ -347,9 +348,14 @@ router.post('/', async (req, res) => {
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(k => k);
 
-    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
+    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
     if (isThinking) {
       systemContext += `Think carefully before providing the final student-facing answer. `;
+    }
+
+    const ragContext = await ragService.buildContext(prompt);
+    if (ragContext) {
+      systemContext += `\n\nHere are relevant textbook excerpts to help answer:\n${ragContext.context}\n\nCite these sources when relevant.`;
     }
 
     let lastGeminiError = '';

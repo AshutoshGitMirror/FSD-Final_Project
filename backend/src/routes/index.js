@@ -8,7 +8,12 @@ const routeRegistry = [
   ['/api/quiz', require('./quiz')],
   ['/api/knowledge-graph', require('./knowledgeGraph')],
   ['/api/spaced-repetition', require('./spacedRepetition')],
-  ['/api/feynman', require('./feynman')]
+  ['/api/feynman', require('./feynman')],
+  ['/api/feedback', require('./feedback')],
+  ['/api/pdf', require('./pdf')],
+  ['/api/video', require('./video')],
+  ['/api/ethics', require('./ethics')],
+  ['/api/teacher', require('./teacher')]
 ];
 
 const registerRoutes = (app) => {

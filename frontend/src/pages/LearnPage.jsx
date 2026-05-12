@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl, linksUrl } from '../config/api';
@@ -6,7 +6,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css'; // `rehype-katex` does not import the CSS for you
+import 'katex/dist/katex.min.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import ConceptDiagram from '../components/ConceptDiagram';
 
 const splitThoughtAndReply = (rawText = '') => {
   const source = String(rawText || '')
@@ -85,6 +87,7 @@ const LearnPage = () => {
   const { subject, chapter } = useParams();
   const user = getUser();
   const std = user?.std || 10;
+  const board = user?.board || 'CBSE';
   const [messages, setMessages] = useState([
     { role: 'ai', text: `Hi! Let's learn about ${chapter} in ${subject}. What do you want to know?` }
   ]);
@@ -94,7 +97,50 @@ const LearnPage = () => {
   const [images, setImages] = useState([]);
   const [extraLinks, setExtraLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbacks, setFeedbacks] = useState({});
+  const [diagrams, setDiagrams] = useState([]);
+  const [loadingDiagrams, setLoadingDiagrams] = useState(false);
+  const [chapterVideos, setChapterVideos] = useState([]);
   const bottomRef = useRef(null);
+  const knownConceptsRef = useRef(new Set());
+
+  const CONCEPT_KEYWORDS = [
+    'photosynthesis', 'water cycle', 'digestive system', 'pythagoras',
+    'electric circuit', 'solar system', 'food chain', 'triangles',
+    'respiration', 'gravity', 'magnetism'
+  ];
+
+  const fetchDiagramsForConcept = useCallback(async (concept) => {
+    if (!subject || knownConceptsRef.current.has(concept.toLowerCase())) return;
+    knownConceptsRef.current.add(concept.toLowerCase());
+    setLoadingDiagrams(true);
+    try {
+      const res = await fetch(
+        backendUrl(`/api/knowledge-graph/diagrams?std=${std}&board=${board}&subject=${encodeURIComponent(subject)}&concept=${encodeURIComponent(concept)}`)
+      );
+      const data = await res.json();
+      if (data.diagrams && data.diagrams.length > 0) {
+        setDiagrams(prev => {
+          const existing = new Set(prev.map(d => d.conceptName));
+          const newOnes = data.diagrams.filter(d => !existing.has(d.conceptName));
+          return [...prev, ...newOnes];
+        });
+      }
+    } catch (err) {
+      console.error('Diagram fetch error:', err);
+    }
+    setLoadingDiagrams(false);
+  }, [std, board, subject]);
+
+  const detectConcepts = useCallback((text) => {
+    if (!text) return;
+    const lower = text.toLowerCase();
+    CONCEPT_KEYWORDS.forEach(keyword => {
+      if (lower.includes(keyword)) {
+        fetchDiagramsForConcept(keyword);
+      }
+    });
+  }, [fetchDiagramsForConcept]);
 
   const persistLinks = async (linksArray, source) => {
     const seen = new Set();
@@ -122,11 +168,20 @@ const LearnPage = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, images, extraLinks]);
 
+  useEffect(() => {
+    if (!subject || !chapter) return;
+    fetch(backendUrl(`/api/video?std=${std}&subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chapter)}`))
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setChapterVideos(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [std, subject, chapter]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
     
     setIsLoading(true);
     const userMessage = { role: 'user', text: input };
+    detectConcepts(input);
     setMessages(prev => [...prev, userMessage, { role: 'ai', text: 'Thinking…', isPlaceholder: true }]);
     const currentInput = input;
     setInput('');
@@ -177,6 +232,7 @@ const LearnPage = () => {
     }
 
     const updateLatestAiMessage = (text, thoughts) => {
+      detectConcepts(text);
       setMessages(prev => {
         const next = [...prev];
         for (let i = next.length - 1; i >= 0; i--) {
@@ -227,7 +283,7 @@ const LearnPage = () => {
         const parsed = splitThoughtAndReply(data.reply || '');
         const mergedThoughts = data.thoughts ?? parsed.thoughts;
         const finalReply = parsed.reply || (mergedThoughts ? 'See thought process below.' : '');
-        updateLatestAiMessage(finalReply, mergedThoughts);
+        updateLatestAiMessage(finalReply, mergedThoughts, data.confidence);
         return;
       }
 
@@ -317,12 +373,46 @@ const LearnPage = () => {
     }
   };
 
+  const handleFeedback = async (messageId, rating, confidence) => {
+    if (feedbacks[messageId]) return;
+    setFeedbacks(prev => ({ ...prev, [messageId]: rating }));
+    try {
+      await authFetch(backendUrl('/api/feedback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, rating, confidence })
+      });
+    } catch (err) {
+      console.error('Feedback error:', err);
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-80px)] p-8 gap-8">
       {/* Visual / Links Sidebar */}
       <div className="w-1/3 flex flex-col gap-6 overflow-y-auto pr-4 hidden lg:flex">
         <h2 className="text-2xl font-black uppercase bg-neo-pink text-white px-4 py-2 border-4 border-black inline-block">Visuals & Links</h2>
         <div className="space-y-4">
+          <AnimatePresence>
+            {diagrams.map((d, i) => (
+              <motion.div
+                key={d.conceptName}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
+              >
+                <ConceptDiagram
+                  definition={d.mermaidDefinition}
+                  caption={d.caption}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {loadingDiagrams && (
+            <div className="card-neo bg-white p-4 animate-pulse">
+              <div className="h-24 bg-gray-200 border-2 border-black" />
+            </div>
+          )}
           {images.map((img, i) => (
              <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
                <img src={img} alt="concept visual" className="card-neo w-full object-cover max-h-48 hover:opacity-90 transition-opacity" onError={(e) => e.target.style.display='none'} />
@@ -333,8 +423,21 @@ const LearnPage = () => {
                 {link.type === 'yt' ? '🎬 Watch Related Video' : '📚 Read Shaalaa Material'}
              </a>
           ))}
-          {images.length === 0 && extraLinks.length === 0 && (
+          {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
              <div className="card-neo bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
+          )}
+          {chapterVideos.length > 0 && (
+            <div>
+              <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
+              <div className="space-y-2">
+                {chapterVideos.map((v, i) => (
+                  <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block card-neo bg-white p-3 hover:-translate-y-0.5 transition-all">
+                    <p className="font-bold text-sm leading-tight">{v.title}</p>
+                    {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
+                  </a>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -385,6 +488,24 @@ const LearnPage = () => {
                     msg.text
                   )}
                 </div>
+                {msg.role === 'ai' && !msg.isPlaceholder && (
+                  <div className="flex items-center gap-2 border-t-2 border-gray-300 pt-2 mt-1">
+                    <button
+                      onClick={() => handleFeedback(`msg-${i}`, 1)}
+                      className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-green-200 transition-colors ${feedbacks[`msg-${i}`] === 1 ? 'bg-green-400' : 'bg-white'}`}
+                      title="Helpful"
+                    >
+                      👍
+                    </button>
+                    <button
+                      onClick={() => handleFeedback(`msg-${i}`, -1)}
+                      className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-red-200 transition-colors ${feedbacks[`msg-${i}`] === -1 ? 'bg-red-400' : 'bg-white'}`}
+                      title="Not helpful"
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

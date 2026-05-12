@@ -1,0 +1,12 @@
+[project]
+name = "chroma-backend"
+version = "0.1.0"
+description = "ChromaDB vector search microservice for TISD RAG"
+requires-python = ">=3.11"
+dependencies = [
+    "chromadb>=0.6.0",
+    "fastapi[standard]>=0.115.0",
+    "sentence-transformers>=3.0.0",
+    "pdfplumber>=0.11.0",
+    "python-multipart>=0.0.20",
+]

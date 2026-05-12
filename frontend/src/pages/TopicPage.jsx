@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
+import PdfViewer from '../components/PdfViewer';
 
 const SUBJECT_COLORS = ['bg-neo-yellow', 'bg-neo-pink text-white', 'bg-neo-blue', 'bg-gray-800 text-white'];
 
@@ -10,9 +11,27 @@ const TopicPage = () => {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pdfInfo, setPdfInfo] = useState(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
   const user = getUser();
   const std = user?.std || 10;
   const board = user?.board || 'CBSE';
+
+  const handleOpenPdf = async (chapterName) => {
+    setPdfLoading(true);
+    try {
+      const res = await fetch(backendUrl(`/api/pdf?std=${std}&subject=${encodeURIComponent(selectedSubject)}&chapter=${encodeURIComponent(chapterName)}`));
+      if (!res.ok) throw new Error('PDF not available');
+      const data = await res.json();
+      setPdfInfo(data);
+      setShowPdf(true);
+    } catch (err) {
+      setPdfInfo({ error: err.message, title: chapterName });
+      setShowPdf(true);
+    }
+    setPdfLoading(false);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -90,6 +109,14 @@ const TopicPage = () => {
                   <p className="font-medium text-gray-500 text-sm">{chapter.description}</p>
                 </div>
                 <div className="border-t-4 border-black flex">
+                  <button
+                    onClick={() => handleOpenPdf(chapter.chapterName)}
+                    disabled={pdfLoading}
+                    className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-green-200 border-r-4 border-black transition-colors disabled:opacity-50"
+                    title="Open NCERT Textbook PDF"
+                  >
+                    {pdfLoading ? '⏳' : '📄 PDF'}
+                  </button>
                   <Link
                     to={`/dashboard/learn/${encodeURIComponent(activeSubject.subjectName)}/${encodeURIComponent(chapter.chapterName)}`}
                     className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-neo-blue border-r-4 border-black transition-colors"
@@ -112,13 +139,35 @@ const TopicPage = () => {
           Loading curriculum...
         </div>
       ) : error ? (
-        <div className="card-neo bg-red-400 p-10 text-center font-black text-xl uppercase text-white">
-          Error: {error}
+        <div className="card-neo bg-red-400 p-10 text-center text-white">
+          <p className="font-black text-xl uppercase mb-4">Error: {error}</p>
+          <button onClick={() => window.location.reload()} className="border-4 border-white bg-white text-black px-6 py-3 font-black uppercase hover:bg-gray-100">
+            Retry
+          </button>
         </div>
       ) : (
         <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
           No curriculum found for Std {std} · {board}
         </div>
+      )}
+
+      {showPdf && pdfInfo && (
+        pdfInfo.error ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+            <div className="card-neo bg-white max-w-lg w-full p-8 text-center">
+              <span className="text-5xl block mb-4">📄</span>
+              <h3 className="font-black text-xl uppercase mb-2">PDF Not Available</h3>
+              <p className="font-bold text-gray-600 mb-4">No NCERT PDF mapped for this chapter yet.</p>
+              <button onClick={() => setShowPdf(false)} className="btn-neo px-6 py-3">Close</button>
+            </div>
+          </div>
+        ) : (
+          <PdfViewer
+            pdfUrl={backendUrl(`/api/pdf/proxy?url=${encodeURIComponent(pdfInfo.ncertUrl)}`)}
+            title={`NCERT Std ${std} ${pdfInfo.subjectName} - ${pdfInfo.chapterName}`}
+            onClose={() => setShowPdf(false)}
+          />
+        )
       )}
     </div>
   );

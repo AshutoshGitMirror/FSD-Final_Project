@@ -123,6 +123,35 @@ router.get('/gaps/:userId', authMiddleware, async (req, res) => {
   }
 });
 
+// ── GET concept diagrams for a concept name ────────────────────
+router.get('/diagrams', async (req, res) => {
+  try {
+    const { std, board, subject, concept } = req.query;
+    if (!std || !board || !subject || !concept) {
+      return res.status(400).json({ error: 'std, board, subject, and concept are required' });
+    }
+
+    const graph = await KnowledgeGraph.findOne(
+      { std: Number(std), board, subjectName: subject },
+      { conceptDiagrams: 1, _id: 0 }
+    );
+
+    if (!graph || !graph.conceptDiagrams) {
+      return res.json({ diagrams: [] });
+    }
+
+    const matched = graph.conceptDiagrams.filter(d =>
+      d.conceptName.toLowerCase().includes(concept.toLowerCase()) ||
+      concept.toLowerCase().includes(d.conceptName.toLowerCase())
+    );
+
+    res.json({ diagrams: matched });
+  } catch (err) {
+    console.error('Diagram fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch diagrams' });
+  }
+});
+
 // ── GET all available subjects for knowledge graphs ────────────
 router.get('/subjects', async (req, res) => {
   try {
