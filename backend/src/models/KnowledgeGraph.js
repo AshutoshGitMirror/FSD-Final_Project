@@ -7,11 +7,17 @@ const KnowledgeGraphSchema = new mongoose.Schema({
   nodes: [
     {
       chapterName: { type: String, required: true },
-      concepts: [{ type: String }],           // Key concepts in this chapter
-      prerequisites: [{ type: String }],       // chapterNames that must be learned first
-      difficulty: { type: Number, default: 3 } // 1-5 scale
+      concepts: [{ type: String }],
+      prerequisites: [{ type: String }],
+      difficulty: { type: Number, default: 3, min: 1, max: 5 }
     }
-  ]
+  ],
+  conceptDiagrams: [{
+    conceptName: { type: String, required: true },
+    mermaidDefinition: { type: String, required: true },
+    diagramType: { type: String, enum: ['flowchart', 'sequence', 'class', 'state', 'graph'], default: 'flowchart' },
+    caption: { type: String }
+  }]
 }, { timestamps: true });
 
 // One graph per subject+std+board
