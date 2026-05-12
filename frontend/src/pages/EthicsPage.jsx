@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const EthicsPage = () => {
   return (
-    <div className="min-h-screen bg-neo-bg font-sans">
+    <div className="min-h-screen bg-amber-50 font-sans">
       <nav className="flex justify-between items-center p-6 border-b-4 border-black bg-white">
         <Link to="/" className="font-black text-2xl tracking-tighter">AI TUTOR</Link>
         <div className="space-x-6 font-bold text-sm">
@@ -15,7 +15,7 @@ const EthicsPage = () => {
         <h1 className="text-5xl font-black uppercase tracking-tight">Ethics & Transparency</h1>
         <p className="text-xl font-medium text-gray-700">How we use AI, handle your data, and keep learning responsible.</p>
 
-        <div className="card-neo bg-white p-8 space-y-6">
+        <div className="card-bub-solid bg-white p-8 space-y-6">
           <section>
             <h2 className="font-black text-2xl uppercase mb-3">🤖 How AI Works Here</h2>
             <p className="font-medium leading-relaxed">

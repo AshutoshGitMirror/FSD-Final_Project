@@ -40,7 +40,7 @@ const LoginPage = () => {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Server error connecting to backend.');
+      setError('Something went wrong in the learning lab! Try again in a moment. ⚡');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ const LoginPage = () => {
   const clearError = () => { if (error) setError(''); };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-neo-bg">
+    <div className="min-h-screen flex flex-col font-sans bg-amber-50">
       <nav className="flex justify-between items-center p-6 border-b-4 border-black bg-white">
         <div className="font-black text-2xl tracking-tighter">AI TUTOR</div>
         <div className="space-x-6 font-bold text-sm text-black">
@@ -60,14 +60,14 @@ const LoginPage = () => {
 
       <main className="flex-1 flex items-center justify-center p-8 relative">
         {/* Floating background elements */}
-        <div className="absolute top-20 left-20 hidden md:block w-48 h-48 card-neo bg-neo-pink p-4 transform -rotate-6 z-0 flex flex-col justify-between">
+        <div className="absolute top-20 left-20 hidden md:block w-48 h-48 card-bub-solid bg-gradient-to-r from-pink-500 to-rose-500 p-4 transform -rotate-6 z-0 flex flex-col justify-between">
           <p className="font-black text-sm uppercase">"Mistakes are proof that you are trying!"</p>
           <div className="flex gap-1 text-2xl">⭐⭐⭐</div>
         </div>
         
-        <div className="card-neo w-full max-w-md bg-white p-10 z-10 mx-auto transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-transform duration-200">
+        <div className="card-bub-solid w-full max-w-md bg-white p-10 z-10 mx-auto transform hover:-translate-y-1 hover:scale-105 transition-transform duration-200">
           <div className="text-center mb-10 relative">
-            <span className="absolute -top-12 -right-8 text-6xl transform rotate-12 drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">⭐</span>
+            <span className="absolute -top-12 -right-8 text-6xl transform rotate-12 ">⭐</span>
             <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">Welcome Back,<br/>Scholar!</h1>
             <p className="font-medium text-gray-600 font-sans">Ready to dive into another session?</p>
           </div>
@@ -75,7 +75,7 @@ const LoginPage = () => {
           <form className="space-y-6" onSubmit={handleLogin}>
             
             {error && (
-              <div className="card-neo bg-red-400 p-4 font-bold text-white mb-4">
+              <div className="card-bub-solid bg-red-400 p-4 font-bold text-white mb-4">
                 {error}
               </div>
             )}
@@ -85,7 +85,7 @@ const LoginPage = () => {
               <input 
                 type="email" 
                 placeholder="student@academy.edu" 
-                className="input-neo w-full font-medium"
+                className="input-bub w-full font-medium"
                 value={email}
                 onChange={e => { setEmail(e.target.value); clearError(); }}
                 required
@@ -101,7 +101,7 @@ const LoginPage = () => {
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="input-neo w-full font-medium tracking-widest"
+                className="input-bub w-full font-medium tracking-widest"
                 value={password}
                 onChange={e => { setPassword(e.target.value); clearError(); }}
                 required
@@ -109,11 +109,11 @@ const LoginPage = () => {
             </div>
 
             <div className="flex items-center gap-3 opacity-50">
-              <input type="checkbox" id="stay-signed" className="w-5 h-5 border-2 border-black accent-neo-pink rounded-none" disabled />
+              <input type="checkbox" id="stay-signed" className="w-5 h-5 border border-gray-200 accent-violet-500 rounded-2xl" disabled />
               <label htmlFor="stay-signed" className="font-bold text-xs uppercase text-gray-400">Stay Signed In (coming soon)</label>
             </div>
             
-            <button type="submit" disabled={loading} className="btn-neo w-full py-4 text-xl mt-4 disabled:opacity-50">
+            <button type="submit" disabled={loading} className="btn-bub-primary w-full py-4 text-xl mt-4 disabled:opacity-50">
               {loading ? '⏳ Signing in...' : "Let's Go! →"}
             </button>
           </form>
@@ -121,7 +121,7 @@ const LoginPage = () => {
           <div className="mt-8 pt-8 border-t-2 border-black text-center">
             <p className="font-bold border-2 border-transparent text-xs uppercase mb-4">Don't have an account yet?</p>
             <Link to="/signup">
-              <button className="card-neo w-full py-3 bg-neo-blue font-bold tracking-wider hover:bg-blue-300">
+              <button className="card-bub-solid w-full py-3 bg-gradient-to-r from-blue-400 to-cyan-400 font-bold tracking-wider hover:bg-blue-300">
                 JOIN THE ACADEMY
               </button>
             </Link>

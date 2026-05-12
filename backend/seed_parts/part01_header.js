@@ -16,7 +16,7 @@ async function upsertCurriculum(entry) {
   await Curriculum.findOneAndUpdate(
     { subjectName: entry.subjectName, std: entry.std, board: entry.board },
     entry,
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 }
 
@@ -25,7 +25,7 @@ async function upsertQuiz(entry) {
   await Quiz.findOneAndUpdate(
     { subjectName: entry.subjectName, chapterName: entry.chapterName },
     entry,
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 }
 
@@ -34,7 +34,7 @@ async function upsertGraph(entry) {
   await KnowledgeGraph.findOneAndUpdate(
     { subjectName: entry.subjectName, std: entry.std, board: entry.board },
     entry,
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: 'after' }
   );
 }
 

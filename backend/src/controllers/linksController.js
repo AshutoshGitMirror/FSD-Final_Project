@@ -4,7 +4,8 @@ const listSavedLinks = async (req, res) => {
   try {
     const links = await savedLinksService.listLinksForUser(req.user.userId);
     res.json(links);
-  } catch {
+  } catch (error) {
+    console.error('listSavedLinks error:', error);
     res.status(500).json({ error: 'Failed to fetch saved links' });
   }
 };

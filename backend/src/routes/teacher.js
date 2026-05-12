@@ -31,7 +31,7 @@ router.patch('/flagged/:id/review', async (req, res) => {
     const item = await FlaggedContent.findByIdAndUpdate(
       req.params.id,
       { status, reviewedBy: req.user.userId, reviewedAt: new Date() },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!item) return res.status(404).json({ error: 'Flagged content not found' });
     res.json(item);
@@ -50,6 +50,7 @@ router.get('/stats', async (req, res) => {
     ]);
     res.json({ open, reviewed, dismissed, total: open + reviewed + dismissed });
   } catch (err) {
+    console.error('Stats fetch error:', err);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });

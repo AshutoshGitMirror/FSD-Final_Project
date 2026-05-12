@@ -167,6 +167,7 @@ router.get('/subjects', async (req, res) => {
 
     res.json(graphs.map(g => g.subjectName));
   } catch (err) {
+    console.error('Subjects fetch error:', err);
     res.status(500).json({ error: 'Failed to fetch subjects' });
   }
 });

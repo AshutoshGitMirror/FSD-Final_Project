@@ -34,7 +34,7 @@ const ConceptDiagram = ({ definition, caption, onError }) => {
   }, [definition, onError]);
 
   return (
-    <div className="card-neo bg-white p-4 mb-4">
+    <div className="card-bub-solid bg-white p-4 mb-4">
       <div ref={containerRef} className="flex justify-center overflow-x-auto" />
       {caption && (
         <p className="text-xs font-bold text-gray-500 text-center mt-2 border-t-2 border-black pt-2">{caption}</p>

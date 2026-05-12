@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
+import confetti from 'canvas-confetti';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
@@ -17,6 +18,8 @@ const QuizPage = () => {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [perfUpdate, setPerfUpdate] = useState(null);
+  const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
   useEffect(() => {
@@ -65,10 +68,19 @@ const QuizPage = () => {
 
   // Persistence Effect
   useEffect(() => {
-    if (finished && quizBank.length > 0) {
+    if (finished && quizBank.length > 0 && !hasSavedRef.current) {
+      hasSavedRef.current = true;
+      const pct = score / quizBank.length;
+      if (pct >= 0.5) {
+        confetti({ particleCount: pct >= 0.9 ? 200 : 80, spread: 120, origin: { y: 0.6 } });
+        if (pct >= 0.9) {
+          setTimeout(() => confetti({ particleCount: 100, spread: 160, origin: { y: 0.5, x: 0.3 } }), 300);
+          setTimeout(() => confetti({ particleCount: 100, spread: 160, origin: { y: 0.5, x: 0.7 } }), 500);
+        }
+      }
       const saveResult = async () => {
         try {
-          await authFetch(backendUrl('/api/progress'), {
+          const res = await authFetch(backendUrl('/api/progress'), {
             method: 'POST',
             body: JSON.stringify({
               subjectName: subject,
@@ -78,7 +90,9 @@ const QuizPage = () => {
               isCompleted: true
             })
           });
-          console.log('Progress saved successfully');
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.performance) setPerfUpdate(data.performance);
 
           // Auto-initialize spaced repetition for this chapter
           try {
@@ -122,29 +136,53 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-8 border-black border-t-neo-pink rounded-full animate-spin mb-4 mx-auto"></div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter">Fetching Database Quiz...</h2>
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">Preparing your quiz challenge! 🧠</h2>
         </div>
       </div>
     );
   }
 
   if (finished) {
+    const pct = score / quizBank.length;
+    const emoji = pct >= 0.9 ? '🌟' : pct >= 0.7 ? '🎉' : pct >= 0.5 ? '👍' : '💪';
+    const message = pct === 1 ? 'PERFECT SCORE! You\'re a Genius!' :
+      pct >= 0.9 ? 'Amazing! Almost Perfect!' :
+      pct >= 0.7 ? 'Great Job! Keep it up!' :
+      pct >= 0.5 ? 'Good Try! Practice makes perfect!' :
+      'Don\'t give up! Try again and you\'ll improve!';
+    const colorClass = pct >= 0.7 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-pink-500 to-rose-500';
+
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] p-8">
-        <div className="card-neo max-w-lg w-full p-10 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-8 bg-neo-pink"></div>
-          <span className="text-8xl block mb-6 px-12 pt-6">🏆</span>
-          <h1 className="text-4xl font-black uppercase mb-4">Quiz Finished!</h1>
-          <p className="font-bold text-xl mb-8">
-            You scored <span className="underline decoration-4 decoration-neo-yellow">{score} out of {quizBank.length}</span>
-          </p>
+        <div className="card-bub-solid max-w-lg w-full p-10 text-center relative overflow-hidden">
+          <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
+          <span className="text-8xl block mb-4 pt-6 animate-bounce">{emoji}</span>
+          <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Quiz Complete!</h1>
+          <p className="font-bold text-lg text-gray-600 mb-6">{message}</p>
+          <div className="card-bub-solid bg-gray-50 p-6 mb-4 inline-block mx-auto">
+            <span className="text-5xl font-black">{score}</span>
+            <span className="text-2xl font-black text-gray-400">/{quizBank.length}</span>
+          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {perfUpdate && (
+            <div className={`mb-6 p-4 rounded-2xl font-bold text-sm ${perfUpdate.leveledUp ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white animate-bounce' : 'bg-gray-100'}`}>
+              {perfUpdate.leveledUp ? (
+                <span>🎉 Level Up! You're now <strong>{perfUpdate.starName}</strong> (⭐ {perfUpdate.starLevel}/5) in {subject}!</span>
+              ) : (
+                <span>{perfUpdate.starName} ⭐ {perfUpdate.starLevel}/5 · Avg: {perfUpdate.averageScore}%</span>
+              )}
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-center">
             <Link to="/dashboard/progress">
-              <button className="card-neo w-full py-4 text-white bg-neo-blue border-4 border-black font-black uppercase hover:bg-blue-400 text-sm">View Progress</button>
+              <button className="card-bub-solid px-6 py-4 bg-gradient-to-r from-blue-400 to-cyan-400  font-black uppercase hover:bg-blue-400 text-sm">📈 Progress</button>
             </Link>
-            <button onClick={() => window.location.reload()} className="btn-neo py-4 w-full text-black text-sm uppercase font-black">Retake Quiz ↺</button>
+            <Link to={`/dashboard/learn/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`}>
+              <button className="card-bub-solid px-6 py-4 bg-green-300  font-black uppercase hover:bg-green-400 text-sm">🤖 Review with AI</button>
+            </Link>
+            <button onClick={() => window.location.reload()} className="btn-bub-primary px-6 py-4 text-sm uppercase font-black">🔄 Retake</button>
           </div>
         </div>
       </div>
@@ -156,8 +194,8 @@ const QuizPage = () => {
   if (!currentQ) {
     return (
       <div className="p-8 text-center mt-20">
-        <h2 className="text-2xl font-black uppercase">No Questions Found in Database</h2>
-        <Link to="/dashboard/topic" className="btn-neo mt-4 inline-block">Go Back</Link>
+        <h2 className="text-2xl font-black uppercase">Hmm, no questions for this topic yet! Try another chapter 📚</h2>
+        <Link to="/dashboard/topic" className="btn-bub-primary mt-4 inline-block">Go Back</Link>
       </div>
     );
   }
@@ -170,16 +208,16 @@ const QuizPage = () => {
           <div className="flex items-center gap-3 mt-1">
             <span className="font-bold text-gray-500 uppercase text-xs">{subject}</span>
             <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-            <span className="font-bold text-neo-pink text-xs uppercase">Question {currentQuestion + 1} of {quizBank.length}</span>
+            <span className="font-bold text-pink-500 text-xs uppercase">Question {currentQuestion + 1} of {quizBank.length}</span>
           </div>
         </div>
         {/* Timer Circle */}
-        <div className={`w-16 h-16 border-4 border-black flex items-center justify-center font-black text-xl shadow-neo transition-colors ${timeLeft < 10 ? 'bg-red-400 animate-pulse' : 'bg-neo-yellow'}`}>
+        <div className={`w-16 h-16  flex items-center justify-center font-black text-xl shadow-lg transition-colors ${timeLeft < 10 ? 'bg-red-400 animate-pulse' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}>
           {timeLeft}s
         </div>
       </div>
 
-      <div className="card-neo p-10 relative">
+      <div className="card-bub-solid p-10 relative">
         <span className="absolute -top-6 -left-6 w-12 h-12 bg-black text-white font-black text-2xl flex items-center justify-center rounded-full border-4 border-white shadow-[0_0_0_4px_#000]">
           ?
         </span>
@@ -199,11 +237,11 @@ const QuizPage = () => {
                 key={i}
                 onClick={() => handleAnswer(i)}
                 disabled={isLocked}
-                className={`card-neo w-full text-left p-6 font-bold text-lg transition-all ${statusClass} ${!isLocked && 'hover:bg-gray-100 hover:-translate-y-1 hover:translate-x-1 hover:shadow-neo'}`}
+                className={`card-bub-solid w-full text-left p-6 font-bold text-lg transition-all ${statusClass} ${!isLocked && 'hover:bg-gray-100 hover:-translate-y-1 hover:translate-x-1 hover:shadow-lg'}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <span className={`inline-block border-2 border-black w-8 h-8 text-center leading-7 mr-4 font-black ${showFeedback && i === currentQ.ans ? 'bg-white text-black' : 'bg-neo-blue'}`}>
+                    <span className={`inline-block border border-gray-200 w-8 h-8 text-center leading-7 mr-4 font-black ${showFeedback && i === currentQ.ans ? 'bg-white text-black' : 'bg-gradient-to-r from-blue-400 to-cyan-400'}`}>
                       {['A', 'B', 'C', 'D'][i]}
                     </span>
                     {opt}
@@ -222,7 +260,7 @@ const QuizPage = () => {
         {quizBank.map((_, i) => (
           <div
             key={i}
-            className={`flex-1 h-3 border-2 border-black ${i < currentQuestion ? 'bg-neo-pink' : i === currentQuestion ? 'bg-neo-yellow animate-pulse' : 'bg-gray-200'}`}
+            className={`flex-1 h-3 border border-gray-200 ${i < currentQuestion ? 'bg-gradient-to-r from-pink-500 to-rose-500' : i === currentQuestion ? 'bg-gradient-to-r from-amber-400 to-orange-400 animate-pulse' : 'bg-gray-200'}`}
           />
         ))}
       </div>

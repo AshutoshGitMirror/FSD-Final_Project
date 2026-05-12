@@ -3,11 +3,23 @@
 **/__pycache__/
 *.log
 .DS_Store
-backend/.env
-frontend/.env
-LinksBackend/.env
-.codex
 .codex/
 clone/
 scratch/
 *.tar.gz
+*.zip
+
+# Environment files — never commit secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+LinksBackend/.env
+chroma-backend/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

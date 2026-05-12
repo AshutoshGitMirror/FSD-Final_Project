@@ -104,6 +104,73 @@ const DIAGRAMS = [
     C --> G[Acute 🔺 All angles < 90°]
     C --> H[Right 🔺 One angle = 90°]
     C --> I[Obtuse 🔺 One angle > 90°]`
+  },
+  {
+    conceptName: 'Respiratory System',
+    diagramType: 'flowchart',
+    caption: 'How we breathe — the path of air through the respiratory system',
+    mermaidDefinition: `graph TD
+    A[👃 Nose] -->|Inhale| B[Trachea]
+    B --> C[Bronchi]
+    C --> D[Bronchioles]
+    D --> E[Alveoli 🫁]
+    E -->|O₂ enters blood| F[🩸 Bloodstream]
+    E -->|CO₂ leaves blood| G[Exhale 💨]
+    F --> H[Oxygen carried to all body cells]`
+  },
+  {
+    conceptName: 'Gravity',
+    diagramType: 'flowchart',
+    caption: 'Gravity — the force that pulls everything toward Earth',
+    mermaidDefinition: `graph TD
+    A[🌍 Earth] -->|Gravitational Force| B[Pulls objects down]
+    B --> C[🍎 Apple falls]
+    B --> D[🏀 Ball comes down]
+    B --> E[🌊 Ocean tides]
+    C --> F[Acceleration = 9.8 m/s²]
+    D --> F
+    E -->|Moon's gravity| G[🌙 Moon]`
+  },
+  {
+    conceptName: 'Magnetism',
+    diagramType: 'flowchart',
+    caption: 'Magnetism — attraction and repulsion between magnetic poles',
+    mermaidDefinition: `graph LR
+    A[🧲 Bar Magnet] --> B[North Pole N]
+    A --> C[South Pole S]
+    B -->|Attracts| D[Opposite Pole S]
+    B -->|Repels| E[Same Pole N]
+    A --> H[🪙 Attracts Iron, Nickel, Cobalt]
+    A --> I[🧭 Compass points North]`
+  },
+  {
+    conceptName: 'Fractions',
+    diagramType: 'flowchart',
+    caption: 'Fractions — parts of a whole with numerator and denominator',
+    mermaidDefinition: `graph TD
+    A[🍕 Pizza cut into 8 slices] --> B[You eat 3 slices]
+    B --> C[Numerator = 3 parts taken]
+    A --> D[Total = 8 slices]
+    D --> E[Denominator = 8 total parts]
+    C --> F[Fraction = ³⁄₈]
+    E --> F
+    F --> G[Types: Proper ⅗, Improper ⁵⁄₃, Mixed 1⅔, Equivalent ½ = ²⁄₄]`
+  },
+  {
+    conceptName: 'Types of Angles',
+    diagramType: 'flowchart',
+    caption: 'Classification of angles by their measure in degrees',
+    mermaidDefinition: `graph TD
+    A[Angles 📐] --> B[Acute < 90°]
+    A --> C[Right = 90°]
+    A --> D[Obtuse > 90° and < 180°]
+    A --> E[Straight = 180°]
+    A --> F[Reflex > 180° and < 360°]
+    A --> G[Full = 360°]
+    B --> H[Example: 45° ✏️]
+    C --> I[Corner of a book 📖]
+    D --> J[Example: 120°]
+    E --> K[Straight line 📏]`
   }
 ];
 
@@ -111,8 +178,16 @@ async function seedDiagrams() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected to MongoDB');
 
+  const SCIENCE_ONLY = ['Photosynthesis', 'Water Cycle', 'Digestive System', 'Electric Circuit', 'Solar System', 'Food Chain', 'Respiratory System', 'Gravity', 'Magnetism'];
+  const MATH_AND_SCIENCE = ['Pythagoras Theorem', 'Types of Triangles'];
+  const MATH_ONLY = ['Fractions', 'Types of Angles'];
+
   for (const diagram of DIAGRAMS) {
-    const subjects = ['Science', 'Mathematics'];
+    const isScienceOnly = SCIENCE_ONLY.includes(diagram.conceptName);
+    const isMathOnly = MATH_ONLY.includes(diagram.conceptName);
+    let subjects = ['Science', 'Mathematics'];
+    if (isScienceOnly) subjects = ['Science'];
+    if (isMathOnly) subjects = ['Mathematics'];
     const stds = [7, 8, 9, 10];
 
     for (const subject of subjects) {
@@ -120,10 +195,10 @@ async function seedDiagrams() {
         const result = await KnowledgeGraph.findOneAndUpdate(
           { std, board: 'CBSE', subjectName: subject },
           { $addToSet: { conceptDiagrams: diagram } },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (result) {
-          console.log(`Added diagram "${diagram.conceptName}" to ${subject} Std ${std}`);
+          console.log(`Added "${diagram.conceptName}" → ${subject} Std ${std}`);
         }
       }
     }

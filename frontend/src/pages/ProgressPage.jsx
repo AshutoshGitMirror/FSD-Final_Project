@@ -11,7 +11,7 @@ const BAR_COLORS = ['#FF66A1', '#A2D2FF', '#FFD500', '#1a1a1a'];
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="border-4 border-black bg-white p-3 shadow-[4px_4px_0_0_#000] font-black">
+      <div className=" bg-white p-3  font-black">
         <p className="uppercase text-sm text-gray-500">{label}</p>
         <p className="text-3xl">{payload[0].value}%</p>
       </div>
@@ -91,25 +91,25 @@ const ProgressPage = () => {
       <p className="font-bold text-gray-500 mb-8 uppercase text-sm">{fullName}'s Journey</p>
 
       {/* ── AI Insight ─────────────────────────────────── */}
-      <div className="card-neo bg-neo-yellow p-8 mb-10 relative transform -rotate-1">
+      <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-8 mb-10 relative transform -rotate-1">
         <span className="absolute -top-6 -left-4 text-5xl">🧠</span>
         <h2 className="text-xl font-black uppercase mb-2 ml-8">AI Performance Insight</h2>
         <p className="font-bold text-lg ml-8 opacity-80">{insight}</p>
       </div>
 
       {/* ── Section 1: Chapters Completed ─────────────── */}
-      <h2 className="text-2xl font-black uppercase mb-6 bg-neo-pink text-white px-4 py-2 inline-block border-4 border-black border-b-8">
+      <h2 className="text-2xl font-black uppercase mb-6 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 inline-block  border-b-8">
         Chapters Completed
       </h2>
       <div className="space-y-4 mb-12">
         {subjectStats.length === 0 ? (
-          <div className="card-neo border-dashed bg-white p-8 font-bold text-gray-400 text-center">
+          <div className="card-bub-solid border-dashed bg-white p-8 font-bold text-gray-400 text-center">
             No progress data yet — take a quiz!
           </div>
         ) : subjectStats.map((subj) => {
           const pct = subj.total > 0 ? Math.round((subj.completed / subj.total) * 100) : 0;
           return (
-            <div key={subj.name} className="card-neo bg-white p-6 hover:-translate-y-1 transition-transform">
+            <div key={subj.name} className="card-bub-solid bg-white p-6 hover:-translate-y-1 transition-transform">
               <div className="flex justify-between items-center mb-3">
                 <div>
                   <h3 className="font-black text-2xl">{subj.name}</h3>
@@ -118,9 +118,9 @@ const ProgressPage = () => {
                 <span className="text-3xl font-black">{pct}%</span>
               </div>
               {/* Progress bar */}
-              <div className="h-4 border-4 border-black bg-gray-100 w-full mb-4">
+              <div className="h-4  bg-gray-100 w-full mb-4">
                 <div
-                  className="h-full bg-neo-pink transition-all duration-700"
+                  className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-700"
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -131,10 +131,10 @@ const ProgressPage = () => {
                   return (
                     <span
                       key={i}
-                      className={`border-2 border-black text-xs font-black px-3 py-1 ${
+                      className={`border border-gray-200 text-xs font-black px-3 py-1 ${
                         attemptedEntry
                           ? attemptedEntry.isCompleted
-                            ? 'bg-neo-yellow'
+                            ? 'bg-gradient-to-r from-amber-400 to-orange-400'
                             : 'bg-gray-200 text-gray-600'
                           : 'bg-white text-gray-400'
                       }`}
@@ -154,15 +154,15 @@ const ProgressPage = () => {
       </div>
 
       {/* ── Section 2: Recharts Bar Chart ─────────────── */}
-      <h2 className="text-2xl font-black uppercase mb-6 bg-neo-blue text-black px-4 py-2 inline-block border-4 border-black border-b-8">
+      <h2 className="text-2xl font-black uppercase mb-6 bg-gradient-to-r from-blue-400 to-cyan-400 text-black px-4 py-2 inline-block  border-b-8">
         Avg Quiz Score per Subject
       </h2>
       {subjectStats.length === 0 ? (
-        <div className="card-neo border-dashed bg-white p-10 font-bold text-gray-400 text-center">
+        <div className="card-bub-solid border-dashed bg-white p-10 font-bold text-gray-400 text-center">
           No scores yet — complete a quiz!
         </div>
       ) : (
-        <div className="card-neo bg-white p-6" style={{ height: 320 }}>
+        <div className="card-bub-solid bg-white p-6" style={{ height: 320 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={subjectStats} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="0" stroke="#e5e5e5" vertical={false} />
