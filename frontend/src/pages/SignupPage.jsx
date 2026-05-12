@@ -8,11 +8,26 @@ const SignupPage = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const clearError = () => { if (error) setError(''); };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setError('');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    setLoading(true);
     try {
       const response = await fetch(backendUrl('/api/auth/register'), {
         method: 'POST',
@@ -31,6 +46,8 @@ const SignupPage = () => {
     } catch (err) {
       console.error('Signup error:', err);
       setError('Server error connecting to backend.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,17 +113,24 @@ const SignupPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block font-black text-xs uppercase mb-2">Full Name</label>
-                  <input type="text" placeholder="Enter your name" className="input-neo w-full" value={fullName} onChange={e => setFullName(e.target.value)} required />
+                  <input type="text" placeholder="Enter your name" className="input-neo w-full" value={fullName} onChange={e => { setFullName(e.target.value); clearError(); }} required />
                 </div>
                 <div>
                   <label className="block font-black text-xs uppercase mb-2">Email Address</label>
-                  <input type="email" placeholder="student@example.com" className="input-neo w-full" value={email} onChange={e => setEmail(e.target.value)} required />
+                  <input type="email" placeholder="student@example.com" className="input-neo w-full" value={email} onChange={e => { setEmail(e.target.value); clearError(); }} required />
                 </div>
               </div>
               
               <div>
                 <label className="block font-black text-xs uppercase mb-2">Password</label>
-                <input type="password" placeholder="Create a secret code" className="input-neo w-full" value={password} onChange={e => setPassword(e.target.value)} required />
+                <input type="password" placeholder="Create a secret code (min 6 chars)" className="input-neo w-full" value={password} onChange={e => { setPassword(e.target.value); clearError(); }} required minLength={6} />
+              </div>
+              <div>
+                <label className="block font-black text-xs uppercase mb-2">Confirm Password</label>
+                <input type="password" placeholder="Re-enter your password" className={`input-neo w-full ${confirmPassword && password !== confirmPassword ? 'ring-4 ring-red-400' : ''}`} value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); clearError(); }} required />
+                {confirmPassword && password !== confirmPassword && (
+                  <p className="text-xs font-bold text-red-500 mt-1">Passwords do not match</p>
+                )}
               </div>
             </div>
 
@@ -154,8 +178,8 @@ const SignupPage = () => {
             </div>
 
             <div className="flex gap-4 items-center mt-8">
-               <button type="submit" className="btn-neo py-6 px-12 text-2xl flex-1 active:shadow-[1px_1px_0_0_#000]">
-                 JOIN THE ADVENTURE 🚀
+               <button type="submit" disabled={loading} className="btn-neo py-6 px-12 text-2xl flex-1 active:shadow-[1px_1px_0_0_#000] disabled:opacity-50">
+                 {loading ? '⏳ Creating account...' : "JOIN THE ADVENTURE 🚀"}
                </button>
                <p className="text-xs font-bold uppercase tracking-wider w-1/3 leading-relaxed">
                  By joining, you agree to our <a href="#" className="underline decoration-2">Quest Rules</a>.

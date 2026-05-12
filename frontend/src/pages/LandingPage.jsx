@@ -7,11 +7,9 @@ const LandingPage = () => {
         <div className="font-black text-2xl tracking-tighter">AI TUTOR</div>
         <div className="space-x-6 font-bold text-sm">
           <a href="#features" className="hover:underline">FEATURES</a>
-          <a href="#pricing" className="hover:underline">PRICING</a>
+          <Link to="/login" className="hover:underline">PRICING</Link> {/* TODO: Add pricing page */}
           <Link to="/login" className="hover:underline">LOGIN</Link>
-          <Link to="/signup">
-            <button className="btn-neo px-4 py-2 text-xs">SIGNUP</button>
-          </Link>
+          <Link to="/signup" className="btn-neo px-4 py-2 text-xs">SIGNUP</Link>
         </div>
       </nav>
 
@@ -43,7 +41,7 @@ const LandingPage = () => {
         </div>
 
         {/* Feature Cards Showcase */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-16 w-full px-4 pb-20">
+        <div id="features" className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-16 w-full px-4 pb-20">
           <div className="card-neo p-8 bg-gray-100 flex flex-col items-start text-left">
             <div className="w-12 h-12 bg-neo-blue border-2 border-black rounded-full flex items-center justify-center mb-4">
               <span className="text-xl">🤖</span>

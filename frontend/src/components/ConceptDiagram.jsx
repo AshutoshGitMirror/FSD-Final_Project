@@ -3,7 +3,7 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({
   theme: 'default',
-  securityLevel: 'loose',
+  securityLevel: 'strict',
   themeVariables: {
     primaryColor: '#FFD500',
     primaryBorderColor: '#000',
@@ -21,7 +21,7 @@ const ConceptDiagram = ({ definition, caption, onError }) => {
     if (!containerRef.current || !definition) return;
 
     const el = containerRef.current;
-    el.innerHTML = definition;
+    el.textContent = definition;
 
     mermaid.run({
       nodes: [el],
@@ -29,7 +29,7 @@ const ConceptDiagram = ({ definition, caption, onError }) => {
     }).catch(err => {
       console.error('Mermaid render error:', err);
       if (onError) onError(err);
-      el.innerHTML = '<pre class="text-xs text-gray-500 p-2 border-2 border-black bg-gray-100">Diagram failed to render</pre>';
+      el.textContent = 'Diagram failed to render';
     });
   }, [definition, onError]);
 

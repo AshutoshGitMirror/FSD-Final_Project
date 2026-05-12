@@ -7,10 +7,12 @@ const TeacherDashboard = () => {
   const [flagged, setFlagged] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [filter, setFilter] = useState('open');
 
   const loadData = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [flaggedRes, statsRes] = await Promise.all([
         authFetch(backendUrl(`/api/teacher/flagged?status=${filter}`)).then(r => r.ok ? r.json() : []),
@@ -20,6 +22,7 @@ const TeacherDashboard = () => {
       setStats(statsRes);
     } catch (err) {
       console.error('Teacher dashboard error:', err);
+      setLoadError('Failed to load data. The server may be unavailable.');
     }
     setLoading(false);
   };
@@ -78,7 +81,16 @@ const TeacherDashboard = () => {
         </button>
       </div>
 
-      {loading ? (
+      {loadError ? (
+        <div className="card-neo bg-red-400 text-white p-8 text-center">
+          <span className="text-4xl block mb-4">⚠️</span>
+          <h3 className="font-black text-xl uppercase mb-2">Error Loading Data</h3>
+          <p className="font-bold mb-4">{loadError}</p>
+          <button onClick={loadData} className="border-4 border-white bg-white text-black px-6 py-3 font-black uppercase hover:bg-gray-100">
+            Retry
+          </button>
+        </div>
+      ) : loading ? (
         <div className="text-center py-12"><div className="w-12 h-12 border-4 border-black border-t-neo-pink rounded-full animate-spin mx-auto"></div></div>
       ) : flagged.length === 0 ? (
         <div className="card-neo bg-white p-12 text-center">

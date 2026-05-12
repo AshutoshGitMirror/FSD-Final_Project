@@ -6,10 +6,14 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError('');
     try {
       const response = await fetch(backendUrl('/api/auth/login'), {
         method: 'POST',
@@ -28,8 +32,12 @@ const LoginPage = () => {
     } catch (err) {
       console.error('Login error:', err);
       setError('Server error connecting to backend.');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const clearError = () => { if (error) setError(''); };
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-neo-bg">
@@ -70,33 +78,34 @@ const LoginPage = () => {
                 placeholder="student@academy.edu" 
                 className="input-neo w-full font-medium"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => { setEmail(e.target.value); clearError(); }}
                 required
+                autoFocus
               />
             </div>
             
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block font-black text-sm uppercase">🔒 Password</label>
-                <a href="#" className="font-bold text-xs text-neo-pink hover:underline uppercase">Forgot?</a>
+                <span className="font-bold text-xs text-gray-400 uppercase cursor-not-allowed">Forgot? (coming soon)</span>
               </div>
               <input 
                 type="password" 
                 placeholder="••••••••" 
                 className="input-neo w-full font-medium tracking-widest"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={e => { setPassword(e.target.value); clearError(); }}
                 required
               />
             </div>
 
-            <div className="flex items-center gap-3">
-              <input type="checkbox" id="stay-signed" className="w-5 h-5 border-2 border-black accent-neo-pink rounded-none" />
-              <label htmlFor="stay-signed" className="font-bold text-xs uppercase">Stay Signed In</label>
+            <div className="flex items-center gap-3 opacity-50">
+              <input type="checkbox" id="stay-signed" className="w-5 h-5 border-2 border-black accent-neo-pink rounded-none" disabled />
+              <label htmlFor="stay-signed" className="font-bold text-xs uppercase text-gray-400">Stay Signed In (coming soon)</label>
             </div>
             
-            <button type="submit" className="btn-neo w-full py-4 text-xl mt-4">
-              Let's Go! →
+            <button type="submit" disabled={loading} className="btn-neo w-full py-4 text-xl mt-4 disabled:opacity-50">
+              {loading ? '⏳ Signing in...' : "Let's Go! →"}
             </button>
           </form>
 

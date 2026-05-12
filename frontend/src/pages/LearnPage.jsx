@@ -87,6 +87,7 @@ const LearnPage = () => {
   const { subject, chapter } = useParams();
   const user = getUser();
   const std = user?.std || 10;
+  const board = user?.board || 'CBSE';
   const [messages, setMessages] = useState([
     { role: 'ai', text: `Hi! Let's learn about ${chapter} in ${subject}. What do you want to know?` }
   ]);

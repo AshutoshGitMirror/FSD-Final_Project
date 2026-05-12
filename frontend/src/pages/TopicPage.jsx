@@ -115,7 +115,7 @@ const TopicPage = () => {
                     className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-green-200 border-r-4 border-black transition-colors disabled:opacity-50"
                     title="Open NCERT Textbook PDF"
                   >
-                    📄 PDF
+                    {pdfLoading ? '⏳' : '📄 PDF'}
                   </button>
                   <Link
                     to={`/dashboard/learn/${encodeURIComponent(activeSubject.subjectName)}/${encodeURIComponent(chapter.chapterName)}`}
@@ -139,8 +139,11 @@ const TopicPage = () => {
           Loading curriculum...
         </div>
       ) : error ? (
-        <div className="card-neo bg-red-400 p-10 text-center font-black text-xl uppercase text-white">
-          Error: {error}
+        <div className="card-neo bg-red-400 p-10 text-center text-white">
+          <p className="font-black text-xl uppercase mb-4">Error: {error}</p>
+          <button onClick={() => window.location.reload()} className="border-4 border-white bg-white text-black px-6 py-3 font-black uppercase hover:bg-gray-100">
+            Retry
+          </button>
         </div>
       ) : (
         <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
