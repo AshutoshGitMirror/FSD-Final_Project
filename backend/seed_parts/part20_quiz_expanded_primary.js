@@ -164,7 +164,7 @@
   await upsertQuiz({ subjectName: 'EVS', chapterName: 'From Tasting to Digesting', questions: [
     { q: 'Digestion begins in the ___', options: ['Stomach', 'Mouth', 'Intestine', 'Liver'], ans: 1 },
     { q: 'Which helps us taste food?', options: ['Teeth', 'Tongue', 'Lips', 'Throat'], ans: 1 },
-    { q: 'How many types of teeth do we have?', options: ['1', '2', '3', '4'], ans: 2 },
+    { q: 'How many types of teeth do we have?', options: ['1', '2', '3', '4'], ans: 3 },
     { q: 'Saliva helps in ___', options: ['Breathing', 'Digesting food', 'Seeing', 'Hearing'], ans: 1 },
     { q: 'The stomach churns food with ___', options: ['Water', 'Digestive juices', 'Blood', 'Air'], ans: 1 },
     { q: 'Spicy food makes our ___ feel hot', options: ['Eyes', 'Ears', 'Tongue', 'Nose'], ans: 2 }
