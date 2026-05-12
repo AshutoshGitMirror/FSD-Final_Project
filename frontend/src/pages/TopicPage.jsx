@@ -4,7 +4,7 @@ import { getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import PdfViewer from '../components/PdfViewer';
 
-const SUBJECT_COLORS = ['bg-neo-yellow', 'bg-neo-pink text-white', 'bg-neo-blue', 'bg-gray-800 text-white'];
+const SUBJECT_COLORS = ['bg-gradient-to-r from-amber-400 to-orange-400', 'bg-gradient-to-r from-pink-500 to-rose-500 text-white', 'bg-gradient-to-r from-blue-400 to-cyan-400', 'bg-gray-800 text-white'];
 
 const TopicPage = () => {
   const [curriculum, setCurriculum] = useState([]);
@@ -75,9 +75,9 @@ const TopicPage = () => {
               key={idx}
               type="button"
               onClick={() => setSelectedSubject(subject.subjectName)}
-              className={`border-4 border-black font-black text-xl px-8 py-4 transition-all active:translate-y-1 active:translate-x-1 ${
+              className={` font-black text-xl px-8 py-4 transition-all active:translate-y-1 active:translate-x-1 ${
                 isActive
-                  ? `${colorClass} shadow-[6px_6px_0_0_#000] -translate-y-1`
+                  ? `${colorClass}  -translate-y-1`
                   : 'bg-white hover:bg-gray-100'
               }`}
             >
@@ -90,7 +90,7 @@ const TopicPage = () => {
       {/* Chapter Grid of Selected Subject */}
       {activeSubject ? (
         <div>
-          <h2 className="text-3xl font-black uppercase mb-8 inline-block border-b-8 border-black pb-2">
+          <h2 className="text-3xl font-black uppercase mb-8 inline-block border-b-2 border-gray-200 pb-2">
             {activeSubject.subjectName} — Chapters
             <span className="ml-4 text-base font-bold text-gray-500">({activeSubject.chapters.length} total)</span>
           </h2>
@@ -99,10 +99,10 @@ const TopicPage = () => {
             {activeSubject.chapters.map((chapter, cIdx) => (
               <div
                 key={cIdx}
-                className="card-neo bg-white flex flex-col justify-between hover:-translate-y-2 hover:shadow-[8px_8px_0_0_#000] transition-all"
+                className="card-bub-solid bg-white flex flex-col justify-between hover:-translate-y-2 hover: transition-all"
               >
                 <div className="p-6">
-                  <div className="w-10 h-10 border-4 border-black bg-neo-yellow font-black text-lg flex items-center justify-center mb-4 shadow-[2px_2px_0_0_#000]">
+                  <div className="w-10 h-10  bg-gradient-to-r from-amber-400 to-orange-400 font-black text-lg flex items-center justify-center mb-4 ">
                     {cIdx + 1}
                   </div>
                   <h3 className="font-black text-xl mb-2 leading-snug">{chapter.chapterName}</h3>
@@ -119,13 +119,13 @@ const TopicPage = () => {
                   </button>
                   <Link
                     to={`/dashboard/learn/${encodeURIComponent(activeSubject.subjectName)}/${encodeURIComponent(chapter.chapterName)}`}
-                    className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-neo-blue border-r-4 border-black transition-colors"
+                    className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-gradient-to-r from-blue-400 to-cyan-400 border-r-4 border-black transition-colors"
                   >
                     🤖 AI Learn
                   </Link>
                   <Link
                     to={`/dashboard/quiz/${encodeURIComponent(activeSubject.subjectName)}/${encodeURIComponent(chapter.chapterName)}`}
-                    className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-neo-pink hover:text-white transition-colors"
+                    className="flex-1 text-center font-black uppercase py-4 text-sm hover:bg-gradient-to-r from-pink-500 to-rose-500 hover:text-white transition-colors"
                   >
                     ⚡ Quiz
                   </Link>
@@ -135,18 +135,18 @@ const TopicPage = () => {
           </div>
         </div>
       ) : loading ? (
-        <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
+        <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-10 text-center font-black text-xl uppercase border-dashed">
           Loading curriculum...
         </div>
       ) : error ? (
-        <div className="card-neo bg-red-400 p-10 text-center text-white">
+        <div className="card-bub-solid bg-red-400 p-10 text-center text-white">
           <p className="font-black text-xl uppercase mb-4">Error: {error}</p>
           <button onClick={() => window.location.reload()} className="border-4 border-white bg-white text-black px-6 py-3 font-black uppercase hover:bg-gray-100">
             Retry
           </button>
         </div>
       ) : (
-        <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
+        <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-10 text-center font-black text-xl uppercase border-dashed">
           No curriculum found for Std {std} · {board}
         </div>
       )}
@@ -154,11 +154,11 @@ const TopicPage = () => {
       {showPdf && pdfInfo && (
         pdfInfo.error ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
-            <div className="card-neo bg-white max-w-lg w-full p-8 text-center">
+            <div className="card-bub-solid bg-white max-w-lg w-full p-8 text-center">
               <span className="text-5xl block mb-4">📄</span>
               <h3 className="font-black text-xl uppercase mb-2">PDF Not Available</h3>
               <p className="font-bold text-gray-600 mb-4">No NCERT PDF mapped for this chapter yet.</p>
-              <button onClick={() => setShowPdf(false)} className="btn-neo px-6 py-3">Close</button>
+              <button onClick={() => setShowPdf(false)} className="btn-bub-primary px-6 py-3">Close</button>
             </div>
           </div>
         ) : (

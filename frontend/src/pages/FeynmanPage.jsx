@@ -74,7 +74,7 @@ const FeynmanPage = () => {
       </div>
 
       {!isStarted ? (
-        <div className="card-neo bg-white p-10 mt-10 text-center max-w-2xl mx-auto">
+        <div className="card-bub-solid bg-white p-10 mt-10 text-center max-w-2xl mx-auto">
           <span className="text-7xl block mb-6">🧑‍🏫</span>
           <h2 className="text-2xl font-black uppercase mb-4">What do you want to teach?</h2>
           <p className="font-bold text-gray-600 mb-8">
@@ -86,51 +86,51 @@ const FeynmanPage = () => {
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
               placeholder="e.g. Photosynthesis, Gravity, Fractions..."
-              className="flex-1 border-4 border-black p-4 font-bold text-lg outline-none focus:bg-yellow-50"
+              className="flex-1  p-4 font-bold text-lg outline-none focus:bg-yellow-50"
               onKeyDown={(e) => e.key === 'Enter' && handleStart()}
             />
             <button
               onClick={handleStart}
-              className="btn-neo bg-neo-pink text-white px-8 py-4 font-black uppercase text-lg hover:bg-pink-600"
+              className="btn-bub-primary bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-4 font-black uppercase text-lg hover:bg-pink-600"
             >
               Start
             </button>
           </div>
         </div>
       ) : (
-        <div className="card-neo bg-white flex-1 flex flex-col overflow-hidden border-4 border-black">
+        <div className="card-bub-solid bg-white flex-1 flex flex-col overflow-hidden ">
           {/* Chat Header */}
-          <div className="bg-neo-yellow border-b-4 border-black p-4 flex justify-between items-center shrink-0">
+          <div className="bg-gradient-to-r from-amber-400 to-orange-400 border-b-4 border-black p-4 flex justify-between items-center shrink-0">
             <div>
               <p className="font-black uppercase text-xs">Teaching Topic:</p>
               <h3 className="font-black text-xl">{concept}</h3>
             </div>
             <button 
               onClick={() => {setIsStarted(false); setConcept(''); setMessages([]);}}
-              className="border-2 border-black bg-white px-4 py-2 font-black text-xs uppercase hover:bg-gray-100"
+              className="border border-gray-200 bg-white px-4 py-2 font-black text-xs uppercase hover:bg-gray-100"
             >
               Change Topic
             </button>
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-neo-bg">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-amber-50">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'assistant' && (
-                  <div className="w-10 h-10 rounded-full border-2 border-black bg-orange-300 flex items-center justify-center text-xl mr-3 shrink-0">
+                  <div className="w-10 h-10 rounded-full border border-gray-200 bg-orange-300 flex items-center justify-center text-xl mr-3 shrink-0">
                     👦
                   </div>
                 )}
                 
-                <div className={`max-w-[80%] p-4 border-4 border-black font-bold text-lg ${
-                  msg.role === 'user' ? 'bg-neo-blue text-black' : 'bg-white text-black'
+                <div className={`max-w-[80%] p-4  font-bold text-lg ${
+                  msg.role === 'user' ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-black' : 'bg-white text-black'
                 } ${msg.role === 'user' ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl' : 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'}`}>
                   {msg.content}
                 </div>
 
                 {msg.role === 'user' && (
-                  <div className="w-10 h-10 rounded-full border-2 border-black bg-neo-pink flex items-center justify-center text-white font-black text-xl ml-3 shrink-0">
+                  <div className="w-10 h-10 rounded-full border border-gray-200 bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center text-white font-black text-xl ml-3 shrink-0">
                     You
                   </div>
                 )}
@@ -138,8 +138,8 @@ const FeynmanPage = () => {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="w-10 h-10 rounded-full border-2 border-black bg-orange-300 flex items-center justify-center text-xl mr-3 shrink-0">👦</div>
-                <div className="p-4 border-4 border-black bg-white rounded-tl-2xl rounded-tr-2xl rounded-br-2xl flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full border border-gray-200 bg-orange-300 flex items-center justify-center text-xl mr-3 shrink-0">👦</div>
+                <div className="p-4  bg-white rounded-tl-2xl rounded-tr-2xl rounded-br-2xl flex items-center gap-2">
                   <div className="w-2 h-2 bg-black rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                   <div className="w-2 h-2 bg-black rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
@@ -156,13 +156,13 @@ const FeynmanPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Explain it simply..."
-              className="flex-1 border-4 border-black p-4 font-bold text-lg outline-none focus:bg-blue-50"
+              className="flex-1  p-4 font-bold text-lg outline-none focus:bg-blue-50"
               disabled={loading}
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="btn-neo bg-green-400 text-black px-8 py-4 font-black uppercase text-lg hover:bg-green-500 disabled:opacity-50"
+              className="btn-bub-primary bg-green-400 text-black px-8 py-4 font-black uppercase text-lg hover:bg-green-500 disabled:opacity-50"
             >
               Send
             </button>

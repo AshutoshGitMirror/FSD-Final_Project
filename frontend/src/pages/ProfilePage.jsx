@@ -63,7 +63,7 @@ const ProfilePage = () => {
       <h1 className="text-4xl font-black uppercase mb-2 tracking-tight">👤 My Profile</h1>
       <p className="font-bold text-gray-600 mb-8">Manage your account and data</p>
 
-      <div className="card-neo bg-white p-8 mb-8">
+      <div className="card-bub-solid bg-white p-8 mb-8">
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b-4 border-black pb-3">
             <span className="font-bold text-gray-600">Name</span>
@@ -71,11 +71,11 @@ const ProfilePage = () => {
           </div>
           <div className="flex justify-between items-center border-b-4 border-black pb-3">
             <span className="font-bold text-gray-600">Standard</span>
-            <span className="font-black text-lg bg-neo-yellow border-2 border-black px-3 py-1">Grade {user?.std}</span>
+            <span className="font-black text-lg bg-gradient-to-r from-amber-400 to-orange-400 border border-gray-200 px-3 py-1">Grade {user?.std}</span>
           </div>
           <div className="flex justify-between items-center border-b-4 border-black pb-3">
             <span className="font-bold text-gray-600">Board</span>
-            <span className="font-black text-lg bg-neo-blue border-2 border-black px-3 py-1">{user?.board}</span>
+            <span className="font-black text-lg bg-gradient-to-r from-blue-400 to-cyan-400 border border-gray-200 px-3 py-1">{user?.board}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="font-bold text-gray-600">Role</span>
@@ -84,10 +84,10 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="card-neo bg-green-50 p-8 mb-8">
+      <div className="card-bub-solid bg-green-50 p-8 mb-8">
         <h2 className="font-black text-xl uppercase mb-2">📥 Download My Data</h2>
         <p className="font-medium text-gray-600 mb-4">Get a JSON file of your profile, progress, feedback, saved links, and more.</p>
-        <button onClick={handleExport} disabled={exporting} className="btn-neo px-6 py-3 disabled:opacity-50">
+        <button onClick={handleExport} disabled={exporting} className="btn-bub-primary px-6 py-3 disabled:opacity-50">
           {exporting ? 'Exporting...' : 'Export My Data'}
         </button>
         {exportData && (
@@ -95,7 +95,7 @@ const ProfilePage = () => {
         )}
       </div>
 
-      <div className="card-neo bg-red-50 p-8">
+      <div className="card-bub-solid bg-red-50 p-8">
         <h2 className="font-black text-xl uppercase mb-2 text-red-700">🗑️ Delete Account</h2>
         <p className="font-medium text-gray-600 mb-4">Permanently delete your account and all associated data. This cannot be undone.</p>
         {!confirmDelete ? (
@@ -107,13 +107,13 @@ const ProfilePage = () => {
             <p className="font-black text-red-700">Are you sure? All your progress will be lost forever!</p>
             <p className="font-medium text-sm text-gray-600">Confirm your password to proceed:</p>
             <input type="password" placeholder="Enter your password" value={deletePassword} onChange={e => { setDeletePassword(e.target.value); setDeleteError(''); }}
-              className="input-neo w-full font-medium tracking-widest" />
+              className="input-bub w-full font-medium tracking-widest" />
             {deleteError && <p className="text-xs font-bold text-red-600">{deleteError}</p>}
             <div className="flex gap-3">
-              <button onClick={handleDelete} disabled={deleting} className="border-4 border-black bg-black text-white px-6 py-3 font-black uppercase hover:bg-gray-800 disabled:opacity-50">
+              <button onClick={handleDelete} disabled={deleting} className=" bg-black text-white px-6 py-3 font-black uppercase hover:bg-gray-800 disabled:opacity-50">
                 {deleting ? 'Deleting...' : 'Yes, Delete Everything'}
               </button>
-              <button onClick={() => { setConfirmDelete(false); setDeletePassword(''); setDeleteError(''); }} className="border-4 border-black bg-white px-6 py-3 font-black uppercase hover:bg-gray-100">
+              <button onClick={() => { setConfirmDelete(false); setDeletePassword(''); setDeleteError(''); }} className=" bg-white px-6 py-3 font-black uppercase hover:bg-gray-100">
                 Cancel
               </button>
             </div>

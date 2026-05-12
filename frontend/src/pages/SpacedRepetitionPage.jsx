@@ -127,7 +127,7 @@ const SpacedRepetitionPage = () => {
 
         {/* Streak Badge */}
         {stats && (
-          <div className="card-neo bg-neo-yellow p-4 text-center transform rotate-2">
+          <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-4 text-center transform rotate-2">
             <span className="text-3xl block mb-1">🔥</span>
             <p className="font-black text-2xl">{stats.streak}</p>
             <p className="font-black uppercase text-xs">Day Streak</p>
@@ -139,13 +139,13 @@ const SpacedRepetitionPage = () => {
       <div className="flex gap-2 mb-8 border-b-4 border-black pb-4">
         <button
           onClick={() => setTab('due')}
-          className={`border-4 border-black font-black uppercase px-6 py-3 transition-all ${tab === 'due' ? 'bg-neo-pink text-white shadow-neo -translate-y-0.5' : 'bg-white'}`}
+          className={` font-black uppercase px-6 py-3 transition-all ${tab === 'due' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg -translate-y-0.5' : 'bg-white'}`}
         >
           📋 Due Reviews ({dueData?.totalDue || 0})
         </button>
         <button
           onClick={() => setTab('stats')}
-          className={`border-4 border-black font-black uppercase px-6 py-3 transition-all ${tab === 'stats' ? 'bg-neo-blue shadow-neo -translate-y-0.5' : 'bg-white'}`}
+          className={` font-black uppercase px-6 py-3 transition-all ${tab === 'stats' ? 'bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg -translate-y-0.5' : 'bg-white'}`}
         >
           📊 Mastery Stats
         </button>
@@ -158,7 +158,7 @@ const SpacedRepetitionPage = () => {
             <h2 className="text-xl font-black uppercase">Active Review</h2>
             <button
               onClick={() => { setActiveReview(null); setQuestionData(null); }}
-              className="border-2 border-black px-3 py-1 font-bold text-sm hover:bg-gray-100"
+              className="border border-gray-200 px-3 py-1 font-bold text-sm hover:bg-gray-100"
             >
               ✕ Close
             </button>
@@ -179,21 +179,21 @@ const SpacedRepetitionPage = () => {
         <div>
           {dueData?.totalDue > 0 ? (
             <div>
-              <div className="card-neo bg-neo-yellow p-6 mb-8 transform -rotate-1">
+              <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-6 mb-8 transform -rotate-1">
                 <span className="text-4xl mr-3">⏰</span>
                 <span className="font-black text-xl">You have {dueData.totalDue} concept{dueData.totalDue > 1 ? 's' : ''} due for review!</span>
               </div>
 
               {Object.entries(dueData.bySubject || {}).map(([subject, items]) => (
                 <div key={subject} className="mb-8">
-                  <h3 className="font-black text-xl uppercase mb-4 bg-neo-pink text-white px-4 py-2 inline-block border-4 border-black">
+                  <h3 className="font-black text-xl uppercase mb-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 inline-block ">
                     {subject}
                   </h3>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((item) => {
                       const urgency = item.interval <= 1 ? 'border-red-500 bg-red-50' : item.interval <= 3 ? 'border-orange-400 bg-orange-50' : 'border-black bg-white';
                       return (
-                        <div key={item._id} className={`card-neo ${urgency} p-5 hover:-translate-y-1 transition-all cursor-pointer`} onClick={() => startReview(item)}>
+                        <div key={item._id} className={`card-bub-solid ${urgency} p-5 hover:-translate-y-1 transition-all cursor-pointer`} onClick={() => startReview(item)}>
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h4 className="font-black text-base leading-tight">{item.concept}</h4>
@@ -204,7 +204,7 @@ const SpacedRepetitionPage = () => {
                           <div className="flex justify-between items-center border-t-2 border-black pt-2 mt-2">
                             <span className="text-xs font-bold text-gray-500">Rep: {item.repetitions}</span>
                             <span className="text-xs font-bold text-gray-500">EF: {item.easeFactor?.toFixed(1)}</span>
-                            <button className="bg-neo-blue border-2 border-black px-3 py-1 font-black text-xs uppercase hover:shadow-neo">
+                            <button className="bg-gradient-to-r from-blue-400 to-cyan-400 border border-gray-200 px-3 py-1 font-black text-xs uppercase hover:shadow-lg">
                               Review →
                             </button>
                           </div>
@@ -216,7 +216,7 @@ const SpacedRepetitionPage = () => {
               ))}
             </div>
           ) : (
-            <div className="card-neo bg-green-100 p-12 text-center max-w-lg mx-auto">
+            <div className="card-bub-solid bg-green-100 p-12 text-center max-w-lg mx-auto">
               <span className="text-6xl block mb-4">{stats?.totalConcepts > 0 ? '🎉' : '🚀'}</span>
               <h3 className="font-black text-2xl uppercase mb-2">
                 {stats?.totalConcepts > 0 ? 'All Caught Up!' : 'Get Started'}
@@ -230,7 +230,7 @@ const SpacedRepetitionPage = () => {
                 <button
                   onClick={initializeAllConcepts}
                   disabled={initializing}
-                  className="btn-neo py-4 px-8 text-lg bg-neo-pink text-white hover:bg-pink-600"
+                  className="btn-bub-primary py-4 px-8 text-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:bg-pink-600"
                 >
                   {initializing ? '⏳ Initializing...' : '🧠 Initialize My Reviews'}
                 </button>
@@ -246,17 +246,17 @@ const SpacedRepetitionPage = () => {
 
           {/* Fun Summary Row */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="card-neo bg-green-400 p-5 text-center">
+            <div className="card-bub-solid bg-green-400 p-5 text-center">
               <span className="text-4xl block mb-1">⭐</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.mastered, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Mastered</p>
             </div>
-            <div className="card-neo bg-neo-yellow p-5 text-center">
+            <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-5 text-center">
               <span className="text-4xl block mb-1">📖</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.learning, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Learning</p>
             </div>
-            <div className="card-neo bg-neo-blue p-5 text-center">
+            <div className="card-bub-solid bg-gradient-to-r from-blue-400 to-cyan-400 p-5 text-center">
               <span className="text-4xl block mb-1">🆕</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.new, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Not Started</p>
@@ -270,18 +270,18 @@ const SpacedRepetitionPage = () => {
             const emoji = subject === 'Mathematics' ? '🔢' : subject === 'Science' ? '🔬' : subject === 'English' ? '📝' : subject === 'Hindi' ? '🇮🇳' : subject === 'Social Science' ? '🌍' : '📚';
 
             return (
-              <div key={subject} className="card-neo bg-white p-5">
+              <div key={subject} className="card-bub-solid bg-white p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-black text-lg uppercase flex items-center gap-2">
                     <span className="text-2xl">{emoji}</span> {subject}
                   </h3>
-                  <span className="font-black text-sm bg-neo-bg border-2 border-black px-3 py-1">
+                  <span className="font-black text-sm bg-amber-50 border border-gray-200 px-3 py-1">
                     {s.mastered + s.learning} / {s.total} started
                   </span>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-8 bg-gray-200 border-4 border-black overflow-hidden flex">
+                <div className="w-full h-8 bg-gray-200  overflow-hidden flex">
                   {masteredPct > 0 && (
                     <div
                       className="h-full bg-green-400 flex items-center justify-center font-black text-xs text-white transition-all duration-500"
@@ -311,7 +311,7 @@ const SpacedRepetitionPage = () => {
           })}
 
           {(!stats || stats.totalConcepts === 0) && (
-            <div className="card-neo bg-neo-bg p-12 text-center">
+            <div className="card-bub-solid bg-amber-50 p-12 text-center">
               <span className="text-6xl block mb-4">📚</span>
               <h3 className="font-black text-xl uppercase mb-2">No Data Yet</h3>
               <p className="font-bold text-gray-500">Complete quizzes to start tracking your memory retention!</p>

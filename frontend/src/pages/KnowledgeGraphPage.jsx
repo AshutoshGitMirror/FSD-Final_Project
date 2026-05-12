@@ -17,7 +17,7 @@ const KnowledgeGraphPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadingGaps, setLoadingGaps] = useState(false);
 
-  const SUBJECT_COLORS = ['bg-neo-yellow', 'bg-neo-pink text-white', 'bg-neo-blue', 'bg-gray-800 text-white', 'bg-green-400'];
+  const SUBJECT_COLORS = ['bg-gradient-to-r from-amber-400 to-orange-400', 'bg-gradient-to-r from-pink-500 to-rose-500 text-white', 'bg-gradient-to-r from-blue-400 to-cyan-400', 'bg-gray-800 text-white', 'bg-green-400'];
 
   // Load available subjects
   useEffect(() => {
@@ -96,7 +96,7 @@ const KnowledgeGraphPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center">
-          <div className="w-16 h-16 border-8 border-black border-t-neo-pink rounded-full animate-spin mb-4 mx-auto"></div>
+          <div className="w-16 h-16  border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
           <h2 className="text-2xl font-black uppercase">Loading Knowledge Graph...</h2>
         </div>
       </div>
@@ -117,9 +117,9 @@ const KnowledgeGraphPage = () => {
           <button
             key={subj}
             onClick={() => setSelectedSubject(subj)}
-            className={`border-4 border-black font-black text-base px-6 py-3 transition-all active:translate-y-1 ${
+            className={` font-black text-base px-6 py-3 transition-all active:translate-y-1 ${
               subj === selectedSubject
-                ? `${SUBJECT_COLORS[idx % SUBJECT_COLORS.length]} shadow-[4px_4px_0_0_#000] -translate-y-0.5`
+                ? `${SUBJECT_COLORS[idx % SUBJECT_COLORS.length]}  -translate-y-0.5`
                 : 'bg-white hover:bg-gray-100'
             }`}
           >
@@ -131,7 +131,7 @@ const KnowledgeGraphPage = () => {
         <button
           onClick={runGapAnalysis}
           disabled={loadingGaps}
-          className="ml-auto border-4 border-black font-black text-base px-6 py-3 bg-red-400 text-white hover:bg-red-500 shadow-neo hover:-translate-y-0.5 transition-all active:translate-y-0"
+          className="ml-auto  font-black text-base px-6 py-3 bg-red-400 text-white hover:bg-red-500 shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
         >
           {loadingGaps ? '⏳ Analyzing...' : '🔍 AI Gap Analysis'}
         </button>
@@ -140,7 +140,7 @@ const KnowledgeGraphPage = () => {
       {/* Main Content */}
       <div className="flex-1 flex gap-6 min-h-0">
         {/* Graph Area */}
-        <div className="flex-1 card-neo bg-white p-2 relative" style={{ minHeight: '500px' }}>
+        <div className="flex-1 card-bub-solid bg-white p-2 relative" style={{ minHeight: '500px' }}>
           {graphData?.nodes?.length > 0 ? (
             <>
               <ConceptMapCanvas
@@ -150,10 +150,10 @@ const KnowledgeGraphPage = () => {
                 weakChapters={weakChapterNames}
               />
               {/* Legend */}
-              <div className="absolute bottom-4 left-4 flex gap-3 bg-white/90 border-2 border-black p-3">
+              <div className="absolute bottom-4 left-4 flex gap-3 bg-white/90 border border-gray-200 p-3">
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-green-400 border border-black"></div><span className="text-xs font-bold">Mastered</span></div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-yellow-400 border border-black"></div><span className="text-xs font-bold">Learning</span></div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-neo-pink border border-black"></div><span className="text-xs font-bold">Weak</span></div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-rose-500 border border-black"></div><span className="text-xs font-bold">Weak</span></div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-gray-300 border border-black"></div><span className="text-xs font-bold">Not tried</span></div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-red-500 border border-black"></div><span className="text-xs font-bold">Gap</span></div>
               </div>
@@ -173,7 +173,7 @@ const KnowledgeGraphPage = () => {
         <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
           {/* Selected Node Info */}
           {selectedNode && (
-            <div className="card-neo bg-white p-5">
+            <div className="card-bub-solid bg-white p-5">
               <h3 className="font-black text-lg mb-3 border-b-4 border-black pb-2">{selectedNode.chapterName}</h3>
               <div className="space-y-3">
                 <div>
@@ -188,7 +188,7 @@ const KnowledgeGraphPage = () => {
                   <p className="font-black uppercase text-xs text-gray-500 mb-1">Key Concepts</p>
                   <div className="flex flex-wrap gap-1">
                     {(selectedNode.concepts || []).map((c, i) => (
-                      <span key={i} className="text-xs border-2 border-black bg-neo-yellow px-2 py-0.5 font-bold">{c}</span>
+                      <span key={i} className="text-xs border border-gray-200 bg-gradient-to-r from-amber-400 to-orange-400 px-2 py-0.5 font-bold">{c}</span>
                     ))}
                   </div>
                 </div>
@@ -197,7 +197,7 @@ const KnowledgeGraphPage = () => {
                   {(selectedNode.prerequisites || []).length > 0 ? (
                     <div className="space-y-1">
                       {selectedNode.prerequisites.map((p, i) => (
-                        <div key={i} className={`text-xs border-2 border-black px-2 py-1 font-bold ${(progressMap[p] || 0) >= 70 ? 'bg-green-200' : 'bg-red-200'}`}>
+                        <div key={i} className={`text-xs border border-gray-200 px-2 py-1 font-bold ${(progressMap[p] || 0) >= 70 ? 'bg-green-200' : 'bg-red-200'}`}>
                           {(progressMap[p] || 0) >= 70 ? '✅' : '⚠️'} {p}
                         </div>
                       ))}
@@ -212,7 +212,7 @@ const KnowledgeGraphPage = () => {
 
           {/* Gap Analysis Results */}
           {gapAnalysis && (
-            <div className="card-neo bg-red-50 p-5">
+            <div className="card-bub-solid bg-red-50 p-5">
               <h3 className="font-black text-lg mb-3 text-red-700">🔍 Gap Analysis</h3>
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
@@ -253,16 +253,16 @@ const KnowledgeGraphPage = () => {
 
           {/* Stats */}
           {graphData?.nodes?.length > 0 && (
-            <div className="card-neo bg-neo-bg p-5">
+            <div className="card-bub-solid bg-amber-50 p-5">
               <h3 className="font-black text-sm uppercase mb-3">📊 Mastery Overview</h3>
               <div className="space-y-2">
                 {graphData.nodes.map((n, i) => {
                   const score = progressMap[n.chapterName] ?? -1;
                   return (
                     <div key={i} className="flex items-center gap-2">
-                      <div className="flex-1 h-3 border-2 border-black bg-gray-200 overflow-hidden">
+                      <div className="flex-1 h-3 border border-gray-200 bg-gray-200 overflow-hidden">
                         <div
-                          className={`h-full transition-all duration-500 ${score >= 70 ? 'bg-green-400' : score >= 40 ? 'bg-neo-yellow' : score >= 0 ? 'bg-neo-pink' : 'bg-gray-300'}`}
+                          className={`h-full transition-all duration-500 ${score >= 70 ? 'bg-green-400' : score >= 40 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : score >= 0 ? 'bg-gradient-to-r from-pink-500 to-rose-500' : 'bg-gray-300'}`}
                           style={{ width: score >= 0 ? `${score}%` : '0%' }}
                         />
                       </div>

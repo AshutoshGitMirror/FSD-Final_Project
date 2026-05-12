@@ -32,8 +32,8 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
 
   if (loading) {
     return (
-      <div className="card-neo bg-white p-8 text-center">
-        <div className="w-12 h-12 border-6 border-black border-t-neo-pink rounded-full animate-spin mx-auto mb-4"></div>
+      <div className="card-bub-solid bg-white p-8 text-center">
+        <div className="w-12 h-12  border-t-violet-400 rounded-full animate-spin mx-auto mb-4"></div>
         <p className="font-black uppercase text-sm text-gray-500">Generating review question...</p>
       </div>
     );
@@ -41,7 +41,7 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
 
   if (!questionData) {
     return (
-      <div className="card-neo bg-gray-100 p-8 text-center">
+      <div className="card-bub-solid bg-gray-100 p-8 text-center">
         <span className="text-4xl mb-4 block">📭</span>
         <p className="font-bold text-gray-500">No question available for this concept.</p>
       </div>
@@ -52,9 +52,9 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
   const showRating = isMCQ ? showResult : true; // For open-ended, always show rating
 
   return (
-    <div className="card-neo bg-white overflow-hidden">
+    <div className="card-bub-solid bg-white overflow-hidden">
       {/* Header */}
-      <div className="bg-neo-yellow border-b-4 border-black p-4">
+      <div className="bg-gradient-to-r from-amber-400 to-orange-400 border-b-4 border-black p-4">
         <p className="font-black uppercase text-xs text-gray-600">{subject} • {chapter}</p>
         <h3 className="font-black text-lg mt-1">🔄 {concept}</h3>
       </div>
@@ -78,10 +78,10 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
                   key={i}
                   onClick={() => handleAnswer(i)}
                   disabled={showResult}
-                  className={`w-full text-left p-4 border-2 border-black font-bold transition-all ${btnClass} ${!showResult ? 'hover:-translate-y-0.5 hover:shadow-neo active:translate-y-0' : ''}`}
+                  className={`w-full text-left p-4 border border-gray-200 font-bold transition-all ${btnClass} ${!showResult ? 'hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`w-7 h-7 border-2 border-black flex items-center justify-center font-black text-sm flex-shrink-0 ${showResult && i === questionData.correctIndex ? 'bg-white text-black' : 'bg-neo-blue'}`}>
+                    <span className={`w-7 h-7 border border-gray-200 flex items-center justify-center font-black text-sm flex-shrink-0 ${showResult && i === questionData.correctIndex ? 'bg-white text-black' : 'bg-gradient-to-r from-blue-400 to-cyan-400'}`}>
                       {['A', 'B', 'C', 'D'][i]}
                     </span>
                     <span>{opt}</span>
@@ -94,7 +94,7 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
           </div>
         ) : (
           /* Open-ended: show a prompt to think */
-          <div className="bg-neo-bg border-4 border-dashed border-gray-400 p-6 text-center">
+          <div className="bg-amber-50 border-4 border-dashed border-gray-400 p-6 text-center">
             <span className="text-3xl block mb-2">🤔</span>
             <p className="font-bold text-gray-600">Think about your answer, then rate how well you recalled it below.</p>
           </div>
@@ -104,7 +104,7 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
       {/* Feedback for MCQ */}
       {showResult && isMCQ && questionData.explanation && (
         <div className="px-6 pb-2">
-          <div className={`p-4 border-2 border-black font-medium text-sm ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+          <div className={`p-4 border border-gray-200 font-medium text-sm ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
             <p className="font-black uppercase text-xs mb-1">{isCorrect ? '✅ Correct!' : '❌ Incorrect'}</p>
             <p>{questionData.explanation}</p>
           </div>
@@ -127,7 +127,7 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
               <button
                 key={q}
                 onClick={() => handleRate(q)}
-                className={`${color} border-4 border-black px-4 py-3 font-black text-sm uppercase hover:shadow-neo hover:-translate-y-1 transition-all active:translate-y-0`}
+                className={`${color}  px-4 py-3 font-black text-sm uppercase hover:shadow-lg hover:-translate-y-1 transition-all active:translate-y-0`}
               >
                 {q} — {label}
               </button>
