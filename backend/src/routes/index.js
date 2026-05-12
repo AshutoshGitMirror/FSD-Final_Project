@@ -9,7 +9,9 @@ const routeRegistry = [
   ['/api/knowledge-graph', require('./knowledgeGraph')],
   ['/api/spaced-repetition', require('./spacedRepetition')],
   ['/api/feynman', require('./feynman')],
-  ['/api/feedback', require('./feedback')]
+  ['/api/feedback', require('./feedback')],
+  ['/api/pdf', require('./pdf')],
+  ['/api/video', require('./video')]
 ];
 
 const registerRoutes = (app) => {

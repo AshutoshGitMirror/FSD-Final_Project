@@ -99,6 +99,7 @@ const LearnPage = () => {
   const [feedbacks, setFeedbacks] = useState({});
   const [diagrams, setDiagrams] = useState([]);
   const [loadingDiagrams, setLoadingDiagrams] = useState(false);
+  const [chapterVideos, setChapterVideos] = useState([]);
   const bottomRef = useRef(null);
   const knownConceptsRef = useRef(new Set());
 
@@ -165,6 +166,14 @@ const LearnPage = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, images, extraLinks]);
+
+  useEffect(() => {
+    if (!subject || !chapter) return;
+    fetch(backendUrl(`/api/video?std=${std}&subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chapter)}`))
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setChapterVideos(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, [std, subject, chapter]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -414,8 +423,21 @@ const LearnPage = () => {
                 {link.type === 'yt' ? '🎬 Watch Related Video' : '📚 Read Shaalaa Material'}
              </a>
           ))}
-          {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && !loadingDiagrams && (
+          {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
              <div className="card-neo bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
+          )}
+          {chapterVideos.length > 0 && (
+            <div>
+              <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
+              <div className="space-y-2">
+                {chapterVideos.map((v, i) => (
+                  <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block card-neo bg-white p-3 hover:-translate-y-0.5 transition-all">
+                    <p className="font-bold text-sm leading-tight">{v.title}</p>
+                    {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
+                  </a>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
