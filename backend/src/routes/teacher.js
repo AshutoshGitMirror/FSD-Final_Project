@@ -50,6 +50,7 @@ router.get('/stats', async (req, res) => {
     ]);
     res.json({ open, reviewed, dismissed, total: open + reviewed + dismissed });
   } catch (err) {
+    console.error('Stats fetch error:', err);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });

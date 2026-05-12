@@ -368,8 +368,8 @@ router.post('/', async (req, res) => {
           const level = await getLevel(decoded.userId, subject);
           systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
         }
-      } catch {
-        // Not authenticated — continue without adaptation
+      } catch (adaptErr) {
+        console.debug('Adaptive level skipped (expected if unauthenticated):', adaptErr.message);
       }
     }
 

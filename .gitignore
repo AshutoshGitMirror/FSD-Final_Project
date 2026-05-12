@@ -11,3 +11,6 @@ LinksBackend/.env
 clone/
 scratch/
 *.tar.gz
+
+# ChromaBackend
+chroma-backend/.env
