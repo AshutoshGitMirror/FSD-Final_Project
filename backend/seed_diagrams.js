@@ -111,8 +111,12 @@ async function seedDiagrams() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected to MongoDB');
 
+  const SCIENCE_ONLY = ['Photosynthesis', 'Water Cycle', 'Digestive System', 'Electric Circuit', 'Solar System', 'Food Chain'];
+  const MATH_AND_SCIENCE = ['Pythagoras Theorem', 'Types of Triangles'];
+
   for (const diagram of DIAGRAMS) {
-    const subjects = ['Science', 'Mathematics'];
+    const isScienceOnly = SCIENCE_ONLY.includes(diagram.conceptName);
+    const subjects = isScienceOnly ? ['Science'] : ['Science', 'Mathematics'];
     const stds = [7, 8, 9, 10];
 
     for (const subject of subjects) {
@@ -120,10 +124,10 @@ async function seedDiagrams() {
         const result = await KnowledgeGraph.findOneAndUpdate(
           { std, board: 'CBSE', subjectName: subject },
           { $addToSet: { conceptDiagrams: diagram } },
-          { new: true }
+          { returnDocument: 'after' }
         );
         if (result) {
-          console.log(`Added diagram "${diagram.conceptName}" to ${subject} Std ${std}`);
+          console.log(`Added "${diagram.conceptName}" → ${subject} Std ${std}`);
         }
       }
     }

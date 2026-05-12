@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
     await Leaderboard.findOneAndUpdate(
       { userId },
       { averageScore, totalChaptersCompleted },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     res.status(201).json(entry);
