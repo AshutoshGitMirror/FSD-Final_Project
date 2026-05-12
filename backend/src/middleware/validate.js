@@ -7,9 +7,7 @@ const validate = (schema) => (req, res, next) => {
       query: req.query,
       params: req.params
     });
-    req.body = parsed.body ?? req.body;
-    req.query = parsed.query ?? req.query;
-    req.params = parsed.params ?? req.params;
+    if (parsed.body !== undefined) req.body = parsed.body;
     next();
   } catch (err) {
     if (err instanceof z.ZodError) {
@@ -27,7 +25,7 @@ const registerSchema = z.object({
     fullName: z.string().min(1, 'Full name is required'),
     email: z.string().email('Invalid email format'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    std: z.number().int().min(1).max(12, 'Standard must be between 1 and 12'),
+    std: z.number().int().min(1).max(10, 'Standard must be between 1 and 10'),
     board: z.enum(['CBSE', 'ICSE', 'IB', 'State Board'], 'Invalid board')
   })
 });
@@ -55,38 +53,6 @@ const feynmanSchema = z.object({
       role: z.string(),
       content: z.string()
     })).min(1, 'At least one message is required')
-  })
-});
-
-const curriculumQuerySchema = z.object({
-  query: z.object({
-    std: z.string().regex(/^\d+$/, 'std must be a number').optional(),
-    board: z.enum(['CBSE', 'ICSE', 'IB', 'State Board']).optional()
-  })
-});
-
-const quizParamsSchema = z.object({
-  params: z.object({
-    subject: z.string().min(1),
-    chapter: z.string().min(1)
-  })
-});
-
-const kgQuerySchema = z.object({
-  query: z.object({
-    std: z.string().regex(/^\d+$/, 'std must be a number'),
-    board: z.string().min(1, 'board is required'),
-    subject: z.string().min(1, 'subject is required')
-  })
-});
-
-const progressPostSchema = z.object({
-  body: z.object({
-    subjectName: z.string().min(1),
-    chapterName: z.string().min(1),
-    quizScore: z.number().min(0),
-    totalQuestions: z.number().int().positive('totalQuestions must be positive'),
-    isCompleted: z.boolean()
   })
 });
 
@@ -128,10 +94,6 @@ module.exports = {
     loginSchema,
     chatSchema,
     feynmanSchema,
-    curriculumQuerySchema,
-    quizParamsSchema,
-    kgQuerySchema,
-    progressPostSchema,
     feedbackSchema,
     linkSaveSchema,
     srInitSchema,

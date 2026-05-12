@@ -107,7 +107,7 @@ const LearnPage = () => {
   const CONCEPT_KEYWORDS = [
     'photosynthesis', 'water cycle', 'digestive system', 'pythagoras',
     'electric circuit', 'solar system', 'food chain', 'triangles',
-    'respiration', 'gravity', 'magnetism', 'photosynthesis'
+    'respiration', 'gravity', 'magnetism'
   ];
 
   const fetchDiagramsForConcept = useCallback(async (concept) => {
@@ -231,7 +231,7 @@ const LearnPage = () => {
         .catch(console.error);
     }
 
-    const updateLatestAiMessage = (text, thoughts, confidence) => {
+    const updateLatestAiMessage = (text, thoughts) => {
       detectConcepts(text);
       setMessages(prev => {
         const next = [...prev];
@@ -241,7 +241,6 @@ const LearnPage = () => {
               ...next[i],
               text,
               thoughts: thoughts ?? next[i].thoughts,
-              confidence: confidence ?? next[i].confidence,
               isPlaceholder: false
             };
             break;
@@ -491,20 +490,15 @@ const LearnPage = () => {
                 </div>
                 {msg.role === 'ai' && !msg.isPlaceholder && (
                   <div className="flex items-center gap-2 border-t-2 border-gray-300 pt-2 mt-1">
-                    {msg.confidence != null && (
-                      <span className={`text-xs font-black px-2 py-0.5 border-2 border-black ${msg.confidence >= 80 ? 'bg-green-300' : msg.confidence >= 50 ? 'bg-yellow-300' : 'bg-red-300'}`}>
-                        {msg.confidence}% confident
-                      </span>
-                    )}
                     <button
-                      onClick={() => handleFeedback(`msg-${i}`, 1, msg.confidence)}
+                      onClick={() => handleFeedback(`msg-${i}`, 1)}
                       className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-green-200 transition-colors ${feedbacks[`msg-${i}`] === 1 ? 'bg-green-400' : 'bg-white'}`}
                       title="Helpful"
                     >
                       👍
                     </button>
                     <button
-                      onClick={() => handleFeedback(`msg-${i}`, -1, msg.confidence)}
+                      onClick={() => handleFeedback(`msg-${i}`, -1)}
                       className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-red-200 transition-colors ${feedbacks[`msg-${i}`] === -1 ? 'bg-red-400' : 'bg-white'}`}
                       title="Not helpful"
                     >

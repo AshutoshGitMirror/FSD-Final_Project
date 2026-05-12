@@ -30,30 +30,17 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     return text.strip()
 
 
-def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[tuple[str, int]]:
-    sentences = re.split(r'(?<=[.!?])\s+', text)
+def chunk_text(text: str, chunk_size_words: int = 500, overlap_words: int = 50) -> list[str]:
+    words = text.split()
     chunks = []
-    current = []
-    current_len = 0
-    start_idx = 0
-
-    for sentence in sentences:
-        sentence = sentence.strip()
-        if not sentence:
-            continue
-        word_count = len(sentence.split())
-        if current_len + word_count > chunk_size and current:
-            chunks.append((" ".join(current), start_idx))
-            overlap_text = current[-overlap:] if overlap < len(current) else current
-            current = list(overlap_text)
-            current_len = sum(len(s.split()) for s in current)
-            start_idx += len(current) - len(overlap_text)
-        current.append(sentence)
-        current_len += word_count
-
-    if current:
-        chunks.append((" ".join(current), start_idx))
-
+    i = 0
+    while i < len(words):
+        end = min(i + chunk_size_words, len(words))
+        chunk = " ".join(words[i:end])
+        chunks.append(chunk)
+        i += chunk_size_words - overlap_words
+        if end == len(words):
+            break
     return chunks
 
 
@@ -74,7 +61,7 @@ def prepare_ncert_ingest(
             continue
 
         chunks = chunk_text(text)
-        for chunk_text_content, chunk_idx in chunks:
+        for chunk_idx, chunk_text_content in enumerate(chunks):
             documents.append({
                 "document": chunk_text_content,
                 "metadata": {

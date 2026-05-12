@@ -5,7 +5,7 @@ from pathlib import Path
 
 import chromadb
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -16,9 +16,14 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="ChromaBackend - RAG Microservice")
 
+CHROMA_API_KEY = os.environ.get("CHROMA_API_KEY", "")
+
+CLIENT_ORIGINS = os.environ.get("CHROMA_ALLOWED_ORIGINS", "http://127.0.0.1:5000,http://localhost:5000")
+allowed_origins = [o.strip() for o in CLIENT_ORIGINS.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins or ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -37,6 +42,15 @@ try:
 except Exception as e:
     logger.error(f"ChromaDB init failed: {e}")
     raise
+
+
+def verify_api_key(authorization: str | None = None):
+    if not CHROMA_API_KEY:
+        return
+    if not authorization:
+        raise HTTPException(401, "Missing Authorization header")
+    if authorization != f"Bearer {CHROMA_API_KEY}":
+        raise HTTPException(403, "Invalid API key")
 
 
 class IngestRequest(BaseModel):
@@ -71,7 +85,8 @@ def embed_text(req: EmbedRequest):
 
 
 @app.post("/ingest")
-def ingest(req: IngestRequest):
+def ingest(req: IngestRequest, authorization: str | None = Header(None)):
+    verify_api_key(authorization)
     if len(req.documents) != len(req.metadatas):
         raise HTTPException(400, "documents and metadatas must have same length")
 
@@ -110,14 +125,15 @@ def search(req: SearchRequest):
         output.append({
             "document": documents[i],
             "metadata": metadatas[i] if i < len(metadatas) else {},
-            "score": round(1 - (distances[i] if i < len(distances) else 0), 4),
+            "similarity": round(1 - (distances[i] if i < len(distances) else 0), 4),
         })
 
     return {"results": output, "query": req.query}
 
 
 @app.post("/clear")
-def clear():
+def clear(authorization: str | None = Header(None)):
+    verify_api_key(authorization)
     global collection
     client.delete_collection("ncert_textbooks")
     collection = client.get_or_create_collection(

@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 const signUserToken = (user) => (
   jwt.sign(
-    { userId: user._id, fullName: user.fullName, std: user.std, board: user.board },
+    { userId: user._id, fullName: user.fullName, std: user.std, board: user.board, role: user.role || 'student' },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   )

@@ -40,3 +40,4 @@ const requireRole = (...roles) => {
 
 module.exports = authMiddleware;
 module.exports.requireRole = requireRole;
+module.exports.authMiddleware = authMiddleware;

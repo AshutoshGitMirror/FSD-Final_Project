@@ -9,7 +9,7 @@ const { authLimiter } = require('./middleware/rateLimiter');
 const createApp = () => {
   const app = express();
 
-  app.use(helmet());
+  app.use(helmet({ frameguard: false }));
   app.use(morgan('short'));
   app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',').map(s => s.trim()) || 'http://localhost:5173',

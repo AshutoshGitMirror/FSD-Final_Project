@@ -10,6 +10,8 @@ const ProfilePage = () => {
   const [exportData, setExportData] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   const handleExport = async () => {
     setExporting(true);
@@ -32,14 +34,26 @@ const ProfilePage = () => {
   };
 
   const handleDelete = async () => {
+    if (!deletePassword) {
+      setDeleteError('Please enter your password');
+      return;
+    }
     setDeleting(true);
+    setDeleteError('');
     try {
-      const res = await authFetch(backendUrl('/api/ethics/delete-account'), { method: 'POST' });
-      if (!res.ok) throw new Error('Deletion failed');
+      const res = await authFetch(backendUrl('/api/ethics/delete-account'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: deletePassword })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Deletion failed');
+      }
       localStorage.removeItem('token');
       navigate('/login');
     } catch (err) {
-      alert('Failed to delete account: ' + err.message);
+      setDeleteError(err.message);
     }
     setDeleting(false);
   };
@@ -91,11 +105,15 @@ const ProfilePage = () => {
         ) : (
           <div className="space-y-3">
             <p className="font-black text-red-700">Are you sure? All your progress will be lost forever!</p>
+            <p className="font-medium text-sm text-gray-600">Confirm your password to proceed:</p>
+            <input type="password" placeholder="Enter your password" value={deletePassword} onChange={e => { setDeletePassword(e.target.value); setDeleteError(''); }}
+              className="input-neo w-full font-medium tracking-widest" />
+            {deleteError && <p className="text-xs font-bold text-red-600">{deleteError}</p>}
             <div className="flex gap-3">
               <button onClick={handleDelete} disabled={deleting} className="border-4 border-black bg-black text-white px-6 py-3 font-black uppercase hover:bg-gray-800 disabled:opacity-50">
                 {deleting ? 'Deleting...' : 'Yes, Delete Everything'}
               </button>
-              <button onClick={() => setConfirmDelete(false)} className="border-4 border-black bg-white px-6 py-3 font-black uppercase hover:bg-gray-100">
+              <button onClick={() => { setConfirmDelete(false); setDeletePassword(''); setDeleteError(''); }} className="border-4 border-black bg-white px-6 py-3 font-black uppercase hover:bg-gray-100">
                 Cancel
               </button>
             </div>

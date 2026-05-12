@@ -389,13 +389,11 @@ router.post('/', async (req, res) => {
         return res.end();
       }
 
-      const ollamaConfidence = ollama.reply && ollama.reply.length > 50 ? 70 : 50;
       return res.json({
         reply: ollama.reply,
         thoughts: ollama.thoughts,
         provider: 'ollama',
-        model: ollama.model,
-        confidence: ollamaConfidence
+        model: ollama.model
       });
     } catch (ollamaError) {
       lastOllamaError = ollamaError.message || 'Ollama request failed';
@@ -447,8 +445,7 @@ router.post('/', async (req, res) => {
         } else {
           finalReply = response.text || "";
         }
-        const geminiConfidence = finalReply && finalReply.length > 50 ? 85 : 70;
-        return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined, confidence: geminiConfidence });
+        return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
       } catch (newSdkError) {
         try {
           const { GoogleGenerativeAI } = require("@google/generative-ai");

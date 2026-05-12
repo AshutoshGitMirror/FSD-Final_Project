@@ -35,7 +35,16 @@ const SignupPage = () => {
         body: JSON.stringify({ fullName, email, password, std, board })
       });
 
-      const data = response.ok ? await response.json() : await response.text().then(t => ({ error: t }));
+      let data;
+      if (response.ok) {
+        data = await response.json();
+      } else {
+        try {
+          data = await response.json();
+        } catch {
+          data = { error: await response.text() };
+        }
+      }
       if (!response.ok) {
         setError(data.error || 'Failed to sign up');
       } else {
