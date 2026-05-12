@@ -20,7 +20,8 @@ def ytdlp_videos(query_text:str, std:int ,  limit:int):
             
             if 'entries' in info:
                 for entry in info['entries']:
-                    # Build the full URL from the video ID
+                    if 'id' not in entry:
+                        continue
                     video_url = f"https://www.youtube.com/watch?v={entry['id']}"
                     video_links.append({
                         "title": entry.get("title"),

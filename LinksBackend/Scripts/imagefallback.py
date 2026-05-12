@@ -19,10 +19,10 @@ def wikimedia_images(keyword: str):
         }
 
         headers = {
-            "User-Agent": "MyImageApp/1.0 (your-email@example.com)"
+            "User-Agent": "MyImageApp/1.0 (contact@project.com)"
         }
 
-        response = requests.get(url, params=params, headers=headers)
+        response = requests.get(url, params=params, headers=headers, timeout=5)
         response.raise_for_status()
         data = response.json()
 
@@ -31,8 +31,11 @@ def wikimedia_images(keyword: str):
         if 'query' in data and 'pages' in data['query']:
             pages = data['query']['pages']
             for page_id in pages:
-                if 'imageinfo' in pages[page_id]:
-                    image_links.append(pages[page_id]['imageinfo'][0]['thumburl'])
+                if 'imageinfo' in pages[page_id] and pages[page_id]['imageinfo']:
+                    info = pages[page_id]['imageinfo'][0]
+                    url = info.get('thumburl') or info.get('url')
+                    if url:
+                        image_links.append(url)
                     if len(image_links) == 5:
                         break
 

@@ -16,8 +16,8 @@ const LoginPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      
-      const data = await response.json();
+
+      const data = response.ok ? await response.json() : await response.text().then(t => ({ error: t }));
       if (!response.ok) {
         setError(data.error || 'Failed to login');
       } else {
@@ -25,7 +25,8 @@ const LoginPage = () => {
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
-    } catch {
+    } catch (err) {
+      console.error('Login error:', err);
       setError('Server error connecting to backend.');
     }
   };
