@@ -35,28 +35,22 @@ const listLinksForUser = async (userId) => {
 const createSavedLink = async (userId, payload) => {
   const linkInput = normalizeLinkInput(payload);
 
-  const link = await SavedLinks.findOneAndUpdate(
-    {
-      userId,
-      url: linkInput.url,
-      source: linkInput.source
-    },
-    {
-      $setOnInsert: {
-        userId,
-        ...linkInput
-      }
-    },
-    {
-      upsert: true,
-      new: true,
-      setDefaultsOnInsert: true
-    }
-  );
+  const existing = await SavedLinks.findOne({
+    userId,
+    url: linkInput.url,
+    source: linkInput.source
+  });
 
-  const created = link.createdAt.getTime() === link.updatedAt.getTime();
+  if (existing) {
+    return { link: existing, created: false };
+  }
 
-  return { link, created };
+  const link = await SavedLinks.create({
+    userId,
+    ...linkInput
+  });
+
+  return { link, created: true };
 };
 
 module.exports = {

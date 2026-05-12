@@ -31,11 +31,11 @@ router.post('/', async (req, res) => {
     // 2. Recalculate stats for Leaderboard
     const allProgress = await Progress.find({ userId });
     
-    const totalPercentage = allProgress.reduce((sum, p) => {
-      if (p.totalQuestions === 0) return sum;
+    const validProgress = allProgress.filter(p => p.totalQuestions > 0);
+    const totalPercentage = validProgress.reduce((sum, p) => {
       return sum + (p.quizScore / p.totalQuestions) * 100;
     }, 0);
-    const averageScore = allProgress.length > 0 ? Math.round(totalPercentage / allProgress.length) : 0;
+    const averageScore = validProgress.length > 0 ? Math.round(totalPercentage / validProgress.length) : 0;
 
     // Count unique completed chapters
     const uniqueChapters = new Set(

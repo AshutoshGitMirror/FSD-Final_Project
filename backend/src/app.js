@@ -21,7 +21,7 @@ const createApp = () => {
 
   app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
-    res.status(err.status || 500).json({
+    res.status(err.statusCode || err.status || 500).json({
       error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message
     });
   });
