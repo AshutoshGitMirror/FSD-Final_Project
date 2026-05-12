@@ -13,6 +13,7 @@ router.get('/', async (req, res) => {
     const data = await Progress.find({ userId: req.user.userId });
     res.json(data);
   } catch (err) {
+    console.error('Progress Fetch Error:', err);
     res.status(500).json({ error: 'Failed to fetch progress' });
   }
 });
@@ -30,9 +31,11 @@ router.post('/', async (req, res) => {
     // 2. Recalculate stats for Leaderboard
     const allProgress = await Progress.find({ userId });
     
-    // Average score calculation
-    const totalPercentage = allProgress.reduce((sum, p) => sum + (p.quizScore / p.totalQuestions) * 100, 0);
-    const averageScore = Math.round(totalPercentage / allProgress.length);
+    const validProgress = allProgress.filter(p => p.totalQuestions > 0);
+    const totalPercentage = validProgress.reduce((sum, p) => {
+      return sum + (p.quizScore / p.totalQuestions) * 100;
+    }, 0);
+    const averageScore = validProgress.length > 0 ? Math.round(totalPercentage / validProgress.length) : 0;
 
     // Count unique completed chapters
     const uniqueChapters = new Set(

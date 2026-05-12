@@ -46,15 +46,24 @@ const FeynmanPage = () => {
           messages: newMessages
         })
       });
+
+      if (!res.ok) {
+        throw new Error(`Server responded with ${res.status}`);
+      }
+
       const data = await res.json();
-      
-      setMessages([...newMessages, { role: 'assistant', content: data.reply }]);
+
+      if (!data || typeof data.reply !== 'string') {
+        throw new Error('Invalid response format');
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (err) {
       console.error('Chat error:', err);
-      setMessages([...newMessages, { role: 'assistant', content: "I'm a bit confused, my brain stopped working. Can you try explaining that again?" }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm a bit confused, my brain stopped working. Can you try explaining that again?" }]);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (

@@ -7,15 +7,26 @@ router.get('/', async (req, res) => {
     const { std, board } = req.query;
     
     let query = {};
-    if (std) query.std = Number(std); // Ensure it's a number for MongoDB query
-    if (board) query.board = board;
+    if (std) {
+      const stdNum = Number(std);
+      if (isNaN(stdNum) || !Number.isInteger(stdNum) || stdNum < 1 || stdNum > 12) {
+        return res.status(400).json({ error: 'Invalid std parameter. Must be between 1 and 12.' });
+      }
+      query.std = stdNum;
+    }
+    if (board) {
+      const allowedBoards = ['CBSE', 'ICSE', 'IB', 'State Board'];
+      if (!allowedBoards.includes(board)) {
+        return res.status(400).json({ error: 'Invalid board parameter.' });
+      }
+      query.board = board;
+    }
 
     const curriculum = await Curriculum.find(query);
     
-    // Do NOT return hardcoded std-10 data if not found. 
-    // Return empty array so frontend can show "Empty" state.
     res.json(curriculum);
   } catch (error) {
+    console.error('Error fetching curriculum:', error);
     res.status(500).json({ error: 'Server error fetching curriculum' });
   }
 });

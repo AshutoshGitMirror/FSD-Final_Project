@@ -21,29 +21,38 @@ const KnowledgeGraphPage = () => {
 
   // Load available subjects
   useEffect(() => {
-    fetch(backendUrl(`/api/knowledge-graph/subjects?std=${std}&board=${board}`))
-      .then(r => r.json())
+    const controller = new AbortController();
+    setLoading(true);
+
+    fetch(backendUrl(`/api/knowledge-graph/subjects?std=${std}&board=${board}`), { signal: controller.signal })
+      .then(r => r.ok ? r.json() : [])
       .then(data => {
         setSubjects(data);
         if (data.length > 0) setSelectedSubject(data[0]);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [std, board]);
 
   // Load graph + progress when subject changes
   useEffect(() => {
     if (!selectedSubject) return;
 
+    const controller = new AbortController();
+
     Promise.all([
-      fetch(backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`))
+      fetch(backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`), { signal: controller.signal })
         .then(r => r.ok ? r.json() : { nodes: [] }),
       authFetch(backendUrl('/api/progress'))
         .then(r => r.ok ? r.json() : [])
     ]).then(([graph, progress]) => {
       setGraphData(graph);
 
-      // Build progress map: chapterName -> best score %
       const pMap = {};
       (Array.isArray(progress) ? progress : []).forEach(p => {
         if (p.subjectName === selectedSubject) {
@@ -56,14 +65,20 @@ const KnowledgeGraphPage = () => {
       setProgressMap(pMap);
       setGapAnalysis(null);
       setSelectedNode(null);
-    }).catch(console.error);
+    }).catch(err => {
+      if (err.name === 'AbortError') return;
+      console.error(err);
+    });
+
+    return () => controller.abort();
   }, [selectedSubject, std, board]);
 
   // Run gap analysis
   const runGapAnalysis = async () => {
+    if (!user?.userId) return;
     setLoadingGaps(true);
     try {
-      const res = await authFetch(backendUrl(`/api/knowledge-graph/gaps/${user?.userId}?subject=${encodeURIComponent(selectedSubject)}`));
+      const res = await authFetch(backendUrl(`/api/knowledge-graph/gaps/${user.userId}?subject=${encodeURIComponent(selectedSubject)}`));
       const data = await res.json();
       setGapAnalysis(data);
     } catch (err) {
@@ -73,6 +88,9 @@ const KnowledgeGraphPage = () => {
   };
 
   const weakChapterNames = gapAnalysis?.weakChapters?.map(w => w.chapterName) || [];
+
+  // Validate difficulty for selectedNode
+  const safeDifficulty = selectedNode ? Math.max(0, Math.min(5, Number(selectedNode.difficulty) || 0)) : 0;
 
   if (loading) {
     return (
@@ -164,7 +182,7 @@ const KnowledgeGraphPage = () => {
                 </div>
                 <div>
                   <p className="font-black uppercase text-xs text-gray-500">Difficulty</p>
-                  <p className="font-bold">{'★'.repeat(selectedNode.difficulty)}{'☆'.repeat(5 - selectedNode.difficulty)}</p>
+                  <p className="font-bold">{'★'.repeat(safeDifficulty)}{'☆'.repeat(5 - safeDifficulty)}</p>
                 </div>
                 <div>
                   <p className="font-black uppercase text-xs text-gray-500 mb-1">Key Concepts</p>

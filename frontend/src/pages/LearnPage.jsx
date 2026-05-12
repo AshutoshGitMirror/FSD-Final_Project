@@ -309,7 +309,8 @@ const LearnPage = () => {
       } else {
         updateLatestAiMessage(parsed.reply || 'See thought process below.', finalThoughts);
       }
-    } catch {
+    } catch (err) {
+      console.error('Chat API error:', err);
       updateLatestAiMessage('Error connecting to AI API.');
     } finally {
       setIsLoading(false);

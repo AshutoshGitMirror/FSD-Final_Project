@@ -8,19 +8,35 @@ const SUBJECT_COLORS = ['bg-neo-yellow', 'bg-neo-pink text-white', 'bg-neo-blue'
 const TopicPage = () => {
   const [curriculum, setCurriculum] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const user = getUser();
   const std = user?.std || 10;
   const board = user?.board || 'CBSE';
 
   useEffect(() => {
-    fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`))
-      .then(res => res.json())
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+
+    fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`), { signal: controller.signal })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(data => {
         setCurriculum(data);
-        // Auto-select first subject by default
         if (data.length > 0) setSelectedSubject(data[0].subjectName);
+        setLoading(false);
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        if (err.name === 'AbortError') return;
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [std, board]);
 
   const activeSubject = curriculum.find(s => s.subjectName === selectedSubject);
@@ -91,9 +107,17 @@ const TopicPage = () => {
             ))}
           </div>
         </div>
-      ) : (
+      ) : loading ? (
         <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
           Loading curriculum...
+        </div>
+      ) : error ? (
+        <div className="card-neo bg-red-400 p-10 text-center font-black text-xl uppercase text-white">
+          Error: {error}
+        </div>
+      ) : (
+        <div className="card-neo bg-neo-yellow p-10 text-center font-black text-xl uppercase border-dashed">
+          No curriculum found for Std {std} · {board}
         </div>
       )}
     </div>

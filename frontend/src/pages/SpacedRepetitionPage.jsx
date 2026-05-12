@@ -49,6 +49,7 @@ const SpacedRepetitionPage = () => {
         for (const chapter of (subject.chapters || [])) {
           await authFetch(backendUrl('/api/spaced-repetition/init'), {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               subjectName: subject.subjectName,
               chapterName: chapter.chapterName
@@ -74,6 +75,7 @@ const SpacedRepetitionPage = () => {
     try {
       const res = await authFetch(backendUrl('/api/spaced-repetition/generate-question'), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           concept: item.concept,
           subjectName: item.subjectName,
@@ -96,6 +98,7 @@ const SpacedRepetitionPage = () => {
     try {
       await authFetch(backendUrl('/api/spaced-repetition/review'), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conceptId: activeReview._id, quality })
       });
 

@@ -19,8 +19,8 @@ const SignupPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password, std, board })
       });
-      
-      const data = await response.json();
+
+      const data = response.ok ? await response.json() : await response.text().then(t => ({ error: t }));
       if (!response.ok) {
         setError(data.error || 'Failed to sign up');
       } else {
@@ -28,7 +28,8 @@ const SignupPage = () => {
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
-    } catch {
+    } catch (err) {
+      console.error('Signup error:', err);
       setError('Server error connecting to backend.');
     }
   };

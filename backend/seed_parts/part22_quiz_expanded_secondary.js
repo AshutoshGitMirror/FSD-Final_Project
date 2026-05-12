@@ -87,7 +87,7 @@
     { q: 'The 10th term of the AP 3, 7, 11, 15... is:', options: ['35', '39', '43', '47'], ans: 1 },
     { q: 'The formula for nth term is:', options: ['a + nd', 'a + (n-1)d', 'a × n × d', 'a × (n-1)d'], ans: 1 },
     { q: 'Sum of first n terms: Sₙ = ?', options: ['n/2 × (a + l)', 'n × (a + l)', 'n/2 × d', 'n × a × d'], ans: 0 },
-    { q: 'Is 101 a term in the AP 1, 4, 7, 10...?', options: ['Yes, it\'s the 34th term', 'No', 'Yes, it\'s the 33rd term', 'Yes, it\'s the 35th term'], ans: 0 },
+    { q: 'Is 101 a term in the AP 1, 4, 7, 10...?', options: ['Yes, it\'s the 34th term', 'No', 'Yes, it\'s the 33rd term', 'Yes, it\'s the 35th term'], ans: 1 },
     { q: 'Sum of first 10 natural numbers:', options: ['45', '50', '55', '100'], ans: 2 },
     { q: 'If a = 5, d = 3, n = 20, then the 20th term is:', options: ['57', '60', '62', '65'], ans: 2 }
   ]});

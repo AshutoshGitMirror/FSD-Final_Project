@@ -7,7 +7,16 @@ const normalizeLinkInput = ({ url, title, source } = {}) => {
     throw error;
   }
 
-  const normalizedSource = source === 'shaalaa' ? 'shaalaa' : 'youtube';
+  try {
+    new URL(url);
+  } catch {
+    const error = new Error('Invalid URL format');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const validSources = ['youtube', 'shaalaa'];
+  const normalizedSource = source && validSources.includes(source) ? source : 'youtube';
   const normalizedTitle =
     (title && String(title).trim()) ||
     (normalizedSource === 'youtube' ? 'YouTube Resource' : 'Shaalaa Resource');
@@ -19,12 +28,13 @@ const normalizeLinkInput = ({ url, title, source } = {}) => {
   };
 };
 
-const listLinksForUser = (userId) => (
-  SavedLinks.find({ userId }).sort({ createdAt: -1 })
-);
+const listLinksForUser = async (userId) => {
+  return await SavedLinks.find({ userId }).sort({ createdAt: -1 }).exec();
+};
 
 const createSavedLink = async (userId, payload) => {
   const linkInput = normalizeLinkInput(payload);
+
   const existing = await SavedLinks.findOne({
     userId,
     url: linkInput.url,
