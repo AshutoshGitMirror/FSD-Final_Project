@@ -17,6 +17,13 @@ const registerUser = async ({ fullName, email, password, std, board }) => {
     throw error;
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    const error = new Error('Please provide a valid email address');
+    error.statusCode = 400;
+    throw error;
+  }
+
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     const error = new Error('User already exists with this email');

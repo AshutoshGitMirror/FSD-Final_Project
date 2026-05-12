@@ -4,19 +4,34 @@ import { backendUrl } from '../config/api';
 
 const LeaderboardPage = () => {
   const [leaders, setLeaders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const user = getUser();
   const std = user?.std;
   const board = user?.board;
 
   useEffect(() => {
-    const url = (std && board) 
-      ? backendUrl(`/api/leaderboard?std=${std}&board=${board}`)
+    setLoading(true);
+    setError(null);
+    const url = (std && board)
+      ? backendUrl(`/api/leaderboard?std=${encodeURIComponent(std)}&board=${encodeURIComponent(board)}`)
       : backendUrl('/api/leaderboard');
 
     fetch(url)
-      .then(res => res.json())
-      .then(data => setLeaders(data))
-      .catch(() => setLeaders([]));
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setLeaders(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Leaderboard fetch error:', err);
+        setError(err.message);
+        setLeaders([]);
+        setLoading(false);
+      });
   }, [std, board]);
 
   return (
@@ -31,7 +46,17 @@ const LeaderboardPage = () => {
       </div>
 
       <div className="space-y-4">
-        {leaders.length === 0 && (
+        {loading && (
+          <div className="card-neo border-dashed p-10 text-center font-bold uppercase">
+            Loading leaderboard...
+          </div>
+        )}
+        {error && (
+          <div className="card-neo bg-red-400 text-white p-10 text-center font-bold uppercase">
+            Error: {error}
+          </div>
+        )}
+        {!loading && !error && leaders.length === 0 && (
           <div className="card-neo border-dashed p-10 text-center text-gray-400 font-bold uppercase">
             No leaderboard data yet.
           </div>

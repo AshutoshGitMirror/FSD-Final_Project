@@ -44,6 +44,10 @@
     height: 28px;
     transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
       scale(1.4);
+
+    @media (prefers-reduced-motion: reduce) {
+      transform: scale(1.4);
+    }
   }
 
   .vite {
@@ -53,6 +57,10 @@
     width: auto;
     transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
       scale(0.8);
+
+    @media (prefers-reduced-motion: reduce) {
+      transform: scale(0.8);
+    }
   }
 }
 

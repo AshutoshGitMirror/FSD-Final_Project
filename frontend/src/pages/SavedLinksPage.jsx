@@ -4,12 +4,27 @@ import { backendUrl } from '../config/api';
 
 const SavedLinksPage = () => {
   const [links, setLinks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     authFetch(backendUrl('/api/links'))
-      .then(res => res.json())
-      .then(data => setLinks(Array.isArray(data) ? data : []))
-      .catch(() => setLinks([]));
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setLinks(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load links:', err);
+        setError(err.message);
+        setLinks([]);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -20,7 +35,17 @@ const SavedLinksPage = () => {
       </p>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {links.length === 0 && (
+        {loading && (
+          <div className="card-neo border-dashed p-10 col-span-2 text-center font-bold uppercase">
+            Loading saved links...
+          </div>
+        )}
+        {error && (
+          <div className="card-neo bg-red-400 text-white p-10 col-span-2 text-center font-bold uppercase">
+            Error: {error}
+          </div>
+        )}
+        {!loading && !error && links.length === 0 && (
           <div className="card-neo border-dashed p-10 col-span-2 text-center text-gray-400 font-bold uppercase">
             No Links Saved Yet. Talk to the AI to fetch and save some!
           </div>
