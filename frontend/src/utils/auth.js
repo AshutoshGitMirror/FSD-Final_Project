@@ -1,3 +1,5 @@
+import { authApiFetch } from '../services/apiClient';
+
 // Helper to get token from localStorage
 export const getToken = () => localStorage.getItem('token');
 
@@ -19,14 +21,4 @@ export const getUser = () => {
 };
 
 // Authenticated fetch — automatically adds Bearer token header
-export const authFetch = (url, options = {}) => {
-  const token = getToken();
-  return fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {})
-    }
-  });
-};
+export const authFetch = authApiFetch;

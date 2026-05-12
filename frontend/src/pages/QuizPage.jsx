@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { authFetch, getUser } from '../utils/auth';
+import { authFetch } from '../utils/auth';
+import { backendUrl } from '../config/api';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
-  const user = getUser();
   
   const [quizBank, setQuizBank] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ const QuizPage = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/quiz/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`);
+        const res = await fetch(backendUrl(`/api/quiz/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`));
         const data = await res.json();
         if (data.questions) {
           setQuizBank(data.questions);
@@ -52,16 +52,15 @@ const QuizPage = () => {
   useEffect(() => {
     if (finished || isLocked || loading || quizBank.length === 0) return;
 
-    if (timeLeft <= 0) {
-      handleNext();
-      return;
-    }
-
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
+      if (timeLeft <= 0) {
+        handleNext();
+        return;
+      }
       setTimeLeft(prev => prev - 1);
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearTimeout(timer);
   }, [timeLeft, finished, isLocked, handleNext, loading, quizBank.length]);
 
   // Persistence Effect
@@ -69,7 +68,7 @@ const QuizPage = () => {
     if (finished && quizBank.length > 0) {
       const saveResult = async () => {
         try {
-          await authFetch('http://localhost:5000/api/progress', {
+          await authFetch(backendUrl('/api/progress'), {
             method: 'POST',
             body: JSON.stringify({
               subjectName: subject,
@@ -83,7 +82,7 @@ const QuizPage = () => {
 
           // Auto-initialize spaced repetition for this chapter
           try {
-            await authFetch('http://localhost:5000/api/spaced-repetition/init', {
+            await authFetch(backendUrl('/api/spaced-repetition/init'), {
               method: 'POST',
               body: JSON.stringify({
                 subjectName: subject,

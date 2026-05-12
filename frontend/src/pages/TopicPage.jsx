@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getUser } from '../utils/auth';
+import { backendUrl } from '../config/api';
 
 const SUBJECT_COLORS = ['bg-neo-yellow', 'bg-neo-pink text-white', 'bg-neo-blue', 'bg-gray-800 text-white'];
 
@@ -12,7 +13,7 @@ const TopicPage = () => {
   const board = user?.board || 'CBSE';
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/curriculum?std=${std}&board=${board}`)
+    fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`))
       .then(res => res.json())
       .then(data => {
         setCurriculum(data);

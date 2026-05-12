@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, Cell
 } from 'recharts';
 import { getUser, authFetch } from '../utils/auth';
+import { backendUrl } from '../config/api';
 
 const BAR_COLORS = ['#FF66A1', '#A2D2FF', '#FFD500', '#1a1a1a'];
 
@@ -30,14 +31,17 @@ const ProgressPage = () => {
 
   useEffect(() => {
     Promise.all([
-      authFetch('http://localhost:5000/api/progress').then(r => r.json()),
-      fetch(`http://localhost:5000/api/curriculum?std=${std}&board=${board}`).then(r => r.json())
+      authFetch(backendUrl('/api/progress')).then(r => r.ok ? r.json() : []),
+      fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`)).then(r => r.ok ? r.json() : [])
     ])
       .then(([progressData, curriculumData]) => {
-        setProgress(progressData);
-        setCurriculum(curriculumData);
-        if (progressData.length > 0) {
-          const best = progressData.reduce((a, b) =>
+        const safeProgress = Array.isArray(progressData) ? progressData : [];
+        const safeCurriculum = Array.isArray(curriculumData) ? curriculumData : [];
+        setProgress(safeProgress);
+        setCurriculum(safeCurriculum);
+        const validScores = safeProgress.filter(p => p.totalQuestions > 0);
+        if (validScores.length > 0) {
+          const best = validScores.reduce((a, b) =>
             (a.quizScore / a.totalQuestions) > (b.quizScore / b.totalQuestions) ? a : b
           );
           const pct = Math.round((best.quizScore / best.totalQuestions) * 100);
@@ -69,7 +73,7 @@ const ProgressPage = () => {
     
     const totalChapters = subj.chapters.length;
     const avg = attempted.length > 0
-      ? Math.round(attempted.reduce((s, p) => s + (p.quizScore / p.totalQuestions) * 100, 0) / attempted.length)
+      ? Math.round(attempted.reduce((s, p) => s + (p.totalQuestions > 0 ? (p.quizScore / p.totalQuestions) * 100 : 0), 0) / attempted.length)
       : 0;
     return {
       name: subj.subjectName,

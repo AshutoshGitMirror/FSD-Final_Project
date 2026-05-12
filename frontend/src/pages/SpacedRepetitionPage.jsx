@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUser, authFetch } from '../utils/auth';
 import ReviewCard from '../components/ReviewCard';
+import { backendUrl } from '../config/api';
 
 
 const SpacedRepetitionPage = () => {
@@ -14,33 +15,39 @@ const SpacedRepetitionPage = () => {
   const [initializing, setInitializing] = useState(false);
 
   // Load due items and stats
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [due, s] = await Promise.all([
-        authFetch('http://localhost:5000/api/spaced-repetition/due').then(r => r.json()),
-        authFetch('http://localhost:5000/api/spaced-repetition/stats').then(r => r.json())
+        authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.json()),
+        authFetch(backendUrl('/api/spaced-repetition/stats')).then(r => r.json())
       ]);
       setDueData(due);
       setStats(s);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   // Initialize SR concepts from the user's curriculum
   const initializeAllConcepts = async () => {
     setInitializing(true);
     try {
       // Fetch curriculum for this user's std/board
-      const currRes = await authFetch(`http://localhost:5000/api/curriculum?std=${user?.std}&board=${user?.board}`);
+      const currRes = await authFetch(backendUrl(`/api/curriculum?std=${user?.std}&board=${user?.board}`));
       const curriculum = await currRes.json();
 
       // Init SR for every subject/chapter combo
       for (const subject of curriculum) {
         for (const chapter of (subject.chapters || [])) {
-          await authFetch('http://localhost:5000/api/spaced-repetition/init', {
+          await authFetch(backendUrl('/api/spaced-repetition/init'), {
             method: 'POST',
             body: JSON.stringify({
               subjectName: subject.subjectName,
@@ -65,7 +72,7 @@ const SpacedRepetitionPage = () => {
     setLoadingQuestion(true);
 
     try {
-      const res = await authFetch('http://localhost:5000/api/spaced-repetition/generate-question', {
+      const res = await authFetch(backendUrl('/api/spaced-repetition/generate-question'), {
         method: 'POST',
         body: JSON.stringify({
           concept: item.concept,
@@ -87,15 +94,15 @@ const SpacedRepetitionPage = () => {
     if (!activeReview) return;
 
     try {
-      await authFetch('http://localhost:5000/api/spaced-repetition/review', {
+      await authFetch(backendUrl('/api/spaced-repetition/review'), {
         method: 'POST',
         body: JSON.stringify({ conceptId: activeReview._id, quality })
       });
 
       // Refresh data
       const [due, s] = await Promise.all([
-        authFetch('http://localhost:5000/api/spaced-repetition/due').then(r => r.json()),
-        authFetch('http://localhost:5000/api/spaced-repetition/stats').then(r => r.json())
+        authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.json()),
+        authFetch(backendUrl('/api/spaced-repetition/stats')).then(r => r.json())
       ]);
       setDueData(due);
       setStats(s);

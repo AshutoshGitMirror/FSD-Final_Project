@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUser, authFetch } from '../utils/auth';
 import ConceptMapCanvas from '../components/ConceptMapCanvas';
+import { backendUrl } from '../config/api';
 
 const KnowledgeGraphPage = () => {
   const user = getUser();
@@ -20,7 +21,7 @@ const KnowledgeGraphPage = () => {
 
   // Load available subjects
   useEffect(() => {
-    fetch(`http://localhost:5000/api/knowledge-graph/subjects?std=${std}&board=${board}`)
+    fetch(backendUrl(`/api/knowledge-graph/subjects?std=${std}&board=${board}`))
       .then(r => r.json())
       .then(data => {
         setSubjects(data);
@@ -35,14 +36,16 @@ const KnowledgeGraphPage = () => {
     if (!selectedSubject) return;
 
     Promise.all([
-      fetch(`http://localhost:5000/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`).then(r => r.json()),
-      authFetch('http://localhost:5000/api/progress').then(r => r.json())
+      fetch(backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(selectedSubject)}`))
+        .then(r => r.ok ? r.json() : { nodes: [] }),
+      authFetch(backendUrl('/api/progress'))
+        .then(r => r.ok ? r.json() : [])
     ]).then(([graph, progress]) => {
       setGraphData(graph);
 
       // Build progress map: chapterName -> best score %
       const pMap = {};
-      progress.forEach(p => {
+      (Array.isArray(progress) ? progress : []).forEach(p => {
         if (p.subjectName === selectedSubject) {
           const pct = p.totalQuestions > 0 ? Math.round((p.quizScore / p.totalQuestions) * 100) : 0;
           if (!pMap[p.chapterName] || pct > pMap[p.chapterName]) {
@@ -60,7 +63,7 @@ const KnowledgeGraphPage = () => {
   const runGapAnalysis = async () => {
     setLoadingGaps(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/knowledge-graph/gaps/${user?.userId}?subject=${encodeURIComponent(selectedSubject)}`);
+      const res = await authFetch(backendUrl(`/api/knowledge-graph/gaps/${user?.userId}?subject=${encodeURIComponent(selectedSubject)}`));
       const data = await res.json();
       setGapAnalysis(data);
     } catch (err) {

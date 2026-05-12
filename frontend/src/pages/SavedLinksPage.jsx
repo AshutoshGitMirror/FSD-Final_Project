@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { authFetch } from '../utils/auth';
+import { backendUrl } from '../config/api';
 
 const SavedLinksPage = () => {
   const [links, setLinks] = useState([]);
 
   useEffect(() => {
-    authFetch('http://localhost:5000/api/links')
+    authFetch(backendUrl('/api/links'))
       .then(res => res.json())
       .then(data => setLinks(Array.isArray(data) ? data : []))
       .catch(() => setLinks([]));

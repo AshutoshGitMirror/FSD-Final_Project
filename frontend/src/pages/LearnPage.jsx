@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getUser } from '../utils/auth';
+import { backendUrl, linksBackendUrl } from '../config/api';
 
 const LearnPage = () => {
   const { subject, chapter } = useParams();
@@ -29,27 +30,27 @@ const LearnPage = () => {
     setInput('');
     
     // Background query for images from python backend
-    fetch(`http://localhost:8080/imglinks?query=${encodeURIComponent(`${subject} ${chapter} ${currentInput}`)}`)
+    fetch(linksBackendUrl(`/imglinks?query=${encodeURIComponent(`${subject} ${chapter} ${currentInput}`)}`))
       .then(res => res.json())
       .then(data => { if(data.images) setImages(data.images); })
       .catch(console.error);
 
     // If external links toggle is ON
     if (showLinks) {
-       fetch(`http://localhost:8080/ytlinks?std=${std}&query=${encodeURIComponent(currentInput)}`)
+       fetch(linksBackendUrl(`/ytlinks?std=${std}&query=${encodeURIComponent(currentInput)}`))
         .then(res => res.json())
         .then(data => { if(data.videos) setExtraLinks(prev => [...prev, ...data.videos.map(v => ({ type: 'yt', url: v }))]); });
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
+      const response = await fetch(backendUrl('/api/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: currentInput, isThinking, subject, chapter })
       });
       const data = await response.json();
       setMessages(prev => [...prev, { role: 'ai', text: data.reply || data.error }]);
-    } catch (err) {
+    } catch {
       setMessages(prev => [...prev, { role: 'ai', text: 'Error connecting to Gemini API.' }]);
     }
   };

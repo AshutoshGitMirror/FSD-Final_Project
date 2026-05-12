@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { backendUrl } from '../config/api';
 
 const SignupPage = () => {
   const [std, setStd] = useState(7);
@@ -13,7 +14,7 @@ const SignupPage = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(backendUrl('/api/auth/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fullName, email, password, std, board })
@@ -27,7 +28,7 @@ const SignupPage = () => {
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
-    } catch (err) {
+    } catch {
       setError('Server error connecting to backend.');
     }
   };

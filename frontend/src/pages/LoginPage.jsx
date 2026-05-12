@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { backendUrl } from '../config/api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(backendUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -24,7 +25,7 @@ const LoginPage = () => {
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
-    } catch (err) {
+    } catch {
       setError('Server error connecting to backend.');
     }
   };
@@ -110,7 +111,7 @@ const LoginPage = () => {
       </main>
 
       <footer className="py-6 text-center text-xs font-bold uppercase tracking-wider">
-        © 2024 AI TUTOR ACADEMY • MADE FOR CREATORS
+        © {new Date().getFullYear()} AI TUTOR ACADEMY • MADE FOR CREATORS
       </footer>
     </div>
   );
