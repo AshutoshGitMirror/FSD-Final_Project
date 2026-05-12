@@ -3,6 +3,7 @@ const router = express.Router();
 const Progress = require('../models/Progress');
 const Leaderboard = require('../models/Leaderboard');
 const authMiddleware = require('../middleware/auth');
+const { updateAfterQuiz } = require('../services/performanceService');
 
 // All progress routes require valid JWT
 router.use(authMiddleware);
@@ -43,14 +44,22 @@ router.post('/', async (req, res) => {
     );
     const totalChaptersCompleted = uniqueChapters.size;
 
-    // 3. Update or Create Leaderboard entry
+    // 3. Update adaptive performance level (Star Level)
+    let perfUpdate = null;
+    try {
+      perfUpdate = await updateAfterQuiz(userId, subjectName, quizScore, totalQuestions);
+    } catch (perfErr) {
+      console.warn('Performance level update skipped:', perfErr.message);
+    }
+
+    // 4. Update or Create Leaderboard entry
     await Leaderboard.findOneAndUpdate(
       { userId },
       { averageScore, totalChaptersCompleted },
       { upsert: true, returnDocument: 'after' }
     );
 
-    res.status(201).json(entry);
+    res.status(201).json({ ...entry.toObject(), performance: perfUpdate });
   } catch (err) {
     console.error('Progress/Leaderboard Update Error:', err);
     res.status(500).json({ error: 'Failed to save progress or update leaderboard' });

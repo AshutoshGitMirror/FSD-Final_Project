@@ -18,6 +18,7 @@ const QuizPage = () => {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [perfUpdate, setPerfUpdate] = useState(null);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
   useEffect(() => {
@@ -77,7 +78,7 @@ const QuizPage = () => {
       }
       const saveResult = async () => {
         try {
-          await authFetch(backendUrl('/api/progress'), {
+          const res = await authFetch(backendUrl('/api/progress'), {
             method: 'POST',
             body: JSON.stringify({
               subjectName: subject,
@@ -87,6 +88,8 @@ const QuizPage = () => {
               isCompleted: true
             })
           });
+          const data = await res.json();
+          if (data.performance) setPerfUpdate(data.performance);
           console.log('Progress saved successfully');
 
           // Auto-initialize spaced repetition for this chapter
@@ -155,10 +158,20 @@ const QuizPage = () => {
           <span className="text-8xl block mb-4 pt-6 animate-bounce">{emoji}</span>
           <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Quiz Complete!</h1>
           <p className="font-bold text-lg text-gray-600 mb-6">{message}</p>
-          <div className="card-bub-solid bg-gray-50 p-6 mb-8 inline-block mx-auto">
+          <div className="card-bub-solid bg-gray-50 p-6 mb-4 inline-block mx-auto">
             <span className="text-5xl font-black">{score}</span>
             <span className="text-2xl font-black text-gray-400">/{quizBank.length}</span>
           </div>
+
+          {perfUpdate && (
+            <div className={`mb-6 p-4 rounded-2xl font-bold text-sm ${perfUpdate.leveledUp ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white animate-bounce' : 'bg-gray-100'}`}>
+              {perfUpdate.leveledUp ? (
+                <span>🎉 Level Up! You're now <strong>{perfUpdate.starName}</strong> (⭐ {perfUpdate.starLevel}/5) in {subject}!</span>
+              ) : (
+                <span>{perfUpdate.starName} ⭐ {perfUpdate.starLevel}/5 · Avg: {perfUpdate.averageScore}%</span>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-3 justify-center">
             <Link to="/dashboard/progress">

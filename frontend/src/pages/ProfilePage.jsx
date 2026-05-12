@@ -1,16 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
 
 const ProfilePage = () => {
   const user = getUser();
+  const [starLevels, setStarLevels] = useState([]);
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
   const [exportData, setExportData] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
+
+  useEffect(() => {
+    authFetch(backendUrl('/api/performance'))
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setStarLevels(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
   const [deleteError, setDeleteError] = useState('');
 
   const handleExport = async () => {
@@ -83,6 +91,26 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {starLevels.length > 0 && (
+        <div className="card-bub-solid bg-white p-8 mb-8">
+          <h2 className="font-black text-xl uppercase mb-4">⭐ Star Levels</h2>
+          <div className="space-y-4">
+            {starLevels.map((s, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                <div>
+                  <p className="font-black text-lg">{s.subjectName}</p>
+                  <p className="text-sm text-gray-500">{s.totalQuizzes} quizzes completed</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-black text-xl">{s.starName}</p>
+                  <p className="text-xs text-gray-400">Avg: {s.averageScore}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card-bub-solid bg-green-50 p-8 mb-8">
         <h2 className="font-black text-xl uppercase mb-2">📥 Download My Data</h2>

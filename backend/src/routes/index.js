@@ -13,7 +13,8 @@ const routeRegistry = [
   ['/api/pdf', require('./pdf')],
   ['/api/video', require('./video')],
   ['/api/ethics', require('./ethics')],
-  ['/api/teacher', require('./teacher')]
+  ['/api/teacher', require('./teacher')],
+  ['/api/performance', require('./performance')]
 ];
 
 const registerRoutes = (app) => {

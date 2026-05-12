@@ -358,6 +358,21 @@ router.post('/', async (req, res) => {
       systemContext += `\n\nHere are relevant textbook excerpts to help answer:\n${ragContext.context}\n\nCite these sources when relevant.`;
     }
 
+    if (subject && req.headers.authorization) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+        if (decoded.userId) {
+          const { getAdaptivePrompt } = require('../services/performanceService');
+          const { getLevel } = require('../services/performanceService');
+          const level = await getLevel(decoded.userId, subject);
+          systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
+        }
+      } catch {
+        // Not authenticated — continue without adaptation
+      }
+    }
+
     let lastGeminiError = '';
     let lastOllamaError = '';
 
