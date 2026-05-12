@@ -94,6 +94,7 @@ const LearnPage = () => {
   const [images, setImages] = useState([]);
   const [extraLinks, setExtraLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbacks, setFeedbacks] = useState({});
   const bottomRef = useRef(null);
 
   const persistLinks = async (linksArray, source) => {
@@ -176,7 +177,7 @@ const LearnPage = () => {
         .catch(console.error);
     }
 
-    const updateLatestAiMessage = (text, thoughts) => {
+    const updateLatestAiMessage = (text, thoughts, confidence) => {
       setMessages(prev => {
         const next = [...prev];
         for (let i = next.length - 1; i >= 0; i--) {
@@ -185,6 +186,7 @@ const LearnPage = () => {
               ...next[i],
               text,
               thoughts: thoughts ?? next[i].thoughts,
+              confidence: confidence ?? next[i].confidence,
               isPlaceholder: false
             };
             break;
@@ -227,7 +229,7 @@ const LearnPage = () => {
         const parsed = splitThoughtAndReply(data.reply || '');
         const mergedThoughts = data.thoughts ?? parsed.thoughts;
         const finalReply = parsed.reply || (mergedThoughts ? 'See thought process below.' : '');
-        updateLatestAiMessage(finalReply, mergedThoughts);
+        updateLatestAiMessage(finalReply, mergedThoughts, data.confidence);
         return;
       }
 
@@ -317,6 +319,20 @@ const LearnPage = () => {
     }
   };
 
+  const handleFeedback = async (messageId, rating, confidence) => {
+    if (feedbacks[messageId]) return;
+    setFeedbacks(prev => ({ ...prev, [messageId]: rating }));
+    try {
+      await authFetch(backendUrl('/api/feedback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, rating, confidence })
+      });
+    } catch (err) {
+      console.error('Feedback error:', err);
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-80px)] p-8 gap-8">
       {/* Visual / Links Sidebar */}
@@ -385,6 +401,29 @@ const LearnPage = () => {
                     msg.text
                   )}
                 </div>
+                {msg.role === 'ai' && !msg.isPlaceholder && (
+                  <div className="flex items-center gap-2 border-t-2 border-gray-300 pt-2 mt-1">
+                    {msg.confidence != null && (
+                      <span className={`text-xs font-black px-2 py-0.5 border-2 border-black ${msg.confidence >= 80 ? 'bg-green-300' : msg.confidence >= 50 ? 'bg-yellow-300' : 'bg-red-300'}`}>
+                        {msg.confidence}% confident
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleFeedback(`msg-${i}`, 1, msg.confidence)}
+                      className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-green-200 transition-colors ${feedbacks[`msg-${i}`] === 1 ? 'bg-green-400' : 'bg-white'}`}
+                      title="Helpful"
+                    >
+                      👍
+                    </button>
+                    <button
+                      onClick={() => handleFeedback(`msg-${i}`, -1, msg.confidence)}
+                      className={`text-sm px-2 py-1 border-2 border-black font-bold hover:bg-red-200 transition-colors ${feedbacks[`msg-${i}`] === -1 ? 'bg-red-400' : 'bg-white'}`}
+                      title="Not helpful"
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

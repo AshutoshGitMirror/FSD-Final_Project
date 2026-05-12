@@ -347,7 +347,7 @@ router.post('/', async (req, res) => {
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(k => k);
 
-    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
+    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
     if (isThinking) {
       systemContext += `Think carefully before providing the final student-facing answer. `;
     }
@@ -383,11 +383,13 @@ router.post('/', async (req, res) => {
         return res.end();
       }
 
+      const ollamaConfidence = ollama.reply && ollama.reply.length > 50 ? 70 : 50;
       return res.json({
         reply: ollama.reply,
         thoughts: ollama.thoughts,
         provider: 'ollama',
-        model: ollama.model
+        model: ollama.model,
+        confidence: ollamaConfidence
       });
     } catch (ollamaError) {
       lastOllamaError = ollamaError.message || 'Ollama request failed';
@@ -439,7 +441,8 @@ router.post('/', async (req, res) => {
         } else {
           finalReply = response.text || "";
         }
-        return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined });
+        const geminiConfidence = finalReply && finalReply.length > 50 ? 85 : 70;
+        return res.json({ reply: finalReply, thoughts: thoughtsSummary.trim() || undefined, confidence: geminiConfidence });
       } catch (newSdkError) {
         try {
           const { GoogleGenerativeAI } = require("@google/generative-ai");
