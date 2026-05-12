@@ -9,6 +9,8 @@ import LeaderboardPage from './LeaderboardPage';
 import KnowledgeGraphPage from './KnowledgeGraphPage';
 import SpacedRepetitionPage from './SpacedRepetitionPage';
 import FeynmanPage from './FeynmanPage';
+import TeacherDashboard from './TeacherDashboard';
+import ProfilePage from './ProfilePage';
 import { getUser } from '../utils/auth';
 
 // ── Profile Modal ──────────────────────────────────────────────
@@ -88,12 +90,15 @@ const DashboardExtended = () => {
           <Link to="/dashboard/progress"     className={getLinkClass('/progress',     'bg-neo-pink text-white')}>📈 Progress</Link>
           <Link to="/dashboard/saved-links"  className={getLinkClass('/saved-links',  'bg-neo-yellow')}>🔗 Saved Links</Link>
           <Link to="/dashboard/leaderboard"  className={getLinkClass('/leaderboard',  'bg-gray-800 text-white')}>🏆 Leaderboard</Link>
+          {(user?.role === 'teacher' || user?.role === 'admin') && (
+            <Link to="/dashboard/teacher"    className={getLinkClass('/teacher', 'bg-red-400 text-white')}>🏫 Teacher Dashboard</Link>
+          )}
         </nav>
 
         {/* Profile Button at bottom */}
         <div className="p-6 border-t-4 border-black">
-          <button
-            onClick={() => setShowProfile(true)}
+          <Link
+            to="/dashboard/profile"
             className="w-full flex items-center gap-4 border-4 border-black p-4 bg-neo-bg hover:bg-neo-yellow hover:shadow-neo transition-all active:translate-y-1 active:translate-x-1"
           >
             <div className="w-10 h-10 rounded-full border-4 border-black bg-neo-pink text-white font-black flex items-center justify-center text-lg flex-shrink-0">
@@ -103,7 +108,7 @@ const DashboardExtended = () => {
               <p className="font-black uppercase text-sm leading-none truncate">{user?.fullName || 'Scholar'}</p>
               <p className="text-xs font-bold text-gray-500 mt-1">Std {user?.std} · {user?.board}</p>
             </div>
-          </button>
+          </Link>
         </div>
       </aside>
 
@@ -120,6 +125,8 @@ const DashboardExtended = () => {
           <Route path="/concept-map"                element={<KnowledgeGraphPage />} />
           <Route path="/review"                     element={<SpacedRepetitionPage />} />
           <Route path="/feynman"                    element={<FeynmanPage />} />
+          <Route path="/teacher"                    element={<TeacherDashboard />} />
+          <Route path="/profile"                    element={<ProfilePage />} />
         </Routes>
       </main>
 

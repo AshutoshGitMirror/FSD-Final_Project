@@ -11,7 +11,9 @@ const routeRegistry = [
   ['/api/feynman', require('./feynman')],
   ['/api/feedback', require('./feedback')],
   ['/api/pdf', require('./pdf')],
-  ['/api/video', require('./video')]
+  ['/api/video', require('./video')],
+  ['/api/ethics', require('./ethics')],
+  ['/api/teacher', require('./teacher')]
 ];
 
 const registerRoutes = (app) => {
