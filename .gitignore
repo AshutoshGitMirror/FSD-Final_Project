@@ -6,3 +6,8 @@
 backend/.env
 frontend/.env
 LinksBackend/.env
+.codex
+.codex/
+clone/
+scratch/
+*.tar.gz

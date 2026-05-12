@@ -17,14 +17,13 @@ const ConceptMapCanvas = ({ nodes = [], progressMap = {}, onNodeClick, weakChapt
   useEffect(() => {
     if (!nodes.length || !svgRef.current) return;
 
-    renderGraph(d3, nodes, progressMap, onNodeClick, weakChapters, svgRef.current);
+    const svgElement = svgRef.current;
+    renderGraph(d3, nodes, progressMap, onNodeClick, weakChapters, svgElement);
 
     return () => {
-      if (svgRef.current) {
-        svgRef.current.innerHTML = '';
-      }
+      svgElement.innerHTML = '';
     };
-  }, [nodes, progressMap, weakChapters]);
+  }, [nodes, progressMap, onNodeClick, weakChapters]);
 
   return (
     <div className="w-full h-full relative">

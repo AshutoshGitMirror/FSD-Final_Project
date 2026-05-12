@@ -28,7 +28,7 @@ const SignupPage = () => {
         localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
-    } catch (err) {
+    } catch {
       setError('Server error connecting to backend.');
     }
   };

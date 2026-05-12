@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUser, authFetch } from '../utils/auth';
 import ReviewCard from '../components/ReviewCard';
 import { backendUrl } from '../config/api';
@@ -15,7 +15,7 @@ const SpacedRepetitionPage = () => {
   const [initializing, setInitializing] = useState(false);
 
   // Load due items and stats
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [due, s] = await Promise.all([
         authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.json()),
@@ -26,9 +26,15 @@ const SpacedRepetitionPage = () => {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   // Initialize SR concepts from the user's curriculum
   const initializeAllConcepts = async () => {
