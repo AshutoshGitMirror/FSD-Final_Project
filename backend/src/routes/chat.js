@@ -358,18 +358,19 @@ router.post('/', async (req, res) => {
       systemContext += `\n\nHere are relevant textbook excerpts to help answer:\n${ragContext.context}\n\nCite these sources when relevant.`;
     }
 
-    if (subject && req.headers.authorization) {
+    if (subject && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       try {
         const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET);
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) throw new Error('Empty token');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
         if (decoded.userId) {
-          const { getAdaptivePrompt } = require('../services/performanceService');
-          const { getLevel } = require('../services/performanceService');
+          const { getAdaptivePrompt, getLevel } = require('../services/performanceService');
           const level = await getLevel(decoded.userId, subject);
           systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
         }
       } catch (adaptErr) {
-        console.debug('Adaptive level skipped (expected if unauthenticated):', adaptErr.message);
+        console.debug('Adaptive level skipped:', adaptErr.message);
       }
     }
 

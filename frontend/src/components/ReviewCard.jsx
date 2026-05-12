@@ -33,7 +33,7 @@ const ReviewCard = ({ concept, chapter, subject, questionData, onRate, loading }
   if (loading) {
     return (
       <div className="card-bub-solid bg-white p-8 text-center">
-        <div className="w-12 h-12  border-t-violet-400 rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-violet-400 rounded-full animate-spin mx-auto mb-4"></div>
         <p className="font-black uppercase text-sm text-gray-500">Generating review question...</p>
       </div>
     );

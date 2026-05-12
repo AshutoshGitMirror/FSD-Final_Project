@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
     const { std, subject, chapter, concept } = req.query;
     const query = {};
     if (std) query.std = Number(std);
-    const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const esc = (s) => String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     if (subject) query.subjectName = { $regex: new RegExp(`^${esc(subject)}$`, 'i') };
     if (chapter) query.chapterName = { $regex: new RegExp(`^${esc(chapter)}$`, 'i') };
     if (concept) query.conceptName = { $regex: esc(concept), $options: 'i' };

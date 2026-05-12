@@ -96,7 +96,7 @@ const KnowledgeGraphPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center">
-          <div className="w-16 h-16  border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
           <h2 className="text-2xl font-black uppercase">Loading Knowledge Graph...</h2>
         </div>
       </div>

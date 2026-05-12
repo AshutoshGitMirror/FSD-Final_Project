@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
@@ -19,6 +19,7 @@ const QuizPage = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [perfUpdate, setPerfUpdate] = useState(null);
+  const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
   useEffect(() => {
@@ -67,7 +68,8 @@ const QuizPage = () => {
 
   // Persistence Effect
   useEffect(() => {
-    if (finished && quizBank.length > 0) {
+    if (finished && quizBank.length > 0 && !hasSavedRef.current) {
+      hasSavedRef.current = true;
       const pct = score / quizBank.length;
       if (pct >= 0.5) {
         confetti({ particleCount: pct >= 0.9 ? 200 : 80, spread: 120, origin: { y: 0.6 } });
@@ -88,9 +90,9 @@ const QuizPage = () => {
               isCompleted: true
             })
           });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           if (data.performance) setPerfUpdate(data.performance);
-          console.log('Progress saved successfully');
 
           // Auto-initialize spaced repetition for this chapter
           try {
@@ -134,7 +136,7 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center">
-          <div className="w-16 h-16  border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-violet-400 rounded-full animate-spin mb-4 mx-auto"></div>
           <h2 className="text-2xl font-black uppercase tracking-tighter">Preparing your quiz challenge! 🧠</h2>
         </div>
       </div>

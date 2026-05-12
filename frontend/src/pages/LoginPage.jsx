@@ -65,7 +65,7 @@ const LoginPage = () => {
           <div className="flex gap-1 text-2xl">⭐⭐⭐</div>
         </div>
         
-        <div className="card-bub-solid w-full max-w-md bg-white p-10 z-10 mx-auto transform hover:-translate-y-1 hover: transition-transform duration-200">
+        <div className="card-bub-solid w-full max-w-md bg-white p-10 z-10 mx-auto transform hover:-translate-y-1 hover:scale-105 transition-transform duration-200">
           <div className="text-center mb-10 relative">
             <span className="absolute -top-12 -right-8 text-6xl transform rotate-12 ">⭐</span>
             <h1 className="text-4xl font-black mb-2 uppercase tracking-tight">Welcome Back,<br/>Scholar!</h1>

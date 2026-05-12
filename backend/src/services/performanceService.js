@@ -8,56 +8,72 @@ const STAR_NAMES = {
   5: '👑 Genius'
 };
 
-function calculateStarLevel(averageScore, totalQuizzes, currentLevel) {
-  if (totalQuizzes < 2) return { level: 1, changed: false };
+function calculateStarLevel(averageScore, currentLevel) {
+  let raw = 1;
+  if (averageScore >= 90) raw = 5;
+  else if (averageScore >= 75) raw = 4;
+  else if (averageScore >= 55) raw = 3;
+  else if (averageScore >= 35) raw = 2;
 
-  let newLevel = 1;
-  if (averageScore >= 90) newLevel = 5;
-  else if (averageScore >= 75) newLevel = 4;
-  else if (averageScore >= 55) newLevel = 3;
-  else if (averageScore >= 35) newLevel = 2;
-  else newLevel = 1;
-
-  if (newLevel === currentLevel) return { level: currentLevel, changed: false };
-  return { level: newLevel, changed: true };
+  // Hysteresis: prevent oscillation at boundaries
+  if (raw > currentLevel) return { level: raw, changed: raw > currentLevel };
+  if (raw < currentLevel) {
+    const diff = currentLevel - raw;
+    if (diff >= 2) return { level: raw, changed: true };
+    return { level: currentLevel, changed: false };
+  }
+  return { level: currentLevel, changed: false };
 }
 
 async function updateAfterQuiz(userId, subjectName, score, totalQuestions) {
   const pct = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
-  let perf = await PerformanceLevel.findOne({ userId, subjectName });
-  if (!perf) {
-    perf = await PerformanceLevel.create({ userId, subjectName });
-  }
+  // Atomic upsert: $inc totalQuizzes, recompute average via $set
+  const perf = await PerformanceLevel.findOneAndUpdate(
+    { userId, subjectName },
+    {
+      $inc: { totalQuizzes: 1 },
+      $setOnInsert: {
+        starLevel: 1,
+        confidence: 0.5,
+        averageScore: pct
+      }
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
 
+  const newTotal = perf.totalQuizzes;
+  const newAvg = Math.round(((perf.averageScore * (newTotal - 1)) + pct) / newTotal);
   const oldLevel = perf.starLevel;
-  const newTotal = perf.totalQuizzes + 1;
-  const newAvg = Math.round(((perf.averageScore * perf.totalQuizzes) + pct) / newTotal);
+  const result = calculateStarLevel(newAvg, oldLevel);
 
-  perf.totalQuizzes = newTotal;
-  perf.averageScore = newAvg;
-  perf.confidence = Math.min(1, perf.confidence + 0.05);
+  const updateFields = { averageScore: newAvg, confidence: Math.min(1, perf.confidence + 0.05) };
 
-  const result = calculateStarLevel(newAvg, newTotal, oldLevel);
   if (result.changed) {
-    perf.starLevel = result.level;
-    perf.levelHistory.push({
-      fromLevel: oldLevel,
-      toLevel: result.level,
-      reason: `Average score ${newAvg}% after ${newTotal} quizzes`
-    });
+    updateFields.starLevel = result.level;
+    updateFields.$push = {
+      levelHistory: {
+        fromLevel: oldLevel,
+        toLevel: result.level,
+        reason: `Average ${newAvg}% after ${newTotal} quizzes`
+      }
+    };
   }
 
-  await perf.save();
+  const updated = await PerformanceLevel.findOneAndUpdate(
+    { _id: perf._id },
+    updateFields,
+    { returnDocument: 'after' }
+  );
 
   return {
-    starLevel: perf.starLevel,
-    starName: STAR_NAMES[perf.starLevel] || '🌱 Sprout',
+    starLevel: updated.starLevel,
+    starName: STAR_NAMES[updated.starLevel] || '🌱 Sprout',
     averageScore: newAvg,
     totalQuizzes: newTotal,
     leveledUp: result.changed && result.level > oldLevel,
     oldLevel: result.changed ? oldLevel : undefined,
-    confidence: perf.confidence
+    confidence: updated.confidence
   };
 }
 
@@ -92,7 +108,7 @@ function getAdaptivePrompt(starLevel) {
     return 'This student is at an early learning stage. Use very simple language, short sentences, many real-life examples, and lots of encouragement. Avoid jargon.';
   }
   if (starLevel === 3) {
-    return 'This student is at a intermediate stage. Use clear explanations with some technical terms explained simply. Mix easy and challenging concepts.';
+    return 'This student is at an intermediate stage. Use clear explanations with some technical terms explained simply. Mix easy and challenging concepts.';
   }
   return 'This student is at an advanced stage. Use proper terminology, dive deeper, and challenge them with complex examples. They can handle detailed explanations.';
 }

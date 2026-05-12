@@ -91,7 +91,7 @@ const TeacherDashboard = () => {
           </button>
         </div>
       ) : loading ? (
-        <div className="text-center py-12"><div className="w-12 h-12  border-t-violet-400 rounded-full animate-spin mx-auto"></div></div>
+        <div className="text-center py-12"><div className="w-12 h-12 border-4 border-gray-200 border-t-violet-400 rounded-full animate-spin mx-auto"></div></div>
       ) : flagged.length === 0 ? (
         <div className="card-bub-solid bg-white p-12 text-center">
           <span className="text-5xl block mb-4">✅</span>

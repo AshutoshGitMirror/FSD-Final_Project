@@ -99,7 +99,7 @@ const TopicPage = () => {
             {activeSubject.chapters.map((chapter, cIdx) => (
               <div
                 key={cIdx}
-                className="card-bub-solid bg-white flex flex-col justify-between hover:-translate-y-2 hover: transition-all"
+                className="card-bub-solid bg-white flex flex-col justify-between hover:-translate-y-2 hover:scale-105 transition-all"
               >
                 <div className="p-6">
                   <div className="w-10 h-10  bg-gradient-to-r from-amber-400 to-orange-400 font-black text-lg flex items-center justify-center mb-4 ">

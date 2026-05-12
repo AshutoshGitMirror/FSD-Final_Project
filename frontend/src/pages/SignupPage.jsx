@@ -113,7 +113,7 @@ const SignupPage = () => {
             )}
 
             {/* Step 1: Info */}
-            <div className="card-bub-solid p-8 bg-white space-y-6 relative hover: transition-shadow">
+            <div className="card-bub-solid p-8 bg-white space-y-6 relative hover:scale-105 transition-shadow">
               <h2 className="text-2xl font-black uppercase mb-4 flex items-center gap-3">
                 <span className="bg-gradient-to-r from-pink-500 to-rose-500 text-white w-8 h-8 flex items-center justify-center border border-gray-200">1</span> 
                 Who are you?
@@ -144,7 +144,7 @@ const SignupPage = () => {
             </div>
 
             {/* Step 2: Class */}
-            <div className="card-bub-solid p-8 bg-white relative hover: transition-shadow">
+            <div className="card-bub-solid p-8 bg-white relative hover:scale-105 transition-shadow">
               <h2 className="text-2xl font-black uppercase mb-6 flex items-center gap-3">
                 <span className="bg-gradient-to-r from-blue-400 to-cyan-400 text-white w-8 h-8 flex items-center justify-center border border-gray-200">2</span> 
                 Pick your Class
@@ -166,7 +166,7 @@ const SignupPage = () => {
             </div>
 
             {/* Step 3: Board */}
-            <div className="card-bub-solid p-8 bg-white relative hover: transition-shadow">
+            <div className="card-bub-solid p-8 bg-white relative hover:scale-105 transition-shadow">
               <h2 className="text-2xl font-black uppercase mb-6 flex items-center gap-3">
                 <span className="bg-gradient-to-r from-amber-400 to-orange-400 text-white w-8 h-8 flex items-center justify-center border border-gray-200">3</span> 
                 Choose your Board
