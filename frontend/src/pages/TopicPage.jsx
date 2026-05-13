@@ -100,20 +100,20 @@ const TopicPage = () => {
     : [];
 
   return (
-    <div className="p-8 pb-20">
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-4xl font-black uppercase tracking-tight">Choose Subject</h1>
-        {starLevel && <div className="text-lg font-bold px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full shadow-lg">{STAR_LABELS[starLevel] || '🌱 Sprout'}</div>}
+    <div className="p-4 md:p-8 pb-24 lg:pb-20">
+      <div className="flex items-center justify-between mb-2 gap-3">
+        <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight">Subjects</h1>
+        {starLevel && <div className="text-sm md:text-lg font-bold px-3 md:px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 shadow-lg shrink-0">{STAR_LABELS[starLevel] || '🌱 Sprout'}</div>}
       </div>
-      <p className="font-bold text-gray-600 mb-8">Std {std} · {board}</p>
+      <p className="font-bold text-gray-600 mb-4 md:mb-8 text-sm md:text-base">Std {std} · {board}</p>
 
-      {/* Subject Selector */}
-      <div className="flex flex-wrap gap-4 mb-8 pb-6 border-b border-gray-200">
+      {/* Subject Selector — horizontal scroll on mobile */}
+      <div className="flex gap-2 md:gap-4 mb-6 md:mb-8 pb-4 md:pb-6 border-b border-gray-200 overflow-x-auto scrollbar-hide -mx-4 md:mx-0 px-4 md:px-0">
         {curriculum.map((subject, idx) => {
           const isActive = subject.subjectName === selectedSubject;
           return (
             <button key={idx} onClick={() => setSelectedSubject(subject.subjectName)}
-              className={`font-bold text-base px-6 py-3 rounded-full transition-all ${isActive ? SUBJECT_COLORS[idx % SUBJECT_COLORS.length] + ' text-white shadow-lg scale-105' : 'bg-white hover:bg-gray-100 shadow-sm border border-gray-200'}`}>
+              className={`font-bold text-sm md:text-base px-4 md:px-6 py-3 min-h-[44px] shrink-0 transition-all ${isActive ? SUBJECT_COLORS[idx % SUBJECT_COLORS.length] + ' text-white shadow-lg scale-105' : 'bg-white hover:bg-gray-100 shadow-sm border-2 border-gray-200'}`}>
               {subject.subjectName}
             </button>
           );
@@ -124,8 +124,8 @@ const TopicPage = () => {
       {activeSubject ? (
         <div>
           <div className="flex items-center gap-4 mb-6">
-            <h2 className="text-2xl font-black">{activeSubject.subjectName}</h2>
-            <span className="text-sm font-bold text-gray-400">
+            <h2 className="text-xl md:text-2xl font-black">{activeSubject.subjectName}</h2>
+            <span className="text-xs md:text-sm font-bold text-gray-400">
               {sortedChapters.filter(c => c.status !== 'locked').length}/{sortedChapters.length} available
             </span>
           </div>
@@ -136,32 +136,32 @@ const TopicPage = () => {
               <p className="font-bold">Loading your personalized curriculum...</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {sortedChapters.map((chapter, cIdx) => {
                 const isLocked = chapter.status === 'locked';
                 return (
                   <div key={cIdx}
-                    className={`rounded-2xl border-2 flex flex-col justify-between transition-all ${getChapterCardStyle(chapter.status)} ${!isLocked ? 'hover:-translate-y-1 hover:shadow-lg' : ''}`}>
-                    <div className="p-5">
+                    className={`rounded-2xl border-2 flex flex-col justify-between transition-all ${getChapterCardStyle(chapter.status)} ${!isLocked ? 'active:scale-[0.98] md:hover:-translate-y-1 md:hover:shadow-lg' : ''}`}>
+                    <div className="p-4 md:p-5">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-lg font-black opacity-60">#{cIdx + 1}</span>
+                        <span className="text-base md:text-lg font-black opacity-60">#{cIdx + 1}</span>
                         {getStatusBadge(chapter.status, chapter.minStarLevel)}
                       </div>
-                      <h3 className="font-bold text-lg mb-1 leading-snug">{chapter.chapterName}</h3>
-                      {chapter.description && <p className="text-sm text-gray-500">{chapter.description}</p>}
+                      <h3 className="font-bold text-base md:text-lg mb-1 leading-snug">{chapter.chapterName}</h3>
+                      {chapter.description && <p className="text-xs md:text-sm text-gray-500">{chapter.description}</p>}
                     </div>
                     {!isLocked ? (
                       <div className="flex border-t border-gray-200">
                         <button onClick={() => handleOpenPdf(chapter.chapterName)} disabled={pdfLoading}
-                          className="flex-1 text-center font-bold py-3 text-xs hover:bg-green-100 border-r border-gray-200 transition-colors">📄 PDF</button>
+                          className="flex-1 text-center font-bold py-3 text-xs min-h-[44px] hover:bg-green-100 border-r border-gray-200 transition-colors">📄 PDF</button>
                         <Link to={`/dashboard/learn/${encodeURIComponent(selectedSubject)}/${encodeURIComponent(chapter.chapterName)}`}
-                          className="flex-1 text-center font-bold py-3 text-xs hover:bg-blue-100 border-r border-gray-200 transition-colors">🤖 Learn</Link>
+                          className="flex-1 text-center font-bold py-3 text-xs min-h-[44px] flex items-center justify-center hover:bg-blue-100 border-r border-gray-200 transition-colors">🤖 Learn</Link>
                         <Link to={`/dashboard/quiz/${encodeURIComponent(selectedSubject)}/${encodeURIComponent(chapter.chapterName)}`}
-                          className="flex-1 text-center font-bold py-3 text-xs hover:bg-pink-100 transition-colors">⚡ Quiz</Link>
+                          className="flex-1 text-center font-bold py-3 text-xs min-h-[44px] flex items-center justify-center hover:bg-pink-100 transition-colors">⚡ Quiz</Link>
                       </div>
                     ) : (
                       <div className="p-4 text-center">
-                        <span className="text-sm font-bold text-gray-400">Master earlier topics to unlock! ⭐{chapter.minStarLevel} needed</span>
+                        <span className="text-xs md:text-sm font-bold text-gray-400">Master earlier topics to unlock! ⭐{chapter.minStarLevel} needed</span>
                       </div>
                     )}
                   </div>
@@ -175,7 +175,7 @@ const TopicPage = () => {
       ) : error ? (
         <div className="bg-red-100 rounded-2xl p-10 text-center text-red-700">
           <p className="font-black text-xl mb-4">Error: {error}</p>
-          <button onClick={() => window.location.reload()} className="bg-white px-6 py-3 font-bold rounded-full shadow hover:shadow-lg">Retry</button>
+          <button onClick={() => window.location.reload()} className="bg-white px-6 py-3 min-h-[44px] font-bold shadow hover:shadow-lg">Retry</button>
         </div>
       ) : (
         <div className="card-bub-solid p-10 text-center font-black text-xl">No curriculum found for Std {std} · {board}</div>
@@ -188,7 +188,7 @@ const TopicPage = () => {
               <span className="text-5xl block mb-4">📄</span>
               <h3 className="font-black text-xl mb-2">PDF Not Available</h3>
               <p className="font-bold text-gray-600 mb-4">No NCERT PDF mapped for this chapter.</p>
-              <button onClick={() => setShowPdf(false)} className="btn-bub-primary px-6 py-3">Close</button>
+              <button onClick={() => setShowPdf(false)} className="btn-bub-primary px-6 py-3 min-h-[44px]">Close</button>
             </div>
           </div>
         ) : (

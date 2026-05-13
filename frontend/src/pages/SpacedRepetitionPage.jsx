@@ -117,12 +117,12 @@ const SpacedRepetitionPage = () => {
   };
 
   return (
-    <div className="p-8 pb-24">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tight mb-2">🔄 Review Hub</h1>
-          <p className="font-bold text-gray-500 text-sm">Spaced Repetition — AI-powered recall for lasting memory</p>
+          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-2">🔄 Review Hub</h1>
+          <p className="font-bold text-gray-500 text-xs md:text-sm">Spaced Repetition — AI-powered recall for lasting memory</p>
         </div>
 
         {/* Streak Badge */}

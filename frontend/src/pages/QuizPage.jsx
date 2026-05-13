@@ -200,30 +200,34 @@ const QuizPage = () => {
     );
   }
 
+  const timerEmoji = timeLeft > 20 ? '😊' : timeLeft > 10 ? '😅' : '🔥';
+
   return (
-    <div className="p-8 max-w-3xl mx-auto mt-12 pb-20">
-      <div className="flex justify-between items-end mb-8 border-b-4 border-black pb-4">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto mt-4 md:mt-12 pb-24 lg:pb-20">
+      <div className="flex justify-between items-end mb-6 md:mb-8 border-b-4 border-black pb-4 gap-3">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tighter">{chapter} Quiz</h1>
-          <div className="flex items-center gap-3 mt-1">
+          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter leading-tight">{chapter} Quiz</h1>
+          <div className="flex items-center gap-2 mt-1">
             <span className="font-bold text-gray-500 uppercase text-xs">{subject}</span>
             <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-            <span className="font-bold text-pink-500 text-xs uppercase">Question {currentQuestion + 1} of {quizBank.length}</span>
+            <span className="font-bold text-pink-500 text-xs uppercase">Q{currentQuestion + 1} of {quizBank.length}</span>
           </div>
         </div>
-        {/* Timer Circle */}
-        <div className={`w-16 h-16  flex items-center justify-center font-black text-xl shadow-lg transition-colors ${timeLeft < 10 ? 'bg-red-400 animate-pulse' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}>
-          {timeLeft}s
+        {/* Child-friendly Timer */}
+        <div className={`min-w-[60px] min-h-[60px] md:min-w-[72px] md:min-h-[72px] flex flex-col items-center justify-center font-black shadow-lg transition-all ${timeLeft <= 10 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white scale-110' : timeLeft <= 20 ? 'bg-gradient-to-r from-amber-400 to-orange-400' : 'bg-gradient-to-r from-blue-400 to-cyan-400'}`}>
+          <span className="text-xl md:text-2xl">{timeLeft}</span>
+          <span className="text-[8px] md:text-[10px] uppercase leading-tight">{timeLeft === 1 ? 'sec' : 'secs'}</span>
+          <span className="text-sm md:text-base">{timerEmoji}</span>
         </div>
       </div>
 
-      <div className="card-bub-solid p-10 relative">
-        <span className="absolute -top-6 -left-6 w-12 h-12 bg-black text-white font-black text-2xl flex items-center justify-center rounded-full border-4 border-white shadow-[0_0_0_4px_#000]">
+      <div className="card-bub-solid p-4 md:p-10 relative">
+        <span className="absolute -top-5 md:-top-6 -left-5 md:-left-6 w-10 h-10 md:w-12 md:h-12 bg-black text-white font-black text-xl md:text-2xl flex items-center justify-center border-4 border-white shadow-[0_0_0_4px_#000]">
           ?
         </span>
-        <h2 className="text-2xl font-bold mb-10 leading-snug">{currentQ.q}</h2>
+        <h2 className="text-lg md:text-2xl font-bold mb-6 md:mb-10 leading-snug pt-2 md:pt-0">{currentQ.q}</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {currentQ.options.map((opt, i) => {
             let statusClass = "bg-white";
             if (showFeedback) {
@@ -237,17 +241,17 @@ const QuizPage = () => {
                 key={i}
                 onClick={() => handleAnswer(i)}
                 disabled={isLocked}
-                className={`card-bub-solid w-full text-left p-6 font-bold text-lg transition-all ${statusClass} ${!isLocked && 'hover:bg-gray-100 hover:-translate-y-1 hover:translate-x-1 hover:shadow-lg'}`}
+                className={`card-bub-solid w-full text-left p-4 md:p-6 font-bold text-base md:text-lg transition-all min-h-[56px] ${statusClass} ${!isLocked && 'active:scale-[0.98] md:hover:bg-gray-100 md:hover:-translate-y-1 md:hover:shadow-lg'}`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <span className={`inline-block border border-gray-200 w-8 h-8 text-center leading-7 mr-4 font-black ${showFeedback && i === currentQ.ans ? 'bg-white text-black' : 'bg-gradient-to-r from-blue-400 to-cyan-400'}`}>
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <span className={`inline-block border-2 border-gray-200 w-8 h-8 md:w-10 md:h-10 text-center leading-7 md:leading-9 font-black text-sm md:text-base shrink-0 ${showFeedback && i === currentQ.ans ? 'bg-white text-black' : 'bg-gradient-to-r from-blue-400 to-cyan-400'}`}>
                       {['A', 'B', 'C', 'D'][i]}
                     </span>
-                    {opt}
+                    <span className="text-sm md:text-lg">{opt}</span>
                   </div>
-                  {showFeedback && i === currentQ.ans && <span>✔️</span>}
-                  {showFeedback && i === selectedIdx && i !== currentQ.ans && <span>❌</span>}
+                  {showFeedback && i === currentQ.ans && <span className="text-xl md:text-2xl">✔️</span>}
+                  {showFeedback && i === selectedIdx && i !== currentQ.ans && <span className="text-xl md:text-2xl">❌</span>}
                 </div>
               </button>
             );
@@ -256,11 +260,11 @@ const QuizPage = () => {
       </div>
 
       {/* Progress Indicator */}
-      <div className="mt-8 flex gap-2">
+      <div className="mt-6 md:mt-8 flex gap-1.5 md:gap-2">
         {quizBank.map((_, i) => (
           <div
             key={i}
-            className={`flex-1 h-3 border border-gray-200 ${i < currentQuestion ? 'bg-gradient-to-r from-pink-500 to-rose-500' : i === currentQuestion ? 'bg-gradient-to-r from-amber-400 to-orange-400 animate-pulse' : 'bg-gray-200'}`}
+            className={`flex-1 h-2 md:h-3 border border-gray-200 ${i < currentQuestion ? 'bg-gradient-to-r from-pink-500 to-rose-500' : i === currentQuestion ? 'bg-gradient-to-r from-amber-400 to-orange-400 animate-pulse' : 'bg-gray-200'}`}
           />
         ))}
       </div>

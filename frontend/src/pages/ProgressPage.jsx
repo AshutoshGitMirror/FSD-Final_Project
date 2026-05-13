@@ -86,9 +86,9 @@ const ProgressPage = () => {
   });
 
   return (
-    <div className="p-8 pb-24 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-black uppercase mb-2 tracking-tight">Progress Insights</h1>
-      <p className="font-bold text-gray-500 mb-8 uppercase text-sm">{fullName}'s Journey</p>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl md:text-4xl font-black uppercase mb-2 tracking-tight">Progress Insights</h1>
+      <p className="font-bold text-gray-500 mb-6 md:mb-8 uppercase text-xs md:text-sm">{fullName}'s Journey</p>
 
       {/* ── AI Insight ─────────────────────────────────── */}
       <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-8 mb-10 relative transform -rotate-1">
