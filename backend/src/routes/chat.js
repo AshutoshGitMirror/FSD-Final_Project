@@ -339,7 +339,7 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
 
 router.post('/', async (req, res) => {
   try {
-    const { prompt, isThinking, subject, chapter } = req.body;
+    const { prompt, isThinking, subject, chapter, std: bodyStd, board: bodyBoard } = req.body;
     const wantsStream = req.get('x-chat-stream') === '1';
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required." });
@@ -348,12 +348,27 @@ router.post('/', async (req, res) => {
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(k => k);
 
+    let std = bodyStd;
+    let board = bodyBoard || 'CBSE';
+    if (!std && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        if (decoded?.std) std = decoded.std;
+        if (decoded?.board) board = decoded.board;
+      } catch {
+        // ignore token parse issues for unauthenticated chats
+      }
+    }
+    if (!std) std = 10;
+
     let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
     if (isThinking) {
       systemContext += `Think carefully before providing the final student-facing answer. `;
     }
 
-    const ragContext = await ragService.buildContext({ std, board: 'CBSE', subject, chapter });
+    const ragContext = await ragService.buildContext({ std, board, subject, chapter });
     if (ragContext) {
       systemContext += `\n\nHere is the relevant NCERT textbook content to help answer:\n${ragContext.context}\n\nRefer to this NCERT content when answering.`;
     }

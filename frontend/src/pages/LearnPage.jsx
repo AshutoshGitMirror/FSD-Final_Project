@@ -275,7 +275,7 @@ const LearnPage = () => {
       const endpoint = isTeaching ? '/api/feynman/chat' : '/api/chat';
       const body = isTeaching
         ? JSON.stringify({ concept: chapter, messages: [...messages, userMessage] })
-        : JSON.stringify({ prompt: currentInput, isThinking, subject, chapter });
+        : JSON.stringify({ prompt: currentInput, isThinking, subject, chapter, std, board });
 
       const response = await authFetch(backendUrl(endpoint), {
         method: 'POST',
