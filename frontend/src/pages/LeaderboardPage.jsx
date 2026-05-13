@@ -98,9 +98,9 @@ const LeaderboardPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="text-right border-l-4 border-black pl-8 hidden sm:block bg-white text-black py-2 px-6 ">
-                <span className="block text-xs font-black uppercase text-gray-500">Overall Avg</span>
-                <span className="text-4xl font-black">{entry.averageScore}%</span>
+              <div className="text-right bg-white text-black py-1 px-3 sm:px-6 sm:border-l-2 sm:border-gray-200">
+                <span className="text-xs font-black uppercase text-gray-500 hidden sm:block">Overall Avg</span>
+                <span className="sm:text-4xl font-black">{entry.averageScore}%</span>
               </div>
             </div>
           );

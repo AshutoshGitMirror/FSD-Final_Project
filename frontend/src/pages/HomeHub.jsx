@@ -70,7 +70,7 @@ const HomeHub = () => {
 
   const bestSubject = performance.reduce((best, p) => p.starLevel > (best?.starLevel || 0) ? p : best, null);
   const totalCompleted = progress.filter(p => p.isCompleted).length;
-  const totalChapters = curriculum.reduce((sum, s) => sum + (s.chapters?.length || 0), 0);
+  const totalChapters = curriculum.reduce((sum, s) => sum + (s?.chapters?.length || 0), 0);
 
   if (loading) {
     return (
