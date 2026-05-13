@@ -107,14 +107,16 @@ async function getAllLevels(userId) {
   }));
 }
 
-function getAdaptivePrompt(starLevel) {
+function getAdaptivePrompt(starLevel, std) {
+  const grade = Number(std) || 10;
+  const gradeGuard = `Stay strictly within Grade ${grade} NCERT scope. Avoid university-level topics, set theory axioms, and abstract constructions not in the syllabus.`;
   if (starLevel <= 2) {
-    return 'This student is at an early learning stage. Use very simple language, short sentences, many real-life examples, and lots of encouragement. Avoid jargon.';
+    return `This student is at an early learning stage. Use very simple language, short sentences, many real-life examples, and lots of encouragement. Avoid jargon. ${gradeGuard}`;
   }
   if (starLevel === 3) {
-    return 'This student is at an intermediate stage. Use clear explanations with some technical terms explained simply. Mix easy and challenging concepts.';
+    return `This student is at an intermediate stage. Use clear explanations with some technical terms explained simply. Mix easy and challenging concepts. ${gradeGuard}`;
   }
-  return 'This student is at an advanced stage. Use proper terminology, dive deeper, and challenge them with complex examples. They can handle detailed explanations.';
+  return `This student is at an advanced stage for their grade. Use proper terminology, but keep everything grade-appropriate and syllabus-bound. ${gradeGuard}`;
 }
 
 module.exports = { updateAfterQuiz, getLevel, getAllLevels, getAdaptivePrompt, STAR_NAMES };

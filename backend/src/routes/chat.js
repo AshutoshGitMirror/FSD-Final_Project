@@ -363,7 +363,7 @@ router.post('/', async (req, res) => {
     }
     if (!std) std = 10;
 
-    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
+    let systemContext = `You are a helpful AI Tutor for Grade ${std}. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student at this grade level. Stay within NCERT scope, avoid advanced/university topics, and use age-appropriate examples. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
     if (isThinking) {
       systemContext += `Think carefully before providing the final student-facing answer. `;
     }
@@ -382,7 +382,7 @@ router.post('/', async (req, res) => {
         if (decoded.userId) {
           const { getAdaptivePrompt, getLevel } = require('../services/performanceService');
           const level = await getLevel(decoded.userId, subject);
-          systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
+          systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel, decoded.std)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
         }
       } catch (adaptErr) {
         console.debug('Adaptive level skipped:', adaptErr.message);
