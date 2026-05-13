@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
@@ -19,6 +19,17 @@ const TopicPage = () => {
   const [pdfInfo, setPdfInfo] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [showPdf, setShowPdf] = useState(false);
+  const fetchKeyRef = useRef(0);
+
+  const retryFetch = () => {
+    fetchKeyRef.current += 1;
+    setLoading(true);
+    setError(null);
+    fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`))
+      .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
+      .then(data => { setCurriculum(data); if (data.length > 0) setSelectedSubject(data[0].subjectName); setLoading(false); })
+      .catch(err => { setError(err.message); setLoading(false); });
+  };
   const user = getUser();
   const std = user?.std || 10;
   const board = user?.board || 'CBSE';
@@ -175,7 +186,7 @@ const TopicPage = () => {
       ) : error ? (
         <div className="bg-red-100 rounded-2xl p-10 text-center text-red-700">
           <p className="font-black text-xl mb-4">Error: {error}</p>
-          <button onClick={() => window.location.reload()} className="bg-white px-6 py-3 min-h-[44px] font-bold shadow hover:shadow-lg">Retry</button>
+          <button onClick={retryFetch} className="bg-white px-6 py-3 min-h-[44px] font-bold rounded-full shadow hover:shadow-lg transition-all">🔄 Retry</button>
         </div>
       ) : (
         <div className="card-bub-solid p-10 text-center font-black text-xl">No curriculum found for Std {std} · {board}</div>
