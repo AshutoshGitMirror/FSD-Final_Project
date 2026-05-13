@@ -9,142 +9,74 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/aitutor';
 const TMP_DIR = '/tmp/ncert_pdfs';
 const NCERT_BASE = 'https://ncert.nic.in/textbook/pdf';
 const PAD = (n) => String(n).padStart(2, '0');
-const CONCURRENCY = 3;
 
-// All verified NCERT book codes from Puppeteer scan + manual verification
-// Format: { std, subject, code, maxCh, ch1 (some start at 2) }
+// TRUTH: Match seed_pdfs.js exactly
 const BOOKS = [
-  // ══ CLASS 1 ══
-  { std:1, subject:'English', code:'aemr1', maxCh:10 },
-  { std:1, subject:'Mathematics', code:'aejm1', maxCh:10 },
-  // ══ CLASS 2 ══
-  { std:2, subject:'English', code:'bemr1', maxCh:10 },
-  { std:2, subject:'Mathematics', code:'bejm1', maxCh:10 },
-  // ══ CLASS 3 ══
-  { std:3, subject:'English', code:'cesa1', maxCh:10 },
-  { std:3, subject:'Mathematics', code:'cemm1', maxCh:10 },
-  { std:3, subject:'Hindi', code:'chve1', maxCh:10 },
-  // ══ CLASS 4 ══
-  { std:4, subject:'English', code:'desa1', maxCh:10 },
-  { std:4, subject:'Mathematics', code:'demm1', maxCh:10 },
-  { std:4, subject:'EVS', code:'deap1', maxCh:27 },
-  // ══ CLASS 5 ══
-  { std:5, subject:'Mathematics', code:'eemh1', maxCh:14 },
-  { std:5, subject:'English', code:'eeen1', maxCh:10 },
-  { std:5, subject:'Hindi', code:'ehhn1', maxCh:10 },
-  { std:5, subject:'EVS', code:'eeap1', maxCh:10 },
-  // ══ CLASS 6 ══
-  { std:6, subject:'Mathematics', code:'fegp1', maxCh:10 },
-  { std:6, subject:'Science', code:'fecu1', maxCh:12 },
-  { std:6, subject:'English', code:'fepr1', maxCh:5 },
-  { std:6, subject:'Hindi', code:'fhml1', maxCh:10 },
-  // ══ CLASS 7 ══
-  { std:7, subject:'Mathematics', code:'gegp1', maxCh:8 },
-  { std:7, subject:'Science', code:'gecu1', maxCh:12 },
-  { std:7, subject:'English', code:'gepr1', maxCh:5 },
-  { std:7, subject:'Hindi', code:'ghml1', maxCh:10 },
-  { std:7, subject:'Social Studies', code:'gees1', maxCh:10 },
-  { std:7, subject:'Social Studies', code:'gees2', maxCh:8 },
-  // ══ CLASS 8 ══
-  { std:8, subject:'Mathematics', code:'hegp1', maxCh:7 },
-  { std:8, subject:'Science', code:'hecu1', maxCh:13 },
-  { std:8, subject:'English', code:'hepr1', maxCh:5 },
-  { std:8, subject:'Hindi', code:'hhml1', maxCh:10 },
-  // ══ CLASS 9 ══
-  { std:9, subject:'Mathematics', code:'iemh1', maxCh:15 },
-  { std:9, subject:'Science', code:'iesc1', maxCh:15 },
-  { std:9, subject:'English', code:'iebe1', maxCh:8 },
-  // ══ CLASS 10 ══
-  { std:10, subject:'Mathematics', code:'jemh1', maxCh:15 },
-  { std:10, subject:'Science', code:'jesc1', maxCh:16 },
-  { std:10, subject:'English', code:'jeff1', maxCh:9 },
-  { std:10, subject:'Hindi', code:'jhks1', maxCh:10 },
-  { std:10, subject:'Social Studies', code:'jess1', maxCh:7 },
+  { std:1, subject:'English', code:'aemr1', names:['My Family and Me','Picture Time','Friends Together','The Cap-seller and the Monkeys','A Farm','My Home','The Park','Funny Bunny','A Greeting Card','A Visit to the Doctor'] },
+  { std:1, subject:'Mathematics', code:'aejm1', names:['Finding the Furry Cat','What is Long?','Mango Treat','Making 10','How Many?','Vegetable Farm','Linas Family','How Much Can We Hold?','Patterns','How Many Times?'] },
+  { std:2, subject:'English', code:'bemr1', names:['My Bicycle','Picture Reading','It Is Fun','Seeing without Seeing','Come Back Soon','Between Home and School','This is My Town','A Show of Clouds','My Name','The Crow'] },
+  { std:2, subject:'Mathematics', code:'bejm1', names:['Fun with Numbers','Counting in Groups','How Much?','Tens and Ones','Patterns','Footprints','Jugs and Mugs','Multiply Me','Shapes','How Many?'] },
+  { std:3, subject:'English', code:'cesa1', names:['The Magic Garden','Nina and the Baby Sparrows','Little by Little','The Enormous Turnip','Sea Song','A Little Fish Story','The Yellow Butterfly','The Ship of the Desert','Good Morning','Bird Talk'] },
+  { std:3, subject:'Mathematics', code:'cemm1', names:['Where to Look From','Fun with Numbers','Give and Take','Long and Short','Shapes and Designs','Fun with Give and Take','Time Goes On','Who is Heavier?','How Many Times?','Play with Patterns'] },
+  { std:4, subject:'English', code:'desa1', names:['Wake Up','Nehas Alarm Clock','Noses','The Little Fir Tree','Run','Nasruddins Aim','Why','Alice in Wonderland','Dont Be Afraid of the Dark','A Watering Rhyme'] },
+  { std:4, subject:'Mathematics', code:'demm1', names:['Building with Bricks','Long and Short','A Trip to Bhopal','Tick Tick Tick','The Way the World Looks','The Junk Seller','Jugs and Mugs','Carts and Wheels','Halves and Quarters','Play with Patterns'] },
+  { std:4, subject:'EVS', code:'deap1', names:['Going to School','Ear to Ear','A Day with Nandu','The Story of Amrita','Anitas Kitchen','OManas Journey','From the Window','Reaching Grandmothers House','Changing Families','Hu Tu Tu Hu Tu Tu','The Valley of Flowers','Changing Times','A Rivers Tale','Basvas Farm','Poet and Farmer','A Busy Month','Nandita in Mumbai','Too Much Water Too Little Water','Abdul in the Garden','Eating Together','Food and Fun','The World in My Home','Pochampalli','Home and Abroad','Spicy Riddles','Defence Officer Wahida','Chuskit Goes to School'] },
+  { std:5, subject:'Mathematics', code:'eemh1', names:['The Fish Tale','Shapes and Angles','How Many Squares?','Parts and Wholes','Does it Look the Same?','Be My Multiple Ill Be Your Factor','Can You See the Pattern?','Mapping Your Way','Boxes and Sketches','Tenths and Hundredths','Area and its Boundary','Smart Charts','Ways to Multiply and Divide','How Big How Heavy'] },
+  { std:6, subject:'Mathematics', code:'fegp1', names:['Knowing Our Numbers','Whole Numbers','Playing with Numbers','Basic Geometrical Ideas','Understanding Elementary Shapes','Integers','Fractions','Decimals','Data Handling','Mensuration'] },
+  { std:6, subject:'Science', code:'fecu1', names:['Food: Where Does It Come From?','Components of Food','Fibre to Fabric','Sorting Materials into Groups','Separation of Substances','Changes Around Us','Getting to Know Plants','Body Movements','The Living Organisms and Their Surroundings','Motion and Measurement of Distances','Light Shadows and Reflections','Electricity and Circuits'] },
+  { std:7, subject:'Mathematics', code:'gegp1', names:['Integers','Fractions','Data Handling','Simple Equations','Lines and Angles','The Triangle and Its Properties','Comparing Quantities','Rational Numbers'] },
+  { std:7, subject:'Science', code:'gecu1', names:['Nutrition in Plants','Nutrition in Animals','Fibre to Fabric','Heat','Acids Bases and Salts','Physical and Chemical Changes','Weather Climate and Adaptations','Winds Storms and Cyclones','Soil','Respiration in Organisms','Transportation in Animals and Plants','Reproduction in Plants'] },
+  { std:8, subject:'Mathematics', code:'hegp1', names:['Rational Numbers','Linear Equations in One Variable','Understanding Quadrilaterals','Data Handling','Squares and Square Roots','Cubes and Cube Roots','Comparing Quantities'] },
+  { std:8, subject:'Science', code:'hecu1', names:['Crop Production and Management','Microorganisms Friend and Foe','Coal and Petroleum','Combustion and Flame','Conservation of Plants and Animals','Reproduction in Animals','Reaching the Age of Adolescence','Force and Pressure','Friction','Sound','Chemical Effects of Electric Current','Some Natural Phenomena','Light'] },
+  { std:9, subject:'Mathematics', code:'iemh1', names:['Number Systems','Polynomials','Coordinate Geometry','Linear Equations in Two Variables','Introduction to Euclids Geometry','Lines and Angles','Triangles','Quadrilaterals','Areas of Parallelograms and Triangles','Circles','Constructions','Herons Formula','Surface Areas and Volumes','Statistics','Probability'] },
+  { std:9, subject:'Science', code:'iesc1', names:['Matter in Our Surroundings','Is Matter Around Us Pure?','Atoms and Molecules','Structure of the Atom','The Fundamental Unit of Life','Tissues','Diversity in Living Organisms','Motion','Force and Laws of Motion','Gravitation','Work and Energy','Sound','Why Do We Fall Ill','Natural Resources','Improvement in Food Resources'] },
+  { std:10, subject:'Mathematics', code:'jemh1', names:['Real Numbers','Polynomials','Pair of Linear Equations in Two Variables','Quadratic Equations','Arithmetic Progressions','Triangles','Coordinate Geometry','Introduction to Trigonometry','Some Applications of Trigonometry','Circles','Areas Related to Circles','Surface Areas and Volumes','Statistics','Probability'] },
+  { std:10, subject:'Science', code:'jesc1', names:['Chemical Reactions and Equations','Acids Bases and Salts','Metals and Non-Metals','Carbon and its Compounds','Life Processes','Control and Coordination','How do Organisms Reproduce?','Heredity and Evolution','Light – Reflection and Refraction','The Human Eye and the Colourful World','Electricity','Magnetic Effects of Electric Current','Our Environment','Sustainable Management of Natural Resources'] },
 ];
 
 async function processChapter(std, subject, code, chNum) {
   const url = `${NCERT_BASE}/${code}${PAD(chNum)}.pdf`;
-  const safeName = `${std}_${subject.replace(/[^a-z0-9]/gi,'')}_ch${chNum}`.replace(/\s+/g,'_');
-  const pdfPath = path.join(TMP_DIR, `${safeName}.pdf`);
-  const txtPath = path.join(TMP_DIR, `${safeName}.txt`);
+  const pdfPath = path.join(TMP_DIR, `${code}${PAD(chNum)}.pdf`);
+  const txtPath = path.join(TMP_DIR, `${code}${PAD(chNum)}.txt`);
 
-  // Download
   try {
-    execSync(`curl -sL --max-time 20 "${url}" -o "${pdfPath}" 2>/dev/null`, { stdio: 'pipe' });
-    if (!fs.existsSync(pdfPath)) return null;
-    const size = fs.statSync(pdfPath).size;
-    if (size < 500) { fs.unlinkSync(pdfPath); return null; }
-  } catch { return null; }
-
-  // Extract text
-  try {
+    execSync(`curl -sL --max-time 30 "${url}" -o "${pdfPath}" 2>/dev/null`, { stdio: 'pipe' });
+    if (!fs.existsSync(pdfPath) || fs.statSync(pdfPath).size < 1000) return null;
     execSync(`pdftotext -layout "${pdfPath}" "${txtPath}" 2>/dev/null`, { stdio: 'pipe' });
     if (!fs.existsSync(txtPath)) return null;
     let content = fs.readFileSync(txtPath, 'utf-8').trim();
-    if (content.length < 100) return null;
-
-    // Remove header/footer noise
     content = content.replace(/^.*?Rationalised 2023-24[\s\S]*?(?=^[A-Z])/m, '').trim();
     content = content.replace(/\n{4,}/g, '\n\n');
-
-    return { content, size: content.length };
+    return content;
   } catch { return null; }
 }
 
 async function main() {
   if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
-
   await mongoose.connect(MONGO_URI);
-  console.log('Connected to MongoDB\n');
-
-  await NcertContent.deleteMany({});
-  console.log('Cleared existing content\n');
-
-  let total = 0;
-  let totalChars = 0;
+  console.log('✅ Connected to MongoDB\n');
 
   for (const book of BOOKS) {
-    console.log(`\n📚 Std ${book.std} ${book.subject} (${book.code}, 1-${book.maxCh})`);
-
-    const batch = [];
-    for (let ch = 1; ch <= book.maxCh; ch++) {
-      batch.push(processChapter(book.std, book.subject, book.code, ch));
+    console.log(`📚 Processing Std ${book.std} ${book.subject}...`);
+    for (let i = 0; i < book.names.length; i++) {
+      const chNum = i + 1;
+      const chapterName = book.names[i];
+      const content = await processChapter(book.std, book.subject, book.code, chNum);
+      if (content) {
+        await NcertContent.findOneAndUpdate(
+          { std: book.std, board: 'CBSE', subjectName: book.subject, chapterName },
+          { content },
+          { upsert: true }
+        );
+        process.stdout.write(`  ✓ ${chapterName} `);
+      } else {
+        process.stdout.write(`  ✗ ${chapterName} `);
+      }
     }
-
-    const results = await Promise.all(batch);
-    let seeded = 0;
-
-    for (let ch = 1; ch <= book.maxCh; ch++) {
-      const result = results[ch - 1];
-      if (!result) continue;
-
-      // Store chapter name from the PDF or use generic
-      const chapterName = `Chapter ${ch}`;
-
-      await NcertContent.findOneAndUpdate(
-        { std: book.std, board: 'CBSE', subjectName: book.subject, chapterName },
-        { content: result.content },
-        { upsert: true, returnDocument: 'after' }
-      );
-      seeded++;
-      total++;
-      totalChars += result.size;
-      process.stdout.write(`  ✓ Ch${ch} (${(result.size/1000).toFixed(0)}K chars) `);
-    }
-
-    if (seeded > 0) console.log(`\n  ✅ ${seeded}/${book.maxCh} chapters`);
-    else console.log(`  ⚠ No chapters found`);
+    console.log('\n');
   }
-
-  // Cleanup
-  try { fs.rmSync(TMP_DIR, { recursive: true, force: true }); } catch {}
-
-  console.log(`\n═══════════════════════════════════════`);
-  console.log(`✅ DONE! ${total} chapters from ${BOOKS.length} books`);
-  console.log(`📊 Total text: ${(totalChars / 1000000).toFixed(1)} MB`);
-  console.log(`═══════════════════════════════════════`);
-
   await mongoose.disconnect();
+  console.log('✅ Re-seeding complete!');
 }
 
 main().catch(err => { console.error(err); process.exit(1); });

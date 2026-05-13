@@ -12,4 +12,4 @@ const NcertContentSchema = new mongoose.Schema({
 
 NcertContentSchema.index({ std: 1, board: 1, subjectName: 1, chapterName: 1 }, { unique: true });
 
-module.exports = mongoose.model('NcertContent', NcertContentSchema);
+module.exports = mongoose.model('NcertContent', NcertContentSchema, 'ncertcontents');
