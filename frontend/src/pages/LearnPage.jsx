@@ -512,7 +512,7 @@ const LearnPage = () => {
                     </div>
                   </blockquote>
                 )}
-                <div className="prose prose-p:my-1 prose-p:text-gray-900 prose-li:my-0 prose-li:text-gray-900 prose-strong:text-gray-900 prose-em:text-gray-900 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-pre:bg-gray-800 prose-pre:text-white max-w-none text-sm md:text-base">
+                <div className="prose prose-p:my-1 prose-p:text-gray-900 prose-li:my-0 prose-li:text-gray-900 prose-strong:text-gray-900 prose-em:text-gray-900 prose-headings:text-gray-900 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-pre:bg-gray-800 prose-pre:text-white max-w-none text-sm md:text-base">
                   {msg.role === 'ai' ? (
                     msg.isPlaceholder ? (
                       <span className="italic text-gray-700">{msg.text}</span>
