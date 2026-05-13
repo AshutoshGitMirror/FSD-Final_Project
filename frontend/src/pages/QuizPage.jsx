@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
+import LevelUpCelebration from '../components/LevelUpCelebration';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
@@ -19,7 +20,7 @@ const QuizPage = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [perfUpdate, setPerfUpdate] = useState(null);
-  const [toasts, setToasts] = useState([]);
+  const [levelUpData, setLevelUpData] = useState(null);
   const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
@@ -92,7 +93,16 @@ const QuizPage = () => {
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
-          if (data.performance) setPerfUpdate(data.performance);
+          if (data.performance) {
+            setPerfUpdate(data.performance);
+            if (data.performance.leveledUp) {
+              setLevelUpData({
+                starName: data.performance.starName,
+                starLevel: data.performance.starLevel,
+                subject
+              });
+            }
+          }
 
           // Auto-initialize spaced repetition for this chapter
           try {

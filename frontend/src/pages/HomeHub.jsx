@@ -13,6 +13,7 @@ const HomeHub = () => {
   const [curriculum, setCurriculum] = useState([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
+  const [gamification, setGamification] = useState(null);
   const [lastChapter, setLastChapter] = useState(null);
   const [greeting, setGreeting] = useState('');
 
@@ -43,10 +44,13 @@ const HomeHub = () => {
       setLoading(false);
     }).catch(() => setLoading(false));
 
-    // Fetch SR streak
-    authFetch(backendUrl('/api/spaced-repetition/stats'))
+    // Fetch gamification data
+    authFetch(backendUrl('/api/gamification/dashboard'))
       .then(r => r.ok ? r.json() : {})
-      .then(data => { if (data.streak) setStreak(data.streak); })
+      .then(data => {
+        if (data.streak) setStreak(data.streak);
+        setGamification(data);
+      })
       .catch(() => {});
   }, [user?.std, user?.board]);
 
@@ -165,8 +169,44 @@ const HomeHub = () => {
         })}
       </div>
 
+      {/* Daily Reward + Achievements */}
+      {gamification && (
+        <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 shadow-sm border border-amber-200">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-bold">🔥 Daily Reward</span>
+              <span className="font-black text-lg">{gamification.streak} day streak</span>
+            </div>
+            {gamification.canClaimDaily ? (
+              <button onClick={async () => {
+                const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
+                if (res.ok) setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
+              }} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold py-3 rounded-full hover:shadow-lg transition-all active:scale-95 animate-pulse">
+                🎁 Claim Daily Reward
+              </button>
+            ) : (
+              <p className="text-sm font-bold text-gray-400 text-center py-3">✅ Claimed today! Come back tomorrow!</p>
+            )}
+          </div>
+          <Link to="/dashboard/achievements" className="bg-gradient-to-br from-violet-50 to-fuchsia-50 rounded-2xl p-5 shadow-sm border border-violet-200 hover:shadow-lg transition-all">
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-bold">🏆 Achievements</span>
+              <span className="font-black text-lg">{gamification.unlockedCount}/{gamification.totalCount}</span>
+            </div>
+            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full" style={{ width: `${(gamification.unlockedCount / gamification.totalCount) * 100}%` }} />
+            </div>
+            {gamification.recentAchievements?.length > 0 && (
+              <p className="text-xs font-bold text-gray-500 mt-2">
+                Latest: {gamification.recentAchievements[0].icon} {gamification.recentAchievements[0].name}
+              </p>
+            )}
+          </Link>
+        </div>
+      )}
+
       {/* Summary Footer */}
-      <div className="mt-8 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-5 text-center">
+      <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-5 text-center">
         <p className="font-bold text-gray-600">
           🎯 {totalCompleted} of {totalChapters} chapters completed
           {totalChapters > 0 && ` · ${Math.round((totalCompleted / totalChapters) * 100)}% overall`}
