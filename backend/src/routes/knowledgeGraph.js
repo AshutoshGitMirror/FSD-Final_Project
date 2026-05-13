@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 
 // ── GET gap analysis for a user ────────────────────────────────
 // Identifies weak prerequisite chains based on quiz scores
-router.get('/gaps/:userId', authMiddleware, async (req, res) => {
+router.get('/gaps', authMiddleware, async (req, res) => {
   try {
     const { subject } = req.query;
     const userId = req.user.userId;
