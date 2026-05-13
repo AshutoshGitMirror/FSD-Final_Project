@@ -17,10 +17,12 @@ const SpacedRepetitionPage = () => {
   // Load due items and stats
   const loadData = useCallback(async () => {
     try {
-      const [due, s] = await Promise.all([
-        authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.json()),
-        authFetch(backendUrl('/api/spaced-repetition/stats')).then(r => r.json())
+      const [dueRes, statsRes] = await Promise.all([
+        authFetch(backendUrl('/api/spaced-repetition/due')),
+        authFetch(backendUrl('/api/spaced-repetition/stats'))
       ]);
+      const due = dueRes.ok ? await dueRes.json() : { items: [], totalDue: 0, bySubject: {} };
+      const s = statsRes.ok ? await statsRes.json() : { streak: 0, subjectStats: {}, totalConcepts: 0 };
       setDueData(due);
       setStats(s);
     } catch (err) {
@@ -49,6 +51,7 @@ const SpacedRepetitionPage = () => {
         for (const chapter of (subject.chapters || [])) {
           await authFetch(backendUrl('/api/spaced-repetition/init'), {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               subjectName: subject.subjectName,
               chapterName: chapter.chapterName
@@ -74,6 +77,7 @@ const SpacedRepetitionPage = () => {
     try {
       const res = await authFetch(backendUrl('/api/spaced-repetition/generate-question'), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           concept: item.concept,
           subjectName: item.subjectName,
@@ -96,6 +100,7 @@ const SpacedRepetitionPage = () => {
     try {
       await authFetch(backendUrl('/api/spaced-repetition/review'), {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conceptId: activeReview._id, quality })
       });
 
@@ -108,23 +113,31 @@ const SpacedRepetitionPage = () => {
       setStats(s);
       setActiveReview(null);
       setQuestionData(null);
+      // Award XP for completing a review
+      try {
+        await authFetch(backendUrl('/api/gamification/check'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'review_complete', metadata: { quality } })
+        });
+      } catch {}
     } catch (err) {
       console.error('Review save error:', err);
     }
   };
 
   return (
-    <div className="p-8 pb-24">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tight mb-2">🔄 Review Hub</h1>
-          <p className="font-bold text-gray-500 text-sm">Spaced Repetition — AI-powered recall for lasting memory</p>
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight mb-2">🧠 Daily Practice</h1>
+          <p className="font-bold text-gray-500 text-xs md:text-sm">Boost your memory — each review earns you <span className="text-amber-600">+10 XP</span>!</p>
         </div>
 
         {/* Streak Badge */}
         {stats && (
-          <div className="card-neo bg-neo-yellow p-4 text-center transform rotate-2">
+          <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-4 text-center transform rotate-2">
             <span className="text-3xl block mb-1">🔥</span>
             <p className="font-black text-2xl">{stats.streak}</p>
             <p className="font-black uppercase text-xs">Day Streak</p>
@@ -136,13 +149,13 @@ const SpacedRepetitionPage = () => {
       <div className="flex gap-2 mb-8 border-b-4 border-black pb-4">
         <button
           onClick={() => setTab('due')}
-          className={`border-4 border-black font-black uppercase px-6 py-3 transition-all ${tab === 'due' ? 'bg-neo-pink text-white shadow-neo -translate-y-0.5' : 'bg-white'}`}
+          className={` font-black uppercase px-6 py-3 transition-all ${tab === 'due' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg -translate-y-0.5' : 'bg-white'}`}
         >
           📋 Due Reviews ({dueData?.totalDue || 0})
         </button>
         <button
           onClick={() => setTab('stats')}
-          className={`border-4 border-black font-black uppercase px-6 py-3 transition-all ${tab === 'stats' ? 'bg-neo-blue shadow-neo -translate-y-0.5' : 'bg-white'}`}
+          className={` font-black uppercase px-6 py-3 transition-all ${tab === 'stats' ? 'bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg -translate-y-0.5' : 'bg-white'}`}
         >
           📊 Mastery Stats
         </button>
@@ -155,7 +168,7 @@ const SpacedRepetitionPage = () => {
             <h2 className="text-xl font-black uppercase">Active Review</h2>
             <button
               onClick={() => { setActiveReview(null); setQuestionData(null); }}
-              className="border-2 border-black px-3 py-1 font-bold text-sm hover:bg-gray-100"
+              className="border border-gray-200 px-3 py-1 font-bold text-sm hover:bg-gray-100"
             >
               ✕ Close
             </button>
@@ -176,32 +189,34 @@ const SpacedRepetitionPage = () => {
         <div>
           {dueData?.totalDue > 0 ? (
             <div>
-              <div className="card-neo bg-neo-yellow p-6 mb-8 transform -rotate-1">
-                <span className="text-4xl mr-3">⏰</span>
-                <span className="font-black text-xl">You have {dueData.totalDue} concept{dueData.totalDue > 1 ? 's' : ''} due for review!</span>
+              <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl p-6 mb-6 text-white shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-4xl mr-3">🧠</span>
+                    <span className="font-black text-xl">You have {dueData.totalDue} concept{dueData.totalDue > 1 ? 's' : ''} to review!</span>
+                    <p className="text-amber-100 text-sm mt-1">Each review earns +10 XP 🔥</p>
+                  </div>
+                  <button onClick={() => { const all = Object.values(dueData.bySubject || {}).flat(); if (all.length > 0) startReview(all[0]); }}
+                    className="bg-white text-amber-700 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all active:scale-95">
+                    ▶ Start Session
+                  </button>
+                </div>
               </div>
 
               {Object.entries(dueData.bySubject || {}).map(([subject, items]) => (
-                <div key={subject} className="mb-8">
-                  <h3 className="font-black text-xl uppercase mb-4 bg-neo-pink text-white px-4 py-2 inline-block border-4 border-black">
-                    {subject}
-                  </h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div key={subject} className="mb-6">
+                  <h3 className="font-bold text-lg mb-3 text-gray-700">{subject}</h3>
+                  <div className="space-y-2">
                     {items.map((item) => {
-                      const urgency = item.interval <= 1 ? 'border-red-500 bg-red-50' : item.interval <= 3 ? 'border-orange-400 bg-orange-50' : 'border-black bg-white';
+                      const urgencyColor = item.interval <= 1 ? 'border-l-red-400 bg-red-50' : item.interval <= 3 ? 'border-l-amber-400 bg-amber-50' : 'border-l-green-400 bg-green-50';
                       return (
-                        <div key={item._id} className={`card-neo ${urgency} p-5 hover:-translate-y-1 transition-all cursor-pointer`} onClick={() => startReview(item)}>
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h4 className="font-black text-base leading-tight">{item.concept}</h4>
-                              <p className="font-bold text-xs text-gray-500 mt-1">{item.chapterName}</p>
+                        <div key={item._id} className={`rounded-xl border border-gray-200 border-l-4 ${urgencyColor} p-4 hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer`} onClick={() => startReview(item)}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-base">{item.concept}</h4>
+                              <p className="text-xs text-gray-500 mt-0.5">{item.chapterName}</p>
                             </div>
-                            <span className="text-2xl">{item.interval <= 1 ? '🔴' : item.interval <= 3 ? '🟡' : '🟢'}</span>
-                          </div>
-                          <div className="flex justify-between items-center border-t-2 border-black pt-2 mt-2">
-                            <span className="text-xs font-bold text-gray-500">Rep: {item.repetitions}</span>
-                            <span className="text-xs font-bold text-gray-500">EF: {item.easeFactor?.toFixed(1)}</span>
-                            <button className="bg-neo-blue border-2 border-black px-3 py-1 font-black text-xs uppercase hover:shadow-neo">
+                            <button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
                               Review →
                             </button>
                           </div>
@@ -213,7 +228,7 @@ const SpacedRepetitionPage = () => {
               ))}
             </div>
           ) : (
-            <div className="card-neo bg-green-100 p-12 text-center max-w-lg mx-auto">
+            <div className="card-bub-solid bg-green-100 p-12 text-center max-w-lg mx-auto">
               <span className="text-6xl block mb-4">{stats?.totalConcepts > 0 ? '🎉' : '🚀'}</span>
               <h3 className="font-black text-2xl uppercase mb-2">
                 {stats?.totalConcepts > 0 ? 'All Caught Up!' : 'Get Started'}
@@ -223,13 +238,13 @@ const SpacedRepetitionPage = () => {
                   ? 'No concepts due for review right now. Great job staying on top of your studies!'
                   : 'Initialize your spaced repetition concepts from your curriculum to start reviewing!'}
               </p>
-              {(!stats || stats.totalConcepts === 0) && (
+              {                (!stats || stats.totalConcepts === 0) && (
                 <button
                   onClick={initializeAllConcepts}
                   disabled={initializing}
-                  className="btn-neo py-4 px-8 text-lg bg-neo-pink text-white hover:bg-pink-600"
+                  className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transition-all active:scale-95"
                 >
-                  {initializing ? '⏳ Initializing...' : '🧠 Initialize My Reviews'}
+                  {initializing ? '⏳ Setting up...' : '🚀 Start Daily Practice'}
                 </button>
               )}
             </div>
@@ -243,17 +258,17 @@ const SpacedRepetitionPage = () => {
 
           {/* Fun Summary Row */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="card-neo bg-green-400 p-5 text-center">
+            <div className="card-bub-solid bg-green-400 p-5 text-center">
               <span className="text-4xl block mb-1">⭐</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.mastered, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Mastered</p>
             </div>
-            <div className="card-neo bg-neo-yellow p-5 text-center">
+            <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-5 text-center">
               <span className="text-4xl block mb-1">📖</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.learning, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Learning</p>
             </div>
-            <div className="card-neo bg-neo-blue p-5 text-center">
+            <div className="card-bub-solid bg-gradient-to-r from-blue-400 to-cyan-400 p-5 text-center">
               <span className="text-4xl block mb-1">🆕</span>
               <p className="font-black text-3xl">{Object.values(stats?.subjectStats || {}).reduce((s, v) => s + v.new, 0)}</p>
               <p className="font-black uppercase text-xs mt-1">Not Started</p>
@@ -267,18 +282,18 @@ const SpacedRepetitionPage = () => {
             const emoji = subject === 'Mathematics' ? '🔢' : subject === 'Science' ? '🔬' : subject === 'English' ? '📝' : subject === 'Hindi' ? '🇮🇳' : subject === 'Social Science' ? '🌍' : '📚';
 
             return (
-              <div key={subject} className="card-neo bg-white p-5">
+              <div key={subject} className="card-bub-solid bg-white p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-black text-lg uppercase flex items-center gap-2">
                     <span className="text-2xl">{emoji}</span> {subject}
                   </h3>
-                  <span className="font-black text-sm bg-neo-bg border-2 border-black px-3 py-1">
+                  <span className="font-black text-sm bg-amber-50 border border-gray-200 px-3 py-1">
                     {s.mastered + s.learning} / {s.total} started
                   </span>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-8 bg-gray-200 border-4 border-black overflow-hidden flex">
+                <div className="w-full h-8 bg-gray-200  overflow-hidden flex">
                   {masteredPct > 0 && (
                     <div
                       className="h-full bg-green-400 flex items-center justify-center font-black text-xs text-white transition-all duration-500"
@@ -308,7 +323,7 @@ const SpacedRepetitionPage = () => {
           })}
 
           {(!stats || stats.totalConcepts === 0) && (
-            <div className="card-neo bg-neo-bg p-12 text-center">
+            <div className="card-bub-solid bg-amber-50 p-12 text-center">
               <span className="text-6xl block mb-4">📚</span>
               <h3 className="font-black text-xl uppercase mb-2">No Data Yet</h3>
               <p className="font-bold text-gray-500">Complete quizzes to start tracking your memory retention!</p>

@@ -2,17 +2,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const signUserToken = (user) => (
-  jwt.sign(
-    { userId: user._id, fullName: user.fullName, std: user.std, board: user.board },
+const signUserToken = (user) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+  return jwt.sign(
+    { userId: user._id, fullName: user.fullName, std: user.std, board: user.board, role: user.role || 'student' },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
-  )
-);
+  );
+};
 
 const registerUser = async ({ fullName, email, password, std, board }) => {
   if (!fullName || !email || !password || !std || !board) {
     const error = new Error('Please provide all required fields');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    const error = new Error('Please provide a valid email address');
     error.statusCode = 400;
     throw error;
   }

@@ -9,4 +9,7 @@ const ProgressSchema = new mongoose.Schema({
   isCompleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
+ProgressSchema.index({ userId: 1 });
+ProgressSchema.index({ userId: 1, subjectName: 1 });
+
 module.exports = mongoose.model('Progress', ProgressSchema);

@@ -18,9 +18,10 @@ const ConceptMapCanvas = ({ nodes = [], progressMap = {}, onNodeClick, weakChapt
     if (!nodes.length || !svgRef.current) return;
 
     const svgElement = svgRef.current;
-    renderGraph(d3, nodes, progressMap, onNodeClick, weakChapters, svgElement);
+    const simulation = renderGraph(d3, nodes, progressMap, onNodeClick, weakChapters, svgElement);
 
     return () => {
+      if (simulation) simulation.stop();
       svgElement.innerHTML = '';
     };
   }, [nodes, progressMap, onNodeClick, weakChapters]);
@@ -145,7 +146,7 @@ function renderGraph(d3, rawNodes, progressMap, onNodeClick, weakChapters, svgEl
 
   // Node circles
   node.append('circle')
-    .attr('r', d => 15 + d.difficulty * 3)
+    .attr('r', d => 15 + (d.difficulty ?? 0) * 3)
     .attr('fill', getNodeColor)
     .attr('stroke', getNodeStroke)
     .attr('stroke-width', d => d.isWeak ? 4 : 3);
@@ -157,7 +158,7 @@ function renderGraph(d3, rawNodes, progressMap, onNodeClick, weakChapters, svgEl
       return name.length > 18 ? name.slice(0, 16) + '…' : name;
     })
     .attr('text-anchor', 'middle')
-    .attr('dy', d => -(20 + d.difficulty * 3))
+    .attr('dy', d => -(20 + (d.difficulty ?? 0) * 3))
     .attr('font-size', '11px')
     .attr('font-weight', '900')
     .attr('fill', '#000')
@@ -182,7 +183,8 @@ function renderGraph(d3, rawNodes, progressMap, onNodeClick, weakChapters, svgEl
   node.append('title').text(d => {
     const status = d.score >= 0 ? `Score: ${d.score}%` : 'Not attempted';
     const prereqs = (d.prerequisites || []).join(', ') || 'None';
-    return `${d.chapterName}\n${status}\nDifficulty: ${'★'.repeat(d.difficulty)}\nPrerequisites: ${prereqs}`;
+    const diff = Math.max(0, Math.min(5, Number(d.difficulty) || 0));
+    return `${d.chapterName}\n${status}\nDifficulty: ${'★'.repeat(diff)}\nPrerequisites: ${prereqs}`;
   });
 
   // Simulation tick
@@ -195,6 +197,8 @@ function renderGraph(d3, rawNodes, progressMap, onNodeClick, weakChapters, svgEl
 
     node.attr('transform', d => `translate(${d.x},${d.y})`);
   });
+
+  return simulation;
 }
 
 export default ConceptMapCanvas;

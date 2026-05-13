@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const ragService = require('../services/ragService');
 
 function extractChunkText(chunk) {
   if (!chunk) return '';
@@ -17,39 +18,6 @@ function extractChunkText(chunk) {
 function writeSse(res, event, payload) {
   res.write(`event: ${event}\n`);
   res.write(`data: ${JSON.stringify(payload)}\n\n`);
-}
-
-function extractOllamaChunkParts(parsed) {
-  if (!parsed || typeof parsed !== 'object') {
-    return { thoughtText: '', replyText: '' };
-  }
-
-  let thoughtText = '';
-  let replyText = '';
-
-  if (typeof parsed.thinking === 'string') {
-    thoughtText += parsed.thinking;
-  }
-  if (parsed.message && typeof parsed.message.thinking === 'string') {
-    thoughtText += parsed.message.thinking;
-  }
-
-  if (typeof parsed.response === 'string') {
-    replyText += parsed.response;
-  }
-  if (parsed.message && typeof parsed.message.content === 'string') {
-    replyText += parsed.message.content;
-  }
-
-  // Some wrappers emit { thinking: true|false, response: "token" }.
-  if (!thoughtText && typeof parsed.thinking === 'boolean' && replyText) {
-    if (parsed.thinking) {
-      thoughtText = replyText;
-      replyText = '';
-    }
-  }
-
-  return { thoughtText, replyText };
 }
 
 async function streamChunksToSse(asyncIterable, res) {
@@ -71,27 +39,179 @@ async function streamChunksToSse(asyncIterable, res) {
 }
 
 function pickOllamaModels(prompt = '', isThinking = false) {
-  const fromEnv = (process.env.OLLAMA_MODELS || '')
-    .split(',')
-    .map((m) => m.trim())
-    .filter(Boolean);
-  if (fromEnv.length > 0) return fromEnv;
-
   if (isThinking) {
+    const thinkingModels = (process.env.OLLAMA_MODELS_THINKING || process.env.OLLAMA_MODELS || '')
+      .split(',')
+      .map((m) => m.trim())
+      .filter(Boolean);
+    if (thinkingModels.length > 0) return thinkingModels;
     return ['deepseek-r1:latest', 'llama3.1:8b', 'gemma3:12b'];
   }
 
+  const defaultModels = (process.env.OLLAMA_MODELS_DEFAULT || process.env.OLLAMA_MODELS || '')
+    .split(',')
+    .map((m) => m.trim())
+    .filter(Boolean);
+  if (defaultModels.length > 0) return defaultModels;
+
   const text = String(prompt).toLowerCase();
   if (/(summari|list|define|solve)/.test(text)) {
-    return ['gemma3:12b', 'llama3.1:8b', 'deepseek-r1:latest'];
+    return ['gemma3:12b', 'llama3.1:8b'];
   }
   if (/(why|how|explain|reason)/.test(text)) {
-    return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+    return ['llama3.1:8b', 'gemma3:12b'];
   }
-  return ['llama3.1:8b', 'gemma3:12b', 'deepseek-r1:latest'];
+  return ['llama3.1:8b', 'gemma3:12b'];
 }
 
-async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
+function extractOllamaStreamParts(parsed) {
+  const typeHint = String(parsed?.type || parsed?.channel || parsed?.event || '').toLowerCase();
+  const phaseHint = String(parsed?.phase || parsed?.stage || parsed?.stream_type || '').toLowerCase();
+  const isThoughtChunk =
+    ['thinking', 'thought', 'reasoning', 'analysis'].includes(typeHint) ||
+    ['thinking', 'thought', 'reasoning', 'analysis'].includes(phaseHint);
+
+  let text = '';
+  if (typeof parsed?.response === 'string') {
+    text = parsed.response;
+  } else if (typeof parsed?.message?.content === 'string') {
+    text = parsed.message.content;
+  } else if (typeof parsed?.content === 'string') {
+    text = parsed.content;
+  } else if (typeof parsed?.text === 'string') {
+    text = parsed.text;
+  }
+
+  let thoughtText = '';
+  if (typeof parsed?.thought === 'string') {
+    thoughtText = parsed.thought;
+  } else if (typeof parsed?.thinking === 'string') {
+    thoughtText = parsed.thinking;
+  } else if (typeof parsed?.reasoning === 'string') {
+    thoughtText = parsed.reasoning;
+  } else if (typeof parsed?.reasoning_content === 'string') {
+    thoughtText = parsed.reasoning_content;
+  } else if (typeof parsed?.thinking_text === 'string') {
+    thoughtText = parsed.thinking_text;
+  } else if (typeof parsed?.think === 'string') {
+    thoughtText = parsed.think;
+  }
+
+  if (!thoughtText && isThoughtChunk && text) {
+    thoughtText = text;
+    text = '';
+  }
+
+  // Some DeepSeek wrappers emit boolean thinking flags with token text in `response`.
+  if (!thoughtText && typeof parsed?.thinking === 'boolean' && text) {
+    if (parsed.thinking) {
+      thoughtText = text;
+      text = '';
+    }
+  }
+
+  return { text, thoughtText };
+}
+
+async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsStream, res }) {
+  const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
+  const chatPath = process.env.OLLAMA_CHAT_PATH || '/chat';
+  const sessionId = `chat-${Date.now()}`;
+  const query = `${systemContext}\n\nStudent: ${prompt}`;
+  const url =
+    `${base}${chatPath}?query=${encodeURIComponent(query)}` +
+    `&session_id=${encodeURIComponent(sessionId)}` +
+    `&deep_research=${isThinking ? 'true' : 'false'}`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/x-ndjson'
+    }
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error(`Ollama /chat HTTP ${response.status}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let ndjson = '';
+  let full = '';
+  let fullThoughts = '';
+  let modelName = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    ndjson += decoder.decode(value, { stream: true });
+
+    let lineBreak = ndjson.indexOf('\n');
+    while (lineBreak !== -1) {
+      const line = ndjson.slice(0, lineBreak).trim();
+      ndjson = ndjson.slice(lineBreak + 1);
+      if (line) {
+        const parsed = JSON.parse(line);
+        if (parsed.error) throw new Error(parsed.error);
+
+        if (!modelName && (parsed.model_name || parsed.model)) {
+          modelName = parsed.model_name || parsed.model;
+        }
+
+        const { text, thoughtText } = extractOllamaStreamParts(parsed);
+
+        if (thoughtText) {
+          fullThoughts += thoughtText;
+          if (wantsStream) {
+            writeSse(res, 'thought', { text: thoughtText });
+          }
+        }
+
+        if (text) {
+          full += text;
+          if (wantsStream) {
+            writeSse(res, 'token', { text });
+          }
+        }
+      }
+      lineBreak = ndjson.indexOf('\n');
+    }
+  }
+
+  ndjson += decoder.decode();
+  if (ndjson.trim()) {
+    const parsed = JSON.parse(ndjson.trim());
+    if (parsed.error) throw new Error(parsed.error);
+    if (!modelName && (parsed.model_name || parsed.model)) {
+      modelName = parsed.model_name || parsed.model;
+    }
+    const { text, thoughtText } = extractOllamaStreamParts(parsed);
+    if (thoughtText) {
+      fullThoughts += thoughtText;
+      if (wantsStream) {
+        writeSse(res, 'thought', { text: thoughtText });
+      }
+    }
+    if (text) {
+      full += text;
+      if (wantsStream) {
+        writeSse(res, 'token', { text });
+      }
+    }
+  }
+
+  if (!full.trim() && !fullThoughts.trim()) {
+    throw new Error('Ollama /chat returned empty output');
+  }
+
+  return {
+    reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
+    thoughts: fullThoughts.trim() || undefined,
+    model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b')
+  };
+}
+
+async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
   const base = (process.env.OLLAMA_URL || 'http://127.0.0.1:11434').replace(/\/+$/, '');
   const models = pickOllamaModels(prompt, isThinking);
   const fullPrompt = `${systemContext}\n\nStudent: ${prompt}`;
@@ -106,7 +226,7 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
         prompt: fullPrompt,
         stream: true
       };
-      if (isThinking) {
+      if (isThinking && /deepseek/i.test(model)) {
         body.think = true;
       }
 
@@ -118,13 +238,13 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
       });
 
       if (!response.ok || !response.body) {
-        throw new Error(`Ollama HTTP ${response.status}`);
+        throw new Error(`Ollama /api/generate HTTP ${response.status}`);
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let ndjson = '';
-      let fullReply = '';
+      let full = '';
       let fullThoughts = '';
 
       while (true) {
@@ -141,17 +261,17 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
             if (parsed.error) {
               throw new Error(parsed.error);
             }
-            const { thoughtText, replyText } = extractOllamaChunkParts(parsed);
+            const { text, thoughtText } = extractOllamaStreamParts(parsed);
             if (thoughtText) {
               fullThoughts += thoughtText;
               if (wantsStream) {
                 writeSse(res, 'thought', { text: thoughtText });
               }
             }
-            if (replyText) {
-              fullReply += replyText;
+            if (text) {
+              full += text;
               if (wantsStream) {
-                writeSse(res, 'token', { text: replyText });
+                writeSse(res, 'token', { text });
               }
             }
           }
@@ -163,26 +283,30 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
       if (ndjson.trim()) {
         const parsed = JSON.parse(ndjson.trim());
         if (parsed.error) throw new Error(parsed.error);
-        const { thoughtText, replyText } = extractOllamaChunkParts(parsed);
+        const { text, thoughtText } = extractOllamaStreamParts(parsed);
         if (thoughtText) {
           fullThoughts += thoughtText;
           if (wantsStream) {
             writeSse(res, 'thought', { text: thoughtText });
           }
         }
-        if (replyText) {
-          fullReply += replyText;
+        if (text) {
+          full += text;
           if (wantsStream) {
-            writeSse(res, 'token', { text: replyText });
+            writeSse(res, 'token', { text });
           }
         }
       }
 
-      if (!fullReply.trim() && !fullThoughts.trim()) {
+      if (!full.trim() && !fullThoughts.trim()) {
         throw new Error(`Ollama model ${model} returned empty output`);
       }
 
-      return { reply: fullReply, thoughts: fullThoughts.trim() || undefined, model };
+      return {
+        reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
+        thoughts: fullThoughts.trim() || undefined,
+        model
+      };
     } catch (err) {
       failures.push(`${model}: ${err.message}`);
     } finally {
@@ -193,9 +317,29 @@ async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStrea
   throw new Error(`Ollama fallback failed (${failures.join(' | ')})`);
 }
 
+async function runOllamaFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
+  const failures = [];
+  try {
+    return await runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsStream, res });
+  } catch (chatError) {
+    failures.push(`/chat: ${chatError.message}`);
+  }
+
+  const allowGenerateFallback = process.env.OLLAMA_ALLOW_GENERATE_FALLBACK !== '0';
+  if (allowGenerateFallback) {
+    try {
+      return await runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res });
+    } catch (generateError) {
+      failures.push(`/api/generate: ${generateError.message}`);
+    }
+  }
+
+  throw new Error(`Ollama fallback failed (${failures.join(' | ')})`);
+}
+
 router.post('/', async (req, res) => {
   try {
-    const { prompt, isThinking, subject, chapter } = req.body;
+    const { prompt, isThinking, subject, chapter, std: bodyStd, board: bodyBoard } = req.body;
     const wantsStream = req.get('x-chat-stream') === '1';
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required." });
@@ -204,14 +348,49 @@ router.post('/', async (req, res) => {
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(k => k);
 
-    let systemContext = `You are a helpful AI Tutor. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student. `;
+    let std = bodyStd;
+    let board = bodyBoard || 'CBSE';
+    if (!std && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        if (decoded?.std) std = decoded.std;
+        if (decoded?.board) board = decoded.board;
+      } catch {
+        // ignore token parse issues for unauthenticated chats
+      }
+    }
+    if (!std) std = 10;
+
+    let systemContext = `You are a helpful AI Tutor for Grade ${std}. We are discussing the subject ${subject}, specifically the chapter ${chapter}. Explain concepts simply and effectively for a student at this grade level. Stay within NCERT scope, avoid advanced/university topics, and use age-appropriate examples. Be inclusive, avoid stereotypes, present multiple perspectives on contentious topics, acknowledge uncertainty, and encourage critical thinking over rote memorization. `;
     if (isThinking) {
-      systemContext += `Please show your step-by-step reasoning before providing the final answer, acting as a deep thinker. `;
+      systemContext += `Think carefully before providing the final student-facing answer. `;
     }
 
-    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(5, apiKeys.length) : 0;
-    let attempt = 0;
+    const ragContext = await ragService.buildContext({ std, board, subject, chapter });
+    if (ragContext) {
+      systemContext += `\n\nHere is the relevant NCERT textbook content to help answer:\n${ragContext.context}\n\nRefer to this NCERT content when answering.`;
+    }
+
+    if (subject && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const token = req.headers.authorization.split(' ')[1];
+        if (!token) throw new Error('Empty token');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        if (decoded.userId) {
+          const { getAdaptivePrompt, getLevel } = require('../services/performanceService');
+          const level = await getLevel(decoded.userId, subject);
+          systemContext += `\n\nTeaching guide: ${getAdaptivePrompt(level.starLevel, decoded.std)}\nStudent's current star level: ${level.starName} (${level.starLevel}/5).`;
+        }
+      } catch (adaptErr) {
+        console.debug('Adaptive level skipped:', adaptErr.message);
+      }
+    }
+
     let lastGeminiError = '';
+    let lastOllamaError = '';
 
     if (wantsStream) {
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
@@ -223,6 +402,38 @@ router.post('/', async (req, res) => {
       }
     }
     
+    // Primary path:
+    // - DeepThink: deepseek-r1 first (then optional local model fallbacks)
+    // - Non-DeepThink: ollama/gemma local models first
+    try {
+      const ollama = await runOllamaFallback({
+        prompt,
+        systemContext,
+        isThinking,
+        wantsStream,
+        res
+      });
+
+      if (wantsStream) {
+        writeSse(res, 'meta', { provider: 'ollama', model: ollama.model });
+        writeSse(res, 'done', {});
+        return res.end();
+      }
+
+      return res.json({
+        reply: ollama.reply,
+        thoughts: ollama.thoughts,
+        provider: 'ollama',
+        model: ollama.model
+      });
+    } catch (ollamaError) {
+      lastOllamaError = ollamaError.message || 'Ollama request failed';
+      console.warn('Ollama primary path failed; falling back to Gemini:', lastOllamaError);
+    }
+
+    // Pure fallback: Gemini (only used if local model chain fails)
+    const MAX_RETRIES = apiKeys.length > 0 ? Math.max(5, apiKeys.length) : 0;
+    let attempt = 0;
     while (attempt < MAX_RETRIES) {
       attempt++;
       const keyIndex = (attempt - 1) % apiKeys.length;
@@ -294,42 +505,36 @@ router.post('/', async (req, res) => {
       }
     }
 
-    // Gemini exhausted/unavailable -> try Ollama/Gemma/DeepSeek fallback chain.
-    try {
-      const ollama = await runOllamaFallback({
-        prompt,
-        systemContext,
-        isThinking,
-        wantsStream,
-        res
-      });
+    const message = apiKeys.length > 0
+      ? `Ollama primary failed: ${lastOllamaError || 'unknown error'}. Gemini fallback failed: ${lastGeminiError || 'unknown error'}`
+      : `Ollama primary failed: ${lastOllamaError || 'unknown error'}. Gemini fallback unavailable: API keys not configured.`;
 
-      if (wantsStream) {
-        writeSse(res, 'meta', { provider: 'ollama', model: ollama.model });
-        writeSse(res, 'done', {});
-        return res.end();
+    if (wantsStream) {
+      if (!res.writableEnded) {
+        writeSse(res, 'error', { message });
+        res.end();
       }
-
-      return res.json({
-        reply: ollama.reply,
-        thoughts: ollama.thoughts,
-        provider: 'ollama',
-        model: ollama.model
-      });
-    } catch (ollamaError) {
-      const message = apiKeys.length > 0
-        ? `Gemini failed: ${lastGeminiError || 'unknown error'}. Ollama fallback failed: ${ollamaError.message}`
-        : `Gemini keys not configured. Ollama fallback failed: ${ollamaError.message}`;
-
-      if (wantsStream) {
-        if (!res.writableEnded) {
-          writeSse(res, 'error', { message });
-          res.end();
-        }
-        return;
-      }
-      return res.status(500).json({ error: message });
+      return;
     }
+
+    // Final fallback: respond with a static but helpful message
+    const fallbackReplies = [
+      `That's a great question about ${subject || 'this topic'}! Here's what I can tell you: ${chapter ? `In ${chapter}, ` : ''}the key idea is to understand the core concepts step by step. Try breaking it down into smaller parts and use the NCERT PDF, concept diagrams, and practice quizzes to master it! 💪`,
+      `Great question! The best way to understand this topic is to: 1) Read the NCERT textbook chapter 2) Try the practice quiz 3) Use the Feynman technique in the sandbox to teach it to someone else. You've got this! 🌟`,
+      `Learning ${subject || 'this'} takes practice and curiosity! Here's a tip: explain the concept to a friend (or use our Feynman Sandbox!). If you can teach it, you've truly learned it. Keep going! 🚀`
+    ];
+    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+
+    if (wantsStream) {
+      if (!res.writableEnded) {
+        writeSse(res, 'token', { text: fallback });
+        writeSse(res, 'done', {});
+        res.end();
+      }
+      return;
+    }
+
+    return res.json({ reply: fallback, provider: 'fallback' });
   } catch (error) {
     console.error("Critical Chat Route Error:", error);
     if (!res.headersSent) {

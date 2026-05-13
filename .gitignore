@@ -1,11 +1,28 @@
-node_modules/
-.env
-dist/
-.vite/
+**/node_modules/
+**/.venv/
+**/__pycache__/
 *.log
 .DS_Store
-.codex
 .codex/
 clone/
 scratch/
 *.tar.gz
+*.zip
+
+# Environment files — never commit secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+LinksBackend/.env
+chroma-backend/.env
+
+# MCP config (contains API keys)
+opencode.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

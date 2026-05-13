@@ -3,6 +3,9 @@ const router = express.Router();
 const Progress = require('../models/Progress');
 const Leaderboard = require('../models/Leaderboard');
 const authMiddleware = require('../middleware/auth');
+const { updateAfterQuiz } = require('../services/performanceService');
+const { checkAndAward } = require('../services/gamificationService');
+const { validate, schemas } = require('../middleware/validate');
 
 // All progress routes require valid JWT
 router.use(authMiddleware);
@@ -13,12 +16,13 @@ router.get('/', async (req, res) => {
     const data = await Progress.find({ userId: req.user.userId });
     res.json(data);
   } catch (err) {
+    console.error('Progress Fetch Error:', err);
     res.status(500).json({ error: 'Failed to fetch progress' });
   }
 });
 
 // POST new progress entry + UPDATE Leaderboard
-router.post('/', async (req, res) => {
+router.post('/', validate(schemas.progressSchema), async (req, res) => {
   try {
     const { subjectName, chapterName, quizScore, totalQuestions, isCompleted } = req.body;
     const userId = req.user.userId;
@@ -30,9 +34,11 @@ router.post('/', async (req, res) => {
     // 2. Recalculate stats for Leaderboard
     const allProgress = await Progress.find({ userId });
     
-    // Average score calculation
-    const totalPercentage = allProgress.reduce((sum, p) => sum + (p.quizScore / p.totalQuestions) * 100, 0);
-    const averageScore = Math.round(totalPercentage / allProgress.length);
+    const validProgress = allProgress.filter(p => p.totalQuestions > 0);
+    const totalPercentage = validProgress.reduce((sum, p) => {
+      return sum + (p.quizScore / p.totalQuestions) * 100;
+    }, 0);
+    const averageScore = validProgress.length > 0 ? Math.round(totalPercentage / validProgress.length) : 0;
 
     // Count unique completed chapters
     const uniqueChapters = new Set(
@@ -40,14 +46,25 @@ router.post('/', async (req, res) => {
     );
     const totalChaptersCompleted = uniqueChapters.size;
 
-    // 3. Update or Create Leaderboard entry
+    // 3. Update adaptive performance level (Star Level)
+    let perfUpdate = null;
+    try {
+      perfUpdate = await updateAfterQuiz(userId, subjectName, quizScore, totalQuestions);
+      if (perfUpdate?.starLevel >= 3) {
+        checkAndAward(userId, 'all_subjects').catch(() => {});
+      }
+    } catch (perfErr) {
+      console.warn('Performance level update skipped:', perfErr.message);
+    }
+
+    // 4. Update or Create Leaderboard entry
     await Leaderboard.findOneAndUpdate(
       { userId },
       { averageScore, totalChaptersCompleted },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
-    res.status(201).json(entry);
+    res.status(201).json({ ...entry.toObject(), performance: perfUpdate });
   } catch (err) {
     console.error('Progress/Leaderboard Update Error:', err);
     res.status(500).json({ error: 'Failed to save progress or update leaderboard' });

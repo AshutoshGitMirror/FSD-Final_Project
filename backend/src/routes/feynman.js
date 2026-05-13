@@ -57,7 +57,7 @@ async function runOllamaFallback(systemPrompt, conversationHistory) {
 
 router.post('/chat', async (req, res) => {
   try {
-    const { concept, messages } = req.body;
+    const { concept, subject: bodySubject, chapter: bodyChapter, messages, std: bodyStd, board: bodyBoard } = req.body;
 
     if (!concept || !messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'concept and messages array are required' });
@@ -65,21 +65,35 @@ router.post('/chat', async (req, res) => {
 
     const rawKeys = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
     const apiKeys = rawKeys.split(',').map(k => k.trim()).filter(Boolean);
-    const std = req.user.std;
+    let std = bodyStd || req.user?.std || 10;
+    let board = bodyBoard || req.user?.board || 'CBSE';
+    const subject = bodySubject || '';
+    const chapter = bodyChapter || concept;
+    if (!std) std = 10;
 
-    const systemPrompt = `You are a curious student in Grade ${std}. The user is a fellow Grade ${std} student trying to explain the concept of "${concept}" to you using the Feynman Technique.
+    let systemPrompt = `You are a helpful AI Tutor for Grade ${std}. Teach "${chapter}" clearly, step-by-step, using simple language and examples.
 
 INSTRUCTIONS:
-1. Act like a Grade ${std} student. Use vocabulary appropriate for your age.
-2. NEVER explain the concept yourself. Your job is to learn from the user.
-3. If the user's explanation has a logical gap, uses big jargon without explaining it, or is too complex, ask a follow-up question to clarify. "But wait, what does [jargon] mean?" or "Why does that happen?"
-4. If the user explains it perfectly, say something like "Oh wow, I get it now! That's so cool because [summarize what you learned in a kid's way]."
-5. Keep your responses short (1-3 sentences max).`;
+1. Explain the concept like a friendly teacher.
+2. Use short paragraphs, simple words, and real-life examples.
+3. Ask short check-in questions to verify understanding.
+4. If the student is stuck, rephrase the idea and give a worked example.
+5. Keep responses concise and encouraging.`;
+
+    try {
+      const ragService = require('../services/ragService');
+      const ragContext = await ragService.buildContext({ std, board, subject, chapter });
+      if (ragContext?.context) {
+        systemPrompt += `\n\nHere is the relevant NCERT textbook content to help answer:\n${ragContext.context}\n\nRefer to this NCERT content when teaching.`;
+      }
+    } catch (err) {
+      console.warn('Feynman RAG context skipped:', err.message);
+    }
 
     // Convert frontend chat structure to Gemini's role/content schema.
     const contents = messages.map(msg => ({
       role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
+      parts: [{ text: msg.content || msg.text || msg.parts?.[0]?.text || '' }]
     }));
 
     // ── Gemini with key rotation (same pattern as chat.js) ──────
@@ -111,7 +125,7 @@ INSTRUCTIONS:
           const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
           const result = await model.generateContent(
-            `${systemPrompt}\n\n${messages.map(m => `${m.role === 'assistant' ? 'Student peer' : 'User'}: ${m.content}`).join('\n')}`
+            `${systemPrompt}\n\n${messages.map(m => `${m.role === 'assistant' ? 'Student peer' : 'User'}: ${m.content || m.text || m.parts?.[0]?.text || ''}`).join('\n')}`
           );
           const response = await result.response;
           const reply = (typeof response.text === 'function' ? response.text() : response.text) || '';

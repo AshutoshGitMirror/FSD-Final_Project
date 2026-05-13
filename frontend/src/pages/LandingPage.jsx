@@ -7,22 +7,20 @@ const LandingPage = () => {
         <div className="font-black text-2xl tracking-tighter">AI TUTOR</div>
         <div className="space-x-6 font-bold text-sm">
           <a href="#features" className="hover:underline">FEATURES</a>
-          <a href="#pricing" className="hover:underline">PRICING</a>
+
           <Link to="/login" className="hover:underline">LOGIN</Link>
-          <Link to="/signup">
-            <button className="btn-neo px-4 py-2 text-xs">SIGNUP</button>
-          </Link>
+          <Link to="/signup" className="btn-bub-primary px-4 py-2 text-xs">SIGNUP</Link>
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-neo-bg">
+      <main className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-amber-50">
         <div className="max-w-4xl pt-12 pb-8">
-          <h2 className="text-sm font-bold bg-neo-pink text-white inline-block px-3 py-1 border-2 border-black mb-6 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">
+          <h2 className="text-sm font-bold bg-gradient-to-r from-pink-500 to-rose-500 text-white inline-block px-3 py-1 border border-gray-200 mb-6  uppercase">
             Grades 1-10 Specialists
           </h2>
           <h1 className="text-6xl md:text-8xl font-black leading-tight tracking-tighter mb-6">
             LEARN LIKE A <br />
-            <span className="bg-neo-yellow text-black border-4 border-black px-4 inline-block mt-2 transform -rotate-2">
+            <span className="bg-gradient-to-r from-amber-400 to-orange-400 text-black  px-4 inline-block mt-2 transform -rotate-2">
               ROCKSTAR
             </span>{' '}
             WITH AI!
@@ -32,10 +30,10 @@ const LandingPage = () => {
           </p>
           <div className="flex gap-6 justify-center">
             <Link to="/signup">
-              <button className="btn-neo px-8 py-4 text-xl">START LEARNING</button>
+              <button className="btn-bub-primary px-8 py-4 text-xl">START LEARNING</button>
             </Link>
             <Link to="/login">
-              <button className="card-neo px-8 py-4 text-xl font-bold transition-transform active:translate-y-1 active:translate-x-1 active:shadow-none hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+              <button className="card-bub-solid px-8 py-4 text-xl font-bold transition-transform active:translate-y-1 active:translate-x-1 active:shadow-none hover:">
                 LOG IN
               </button>
             </Link>
@@ -43,9 +41,9 @@ const LandingPage = () => {
         </div>
 
         {/* Feature Cards Showcase */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-16 w-full px-4 pb-20">
-          <div className="card-neo p-8 bg-gray-100 flex flex-col items-start text-left">
-            <div className="w-12 h-12 bg-neo-blue border-2 border-black rounded-full flex items-center justify-center mb-4">
+        <div id="features" className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-16 w-full px-4 pb-20">
+          <div className="card-bub-solid p-8 bg-gray-100 flex flex-col items-start text-left">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 border border-gray-200 rounded-full flex items-center justify-center mb-4">
               <span className="text-xl">🤖</span>
             </div>
             <h3 className="text-2xl font-black mb-2 uppercase">AI Genius Tutor</h3>
@@ -54,8 +52,8 @@ const LandingPage = () => {
             </p>
           </div>
           
-          <div className="card-neo p-8 bg-neo-yellow flex flex-col items-start text-left">
-            <div className="w-12 h-12 bg-white border-2 border-black flex items-center justify-center mb-4">
+          <div className="card-bub-solid p-8 bg-gradient-to-r from-amber-400 to-orange-400 flex flex-col items-start text-left">
+            <div className="w-12 h-12 bg-white border border-gray-200 flex items-center justify-center mb-4">
               <span className="text-xl">⚡</span>
             </div>
             <h3 className="text-2xl font-black mb-2 uppercase">Instant Quizzes</h3>

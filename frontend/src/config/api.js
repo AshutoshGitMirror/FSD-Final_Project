@@ -1,17 +1,17 @@
-const trimTrailingSlash = (value) => value.replace(/\/+$/, '');
-const ensureLeadingSlash = (value) => value.startsWith('/') ? value : `/${value}`;
+const normalizeBaseUrl = (value, fallback) => {
+  const base = (value && value.trim()) || fallback;
+  return base.replace(/\/+$/, '');
+};
 
-const defaultBackendOrigin = 'http://localhost:5000';
-const defaultLinksOrigin = 'http://localhost:8080';
+const BACKEND_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_BACKEND_URL, 'http://localhost:5000');
+const LINKS_BASE_URL = normalizeBaseUrl(import.meta.env.VITE_LINKS_URL, 'http://localhost:8080');
 
-export const API_BASE_URL = trimTrailingSlash(
-  import.meta.env.VITE_API_BASE_URL || defaultBackendOrigin
-);
+export const backendUrl = (path = '') => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${BACKEND_BASE_URL}${normalizedPath}`;
+};
 
-export const LINKS_API_BASE_URL = trimTrailingSlash(
-  import.meta.env.VITE_LINKS_API_BASE_URL || defaultLinksOrigin
-);
-
-export const backendUrl = (path = '') => `${API_BASE_URL}${ensureLeadingSlash(path)}`;
-
-export const linksBackendUrl = (path = '') => `${LINKS_API_BASE_URL}${ensureLeadingSlash(path)}`;
+export const linksUrl = (path = '') => {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return `${LINKS_BASE_URL}${normalizedPath}`;
+};

@@ -13,16 +13,8 @@ router.get('/:subject/:chapter', async (req, res) => {
     });
 
     if (!quiz) {
-      // Return a default set of questions if none found, so the UI doesn't break
-      return res.json({
-        questions: [
-          {
-            q: `Welcome to the ${chapter} Quiz! Default questions are being loaded. What is the main topic?`,
-            options: [`The topic is ${chapter}`, 'Not sure', 'Something else', 'None'],
-            ans: 0
-          }
-        ]
-      });
+      console.warn(`Quiz not found for subject: ${subject}, chapter: ${chapter}`);
+      return res.status(404).json({ error: 'Quiz not found for this chapter' });
     }
 
     res.json(quiz);
