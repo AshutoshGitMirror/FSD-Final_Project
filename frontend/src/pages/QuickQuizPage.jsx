@@ -37,12 +37,18 @@ const QuickQuizPage = () => {
     setRating(quality);
     setCompleted(c => c + 1);
 
+    // Dopamine hit: confetti + toast for "Got it!"
+    if (quality >= 4) {
+      confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+    }
+
     try {
       await authFetch(backendUrl('/api/spaced-repetition/review'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conceptId: items[current]._id, quality })
       });
+      addToast(`🔥 +10 XP for reviewing "${items[current].concept}"`, 'xp', 2000);
     } catch {}
 
     setTimeout(() => {
@@ -51,9 +57,9 @@ const QuickQuizPage = () => {
         setCurrent(c => c + 1);
       } else {
         setFinished(true);
-        if (completed + 1 >= total) {
-          confetti({ particleCount: 80, spread: 120, origin: { y: 0.6 } });
-        }
+        confetti({ particleCount: 100, spread: 140, origin: { y: 0.5 } });
+        setTimeout(() => confetti({ particleCount: 80, spread: 120, origin: { y: 0.6, x: 0.3 } }), 300);
+        addToast(`🎉 Review session complete! +${completed + 1} concepts reviewed!`, 'success', 4000);
         authFetch(backendUrl('/api/gamification/check'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -78,13 +84,21 @@ const QuickQuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[80vh] p-6">
         <div className="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-xl border border-gray-100">
-          <span className="text-7xl block mb-4">🎉</span>
-          <h2 className="text-3xl font-black mb-2">Review Complete!</h2>
-          <p className="text-xl font-bold text-gray-500 mb-2">{completed} concepts reviewed</p>
-          <p className="text-gray-400 mb-6">Great job! Keep your streak going! 🔥</p>
+          <span className="text-7xl block mb-4 animate-bounce">🎉</span>
+          <h2 className="text-3xl font-black mb-2">Session Complete!</h2>
+          <p className="text-xl font-bold mb-2">
+            <span className="text-violet-600">{completed}</span> concepts reviewed
+          </p>
+          <p className="text-gray-400 mb-6">
+            {completed >= 4 ? 'Amazing focus! 🔥' : completed >= 2 ? 'Great progress! 💪' : 'Every review counts! ⭐'}
+          </p>
           <div className="flex gap-3 justify-center">
-            <Link to="/dashboard" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold px-6 py-3 rounded-full">🏠 Home</Link>
-            <Link to="/dashboard/review" className="bg-gray-100 font-bold px-6 py-3 rounded-full hover:bg-gray-200">📚 Full Review</Link>
+            <Link to="/dashboard" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all">🏠 Home</Link>
+            <button onClick={() => { setCurrent(0); setCompleted(0); setFinished(false); setRating(null); setLoading(true);
+              authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.ok ? r.json() : { items: [] }).then(data => {
+                const due = (data.items || []).slice(0, 5); setItems(due); setTotal(due.length); setLoading(false);
+              });
+            }} className="bg-gray-100 font-bold px-6 py-3 rounded-full hover:bg-gray-200 transition-all">🔄 One More Set</button>
           </div>
         </div>
       </div>
