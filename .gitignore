@@ -18,6 +18,9 @@ frontend/.env
 LinksBackend/.env
 chroma-backend/.env
 
+# MCP config (contains API keys)
+opencode.json
+
 # IDE
 .vscode/
 .idea/
