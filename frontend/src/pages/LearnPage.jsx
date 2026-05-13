@@ -152,6 +152,32 @@ const LearnPage = () => {
     setLoadingDiagrams(false);
   }, [std, board, subject]);
 
+  // Auto-fetch all diagrams for the chapter on load
+  useEffect(() => {
+    if (!subject) return;
+    const controller = new AbortController();
+    fetch(
+      backendUrl(`/api/knowledge-graph?std=${std}&board=${board}&subject=${encodeURIComponent(subject)}`),
+      { signal: controller.signal }
+    )
+      .then(r => r.ok ? r.json() : null)
+      .then(graph => {
+        if (graph?.conceptDiagrams?.length > 0) {
+          const chapterLower = (chapter || '').toLowerCase();
+          const subjectDiagrams = graph.conceptDiagrams.filter(d => {
+            const name = d.conceptName.toLowerCase();
+            return chapterLower.includes(name) || name.includes(chapterLower);
+          });
+          const matchedDiagrams = subjectDiagrams.length > 0 ? subjectDiagrams : graph.conceptDiagrams.slice(0, 3);
+          if (matchedDiagrams.length > 0) {
+            setDiagrams(matchedDiagrams);
+          }
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [std, board, subject, chapter]);
+
   const detectConcepts = useCallback((text) => {
     if (!text) return;
     const lower = text.toLowerCase();
