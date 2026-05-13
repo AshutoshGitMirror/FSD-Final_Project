@@ -32,4 +32,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Redirect proxy to direct NCERT URL (NCERT blocks cloud server connections)
+router.get('/proxy', (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'url is required' });
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== 'ncert.nic.in') {
+      return res.status(403).json({ error: 'Only NCERT URLs are allowed' });
+    }
+  } catch {
+    return res.status(400).json({ error: 'Invalid URL' });
+  }
+  res.redirect(301, url);
+});
+
 module.exports = router;
