@@ -353,9 +353,9 @@ router.post('/', async (req, res) => {
       systemContext += `Think carefully before providing the final student-facing answer. `;
     }
 
-    const ragContext = await ragService.buildContext(prompt);
+    const ragContext = await ragService.buildContext({ std, board: 'CBSE', subject, chapter });
     if (ragContext) {
-      systemContext += `\n\nHere are relevant textbook excerpts to help answer:\n${ragContext.context}\n\nCite these sources when relevant.`;
+      systemContext += `\n\nHere is the relevant NCERT textbook content to help answer:\n${ragContext.context}\n\nRefer to this NCERT content when answering.`;
     }
 
     if (subject && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
