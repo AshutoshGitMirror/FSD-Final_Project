@@ -40,7 +40,7 @@ async function processChapter(std, subject, code, chNum) {
   const txtPath = path.join(TMP_DIR, `${code}${PAD(chNum)}.txt`);
 
   try {
-    execSync(`curl -sL --max-time 30 "${url}" -o "${pdfPath}" 2>/dev/null`, { stdio: 'pipe' });
+    execSync(`curl -sL -A "Mozilla/5.0" --max-time 30 "${url}" -o "${pdfPath}" 2>/dev/null`, { stdio: 'pipe' });
     if (!fs.existsSync(pdfPath) || fs.statSync(pdfPath).size < 1000) return null;
     execSync(`pdftotext -layout "${pdfPath}" "${txtPath}" 2>/dev/null`, { stdio: 'pipe' });
     if (!fs.existsSync(txtPath)) return null;
