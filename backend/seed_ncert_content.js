@@ -8,102 +8,143 @@ const NcertContent = require('./src/models/NcertContent');
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/aitutor';
 const TMP_DIR = '/tmp/ncert_pdfs';
 const NCERT_BASE = 'https://ncert.nic.in/textbook/pdf';
-
 const PAD = (n) => String(n).padStart(2, '0');
+const CONCURRENCY = 3;
 
-// Verify NCERT chapter PDFs that actually return HTTP 200
-const CHAPTERS = [
-  // Class 10 Science
-  { std: 10, subject: 'Science', chapter: 'Chemical Reactions and Equations', code: 'jesc1', ch: 1 },
-  { std: 10, subject: 'Science', chapter: 'Acids Bases and Salts', code: 'jesc1', ch: 2 },
-  { std: 10, subject: 'Science', chapter: 'Life Processes', code: 'jesc1', ch: 5 },
-  { std: 10, subject: 'Science', chapter: 'Electricity', code: 'jesc1', ch: 11 },
-  // Class 10 Math
-  { std: 10, subject: 'Mathematics', chapter: 'Real Numbers', code: 'jemh1', ch: 1 },
-  { std: 10, subject: 'Mathematics', chapter: 'Polynomials', code: 'jemh1', ch: 2 },
-  { std: 10, subject: 'Mathematics', chapter: 'Introduction to Trigonometry', code: 'jemh1', ch: 8 },
-  // Class 9 Science
-  { std: 9, subject: 'Science', chapter: 'Matter in Our Surroundings', code: 'iesc1', ch: 1 },
-  { std: 9, subject: 'Science', chapter: 'Motion', code: 'iesc1', ch: 8 },
-  { std: 9, subject: 'Science', chapter: 'Force and Laws of Motion', code: 'iesc1', ch: 9 },
-  // Class 9 Math
-  { std: 9, subject: 'Mathematics', chapter: 'Number Systems', code: 'iemh1', ch: 1 },
-  { std: 9, subject: 'Mathematics', chapter: 'Coordinate Geometry', code: 'iemh1', ch: 3 },
-  { std: 9, subject: 'Mathematics', chapter: 'Probability', code: 'iemh1', ch: 15 },
-  // Class 7 Science
-  { std: 7, subject: 'Science', chapter: 'Nutrition in Plants', code: 'gesc1', ch: 1 },
-  { std: 7, subject: 'Science', chapter: 'Heat', code: 'gesc1', ch: 4 },
-  // Class 7 Math
-  { std: 7, subject: 'Mathematics', chapter: 'Integers', code: 'gegp1', ch: 1 },
-  { std: 7, subject: 'Mathematics', chapter: 'Fractions and Decimals', code: 'gegp1', ch: 2 },
+// All verified NCERT book codes from Puppeteer scan + manual verification
+// Format: { std, subject, code, maxCh, ch1 (some start at 2) }
+const BOOKS = [
+  // ══ CLASS 1 ══
+  { std:1, subject:'English', code:'aemr1', maxCh:10 },
+  { std:1, subject:'Mathematics', code:'aejm1', maxCh:10 },
+  // ══ CLASS 2 ══
+  { std:2, subject:'English', code:'bemr1', maxCh:10 },
+  { std:2, subject:'Mathematics', code:'bejm1', maxCh:10 },
+  // ══ CLASS 3 ══
+  { std:3, subject:'English', code:'cesa1', maxCh:10 },
+  { std:3, subject:'Mathematics', code:'cemm1', maxCh:10 },
+  { std:3, subject:'Hindi', code:'chve1', maxCh:10 },
+  // ══ CLASS 4 ══
+  { std:4, subject:'English', code:'desa1', maxCh:10 },
+  { std:4, subject:'Mathematics', code:'demm1', maxCh:10 },
+  { std:4, subject:'EVS', code:'deap1', maxCh:27 },
+  // ══ CLASS 5 ══
+  { std:5, subject:'Mathematics', code:'eemh1', maxCh:14 },
+  { std:5, subject:'English', code:'eeen1', maxCh:10 },
+  { std:5, subject:'Hindi', code:'ehhn1', maxCh:10 },
+  { std:5, subject:'EVS', code:'eeap1', maxCh:10 },
+  // ══ CLASS 6 ══
+  { std:6, subject:'Mathematics', code:'fegp1', maxCh:10 },
+  { std:6, subject:'Science', code:'fecu1', maxCh:12 },
+  { std:6, subject:'English', code:'fepr1', maxCh:5 },
+  { std:6, subject:'Hindi', code:'fhml1', maxCh:10 },
+  // ══ CLASS 7 ══
+  { std:7, subject:'Mathematics', code:'gegp1', maxCh:8 },
+  { std:7, subject:'Science', code:'gecu1', maxCh:12 },
+  { std:7, subject:'English', code:'gepr1', maxCh:5 },
+  { std:7, subject:'Hindi', code:'ghml1', maxCh:10 },
+  { std:7, subject:'Social Studies', code:'gees1', maxCh:10 },
+  { std:7, subject:'Social Studies', code:'gees2', maxCh:8 },
+  // ══ CLASS 8 ══
+  { std:8, subject:'Mathematics', code:'hegp1', maxCh:7 },
+  { std:8, subject:'Science', code:'hecu1', maxCh:13 },
+  { std:8, subject:'English', code:'hepr1', maxCh:5 },
+  { std:8, subject:'Hindi', code:'hhml1', maxCh:10 },
+  // ══ CLASS 9 ══
+  { std:9, subject:'Mathematics', code:'iemh1', maxCh:15 },
+  { std:9, subject:'Science', code:'iesc1', maxCh:15 },
+  { std:9, subject:'English', code:'iebe1', maxCh:8 },
+  // ══ CLASS 10 ══
+  { std:10, subject:'Mathematics', code:'jemh1', maxCh:15 },
+  { std:10, subject:'Science', code:'jesc1', maxCh:16 },
+  { std:10, subject:'English', code:'jeff1', maxCh:9 },
+  { std:10, subject:'Hindi', code:'jhks1', maxCh:10 },
+  { std:10, subject:'Social Studies', code:'jess1', maxCh:7 },
 ];
 
-async function downloadAndExtract() {
-  // Ensure tmp dir
+async function processChapter(std, subject, code, chNum) {
+  const url = `${NCERT_BASE}/${code}${PAD(chNum)}.pdf`;
+  const safeName = `${std}_${subject.replace(/[^a-z0-9]/gi,'')}_ch${chNum}`.replace(/\s+/g,'_');
+  const pdfPath = path.join(TMP_DIR, `${safeName}.pdf`);
+  const txtPath = path.join(TMP_DIR, `${safeName}.txt`);
+
+  // Download
+  try {
+    execSync(`curl -sL --max-time 20 "${url}" -o "${pdfPath}" 2>/dev/null`, { stdio: 'pipe' });
+    if (!fs.existsSync(pdfPath)) return null;
+    const size = fs.statSync(pdfPath).size;
+    if (size < 500) { fs.unlinkSync(pdfPath); return null; }
+  } catch { return null; }
+
+  // Extract text
+  try {
+    execSync(`pdftotext -layout "${pdfPath}" "${txtPath}" 2>/dev/null`, { stdio: 'pipe' });
+    if (!fs.existsSync(txtPath)) return null;
+    let content = fs.readFileSync(txtPath, 'utf-8').trim();
+    if (content.length < 100) return null;
+
+    // Remove header/footer noise
+    content = content.replace(/^.*?Rationalised 2023-24[\s\S]*?(?=^[A-Z])/m, '').trim();
+    content = content.replace(/\n{4,}/g, '\n\n');
+
+    return { content, size: content.length };
+  } catch { return null; }
+}
+
+async function main() {
   if (!fs.existsSync(TMP_DIR)) fs.mkdirSync(TMP_DIR, { recursive: true });
 
   await mongoose.connect(MONGO_URI);
   console.log('Connected to MongoDB\n');
 
-  for (const ch of CHAPTERS) {
-    const url = `${NCERT_BASE}/${ch.code}${PAD(ch.ch)}.pdf`;
-    const pdfPath = path.join(TMP_DIR, `${ch.std}_${ch.subject}_${ch.chapter.replace(/[^a-z0-9]/gi, '_')}.pdf`);
-    const txtPath = pdfPath.replace('.pdf', '.txt');
+  await NcertContent.deleteMany({});
+  console.log('Cleared existing content\n');
 
-    // Download the PDF
-    try {
-      console.log(`Downloading Std ${ch.std} ${ch.subject}: ${ch.chapter}...`);
-      execSync(`curl -sL --max-time 30 "${url}" -o "${pdfPath}"`, { stdio: 'pipe' });
-      const size = fs.statSync(pdfPath).size;
-      if (size < 1000) { console.log(`  ⚠ Skipped: file too small (${size} bytes)`); continue; }
-    } catch (err) {
-      console.log(`  ⚠ Download failed: ${err.message}`);
-      continue;
+  let total = 0;
+  let totalChars = 0;
+
+  for (const book of BOOKS) {
+    console.log(`\n📚 Std ${book.std} ${book.subject} (${book.code}, 1-${book.maxCh})`);
+
+    const batch = [];
+    for (let ch = 1; ch <= book.maxCh; ch++) {
+      batch.push(processChapter(book.std, book.subject, book.code, ch));
     }
 
-    // Extract text using pdftotext
-    try {
-      execSync(`pdftotext -layout "${pdfPath}" "${txtPath}"`, { stdio: 'pipe' });
-    } catch {
-      console.log(`  ⚠ pdftotext failed`);
-      continue;
+    const results = await Promise.all(batch);
+    let seeded = 0;
+
+    for (let ch = 1; ch <= book.maxCh; ch++) {
+      const result = results[ch - 1];
+      if (!result) continue;
+
+      // Store chapter name from the PDF or use generic
+      const chapterName = `Chapter ${ch}`;
+
+      await NcertContent.findOneAndUpdate(
+        { std: book.std, board: 'CBSE', subjectName: book.subject, chapterName },
+        { content: result.content },
+        { upsert: true, returnDocument: 'after' }
+      );
+      seeded++;
+      total++;
+      totalChars += result.size;
+      process.stdout.write(`  ✓ Ch${ch} (${(result.size/1000).toFixed(0)}K chars) `);
     }
 
-    // Read extracted text
-    let content = '';
-    try {
-      content = fs.readFileSync(txtPath, 'utf-8').trim();
-    } catch {
-      console.log(`  ⚠ Failed to read extracted text`);
-      continue;
-    }
-
-    if (content.length < 50) {
-      console.log(`  ⚠ Extracted text too short (${content.length} chars)`);
-      continue;
-    }
-
-    // Truncate to reasonable length for AI context
-    const truncated = content.substring(0, 5000);
-
-    // Upsert into MongoDB
-    await NcertContent.findOneAndUpdate(
-      { std: ch.std, board: 'CBSE', subjectName: ch.subject, chapterName: ch.chapter },
-      {
-        content: truncated,
-        summary: `NCERT Std ${ch.std} ${ch.subject} Chapter: ${ch.chapter}`,
-        keyPoints: []
-      },
-      { upsert: true, returnDocument: 'after' }
-    );
-    console.log(`  ✓ ${content.length} chars extracted and stored`);
+    if (seeded > 0) console.log(`\n  ✅ ${seeded}/${book.maxCh} chapters`);
+    else console.log(`  ⚠ No chapters found`);
   }
 
   // Cleanup
   try { fs.rmSync(TMP_DIR, { recursive: true, force: true }); } catch {}
 
+  console.log(`\n═══════════════════════════════════════`);
+  console.log(`✅ DONE! ${total} chapters from ${BOOKS.length} books`);
+  console.log(`📊 Total text: ${(totalChars / 1000000).toFixed(1)} MB`);
+  console.log(`═══════════════════════════════════════`);
+
   await mongoose.disconnect();
-  console.log('\n✅ Done! Real NCERT text content seeded.');
 }
 
-downloadAndExtract().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => { console.error(err); process.exit(1); });
