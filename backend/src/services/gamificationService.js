@@ -66,6 +66,13 @@ async function checkAndAward(userId, action, metadata = {}) {
     await updateProgress(userId, 'all_rounder', allAbove3 ? 1 : 0, 1, newAchievements, earned);
   }
 
+  if (action === 'review_complete') {
+    await ensureAchievement(userId, 'teacher');
+    const existing = await Achievement.findOne({ userId, achievementId: 'teacher' });
+    const count = existing?.progress || 0;
+    await updateProgress(userId, 'teacher', Math.min(count + 1, 5), 5, newAchievements, earned);
+  }
+
   return { newAchievements: earned, achievements: newAchievements };
 }
 
