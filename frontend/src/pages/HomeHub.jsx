@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
+import { addToast } from '../components/ToastContainer';
 
 const STAR_LABELS = { 1:'🌱 Sprout', 2:'🌿 Learner', 3:'🌳 Star', 4:'⭐ Superstar', 5:'👑 Genius' };
 const SUBJECT_ICONS = { 'Mathematics':'🔢','Science':'🔬','English':'📝','Hindi':'🇮🇳','Social Studies':'🌍','EVS':'🌿' };
@@ -204,8 +205,10 @@ const HomeHub = () => {
                 try {
                   const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
                   if (res.ok) {
+                    const data = await res.json();
                     confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
-                    setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
+                    addToast(`🔥 ${data.xpEarned} XP earned! ${data.streak}-day streak!`, 'xp', 4000);
+                    setGamification(prev => ({ ...prev, canClaimDaily: false, streak: data.streak || prev.streak + 1 }));
                   }
                 } catch (e) { console.warn('Daily reward claim failed:', e); }
               }} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold py-3 rounded-full hover:shadow-lg transition-all active:scale-95 animate-pulse">
