@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
+import { addToast } from '../components/ToastContainer';
 
 const STAR_LABELS = { 1:'🌱 Sprout', 2:'🌿 Learner', 3:'🌳 Star', 4:'⭐ Superstar', 5:'👑 Genius' };
 const SUBJECT_ICONS = { 'Mathematics':'🔢','Science':'🔬','English':'📝','Hindi':'🇮🇳','Social Studies':'🌍','EVS':'🌿' };
@@ -17,12 +18,25 @@ const HomeHub = () => {
   const [gamification, setGamification] = useState(null);
   const [lastChapter, setLastChapter] = useState(null);
   const [greeting, setGreeting] = useState('');
+  const [mascotQuote, setMascotQuote] = useState('');
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good morning');
     else if (hour < 17) setGreeting('Good afternoon');
     else setGreeting('Good evening');
+
+    const quotes = [
+      'Every expert was once a beginner! 🌟',
+      'Mistakes are proof that you are trying! 💪',
+      'The more you learn, the more you grow! 🌱',
+      'You are smarter than you think! 🧠',
+      'Learning is an adventure! 🚀',
+      'Small steps lead to big results! 👣',
+      'Curiosity is the key to knowledge! 🔑',
+      'You\'ve got this, superstar! ⭐',
+    ];
+    setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
   }, []);
 
   useEffect(() => {
@@ -57,7 +71,7 @@ const HomeHub = () => {
 
   const bestSubject = performance.reduce((best, p) => p.starLevel > (best?.starLevel || 0) ? p : best, null);
   const totalCompleted = progress.filter(p => p.isCompleted).length;
-  const totalChapters = curriculum.reduce((sum, s) => sum + (s.chapters?.length || 0), 0);
+  const totalChapters = curriculum.reduce((sum, s) => sum + (s?.chapters?.length || 0), 0);
 
   if (loading) {
     return (
@@ -74,8 +88,32 @@ const HomeHub = () => {
     <div className="p-6 max-w-5xl mx-auto">
       {/* Welcome Header */}
       <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-8 border border-violet-200/50 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
-        <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+          <div className="flex-1">
+            <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
+            <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {/* Mini streak */}
+            {gamification && (
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full px-4 py-2 border border-amber-200">
+                <span className="text-lg">{gamification.streak > 0 ? '🔥' : '💪'}</span>
+                <span className="font-bold text-sm">{gamification.streak}</span>
+              </div>
+            )}
+            {/* Mini achievements */}
+            {gamification && (
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-full px-4 py-2 border border-violet-200">
+                <span className="text-lg">🏆</span>
+                <span className="font-bold text-sm">{gamification.unlockedCount}/{gamification.totalCount}</span>
+              </div>
+            )}
+            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl px-5 py-3 border border-amber-200">
+              <span className="text-2xl">🤖</span>
+              <p className="text-sm font-medium text-gray-600 italic">{mascotQuote}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4 mb-8">
@@ -180,11 +218,15 @@ const HomeHub = () => {
             </div>
             {gamification.canClaimDaily ? (
               <button onClick={async () => {
-                const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
-                if (res.ok) {
-                  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
-                  setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
-                }
+                try {
+                  const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
+                  if (res.ok) {
+                    const data = await res.json();
+                    confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+                    addToast(`🔥 ${data.xpEarned} XP earned! ${data.streak}-day streak!`, 'xp', 4000);
+                    setGamification(prev => ({ ...prev, canClaimDaily: false, streak: data.streak || prev.streak + 1 }));
+                  }
+                } catch (e) { console.warn('Daily reward claim failed:', e); }
               }} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold py-3 rounded-full hover:shadow-lg transition-all active:scale-95 animate-pulse">
                 🎁 Claim Daily Reward
               </button>

@@ -9,6 +9,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
   const [exportData, setExportData] = useState(null);
+  const [exportError, setExportError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
@@ -35,8 +36,9 @@ const ProfilePage = () => {
       a.download = `my-data-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      setTimeout(() => setExportData(null), 5000);
     } catch (err) {
-      alert('Failed to export data: ' + err.message);
+      setExportError('Could not export data. Please try again.');
     }
     setExporting(false);
   };
@@ -118,6 +120,9 @@ const ProfilePage = () => {
         <button onClick={handleExport} disabled={exporting} className="btn-bub-primary px-6 py-3 disabled:opacity-50">
           {exporting ? 'Exporting...' : 'Export My Data'}
         </button>
+        {exportError && (
+          <p className="text-xs font-bold text-red-500 mt-2">{exportError}</p>
+        )}
         {exportData && (
           <p className="text-xs font-bold text-green-600 mt-2">✓ Download started! Check your downloads folder.</p>
         )}

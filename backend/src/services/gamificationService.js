@@ -9,7 +9,7 @@ const ACHIEVEMENTS = {
   star_learner:  { name: 'Star Learner',  icon: '🌳', desc: 'Reach Star Level 3 in any subject',      maxProgress: 3, xpReward: 100 },
   perfect_score: { name: 'Perfect Score', icon: '💯', desc: 'Get 100% on a quiz',                     maxProgress: 1, xpReward: 150 },
   streak_master: { name: 'Streak Master', icon: '🔥', desc: '7-day streak',                           maxProgress: 7, xpReward: 200 },
-  bookworm:      { name: 'Bookworm',      icon: '📖', desc: 'View 10 NCERT PDFs',                      maxProgress: 10, xpReward: 100 },
+  bookworm:      { name: 'Bookworm',      icon: '📖', desc: 'Watch 10 educational videos',               maxProgress: 10, xpReward: 100 },
   teacher:       { name: 'Teacher',       icon: '👨‍🏫', desc: 'Use Teach Mode 5 times',                  maxProgress: 5, xpReward: 150 },
   explorer:      { name: 'Explorer',      icon: '🧭', desc: 'Visit all subjects',                      maxProgress: 1, xpReward: 100 },
   genius:        { name: 'Genius',        icon: '👑', desc: 'Reach Star Level 5 in any subject',      maxProgress: 5, xpReward: 500 },
@@ -64,6 +64,13 @@ async function checkAndAward(userId, action, metadata = {}) {
     const levels = await PerformanceLevel.find({ userId });
     const allAbove3 = levels.length >= 3 && levels.every(l => l.starLevel >= 3);
     await updateProgress(userId, 'all_rounder', allAbove3 ? 1 : 0, 1, newAchievements, earned);
+  }
+
+  if (action === 'review_complete') {
+    await ensureAchievement(userId, 'teacher');
+    const existing = await Achievement.findOne({ userId, achievementId: 'teacher' });
+    const count = existing?.progress || 0;
+    await updateProgress(userId, 'teacher', Math.min(count + 1, 5), 5, newAchievements, earned);
   }
 
   return { newAchievements: earned, achievements: newAchievements };

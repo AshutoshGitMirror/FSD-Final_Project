@@ -4,6 +4,7 @@ import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
 import LevelUpCelebration from '../components/LevelUpCelebration';
+import { addToast } from '../components/ToastContainer';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
@@ -126,7 +127,9 @@ const QuizPage = () => {
             if (gcRes.ok) {
               const gcData = await gcRes.json();
               if (gcData.newAchievements?.length) {
-                setToasts(gcData.newAchievements);
+                gcData.newAchievements.forEach(a => {
+                  addToast(`🏆 ${a.name} — ${a.desc}`, 'achievement', 4000);
+                });
               }
             }
           } catch (gcErr) {
@@ -181,16 +184,7 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] p-8">
         <div className="card-bub-solid max-w-lg w-full p-10 text-center relative overflow-hidden">
-          {toasts.length > 0 && (
-          <div className="fixed top-4 right-4 z-50 space-y-2">
-            {toasts.map((a, i) => (
-              <div key={i} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-4 py-3 rounded-2xl shadow-lg animate-bounce">
-                🏆 {a.name} — {a.description}
-              </div>
-            ))}
-          </div>
-        )}
-        <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
+          <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
           <span className="text-8xl block mb-4 pt-6 animate-bounce">{emoji}</span>
           <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Quiz Complete!</h1>
           <p className="font-bold text-lg text-gray-600 mb-6">{message}</p>
@@ -209,14 +203,10 @@ const QuizPage = () => {
             </div>
           )}
 
-          <div className="flex gap-3 justify-center">
-            <Link to="/dashboard/progress">
-              <button className="card-bub-solid px-6 py-4 bg-gradient-to-r from-blue-400 to-cyan-400  font-black uppercase hover:bg-blue-400 text-sm">📈 Progress</button>
-            </Link>
-            <Link to={`/dashboard/learn/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`}>
-              <button className="card-bub-solid px-6 py-4 bg-green-300  font-black uppercase hover:bg-green-400 text-sm">🤖 Review with AI</button>
-            </Link>
-            <button onClick={() => window.location.reload()} className="btn-bub-primary px-6 py-4 text-sm uppercase font-black">🔄 Retake</button>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link to={`/dashboard/topic`} className="bg-gray-100 font-bold px-5 py-3 rounded-full hover:bg-gray-200 transition-all text-sm">📚 Back to Topics</Link>
+            <Link to={`/dashboard/learn/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`} className="bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold px-5 py-3 rounded-full hover:shadow-lg transition-all text-sm">🤖 Learn</Link>
+            <button onClick={() => { setCurrentQuestion(0); setScore(0); setFinished(false); setTimeLeft(30); setSelectedIdx(null); setShowFeedback(false); setIsLocked(false); setPerfUpdate(null); hasSavedRef.current = false; }} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-5 py-3 rounded-full hover:shadow-lg transition-all text-sm">🔄 Retake Quiz</button>
           </div>
         </div>
       </div>
@@ -302,6 +292,14 @@ const QuizPage = () => {
           />
         ))}
       </div>
+
+      <LevelUpCelebration
+        show={!!levelUpData}
+        starName={levelUpData?.starName || ''}
+        starLevel={levelUpData?.starLevel || 1}
+        subject={levelUpData?.subject || ''}
+        onClose={() => setLevelUpData(null)}
+      />
     </div>
   );
 };

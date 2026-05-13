@@ -27,8 +27,9 @@ const KnowledgeGraphPage = () => {
     fetch(backendUrl(`/api/knowledge-graph/subjects?std=${std}&board=${board}`), { signal: controller.signal })
       .then(r => r.ok ? r.json() : [])
       .then(data => {
-        setSubjects(data);
-        if (data.length > 0) setSelectedSubject(data[0]);
+        const arr = Array.isArray(data) ? data : [];
+        setSubjects(arr);
+        if (arr.length > 0) setSelectedSubject(arr[0]);
         setLoading(false);
       })
       .catch(err => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
+import confetti from 'canvas-confetti';
 
 const AchievementsPage = () => {
   const [achievements, setAchievements] = useState([]);
@@ -16,6 +17,11 @@ const AchievementsPage = () => {
       setAchievements(Array.isArray(achs) ? achs : []);
       setStats(prev => ({ ...prev, ...dash }));
       setLoading(false);
+      // Small celebration if user has achievements
+      const unlocked = Array.isArray(achs) ? achs.filter(a => a.unlocked).length : 0;
+      if (unlocked > 0) {
+        setTimeout(() => confetti({ particleCount: 50, spread: 100, origin: { y: 0.7 } }), 300);
+      }
     }).catch(() => setLoading(false));
   }, []);
 
