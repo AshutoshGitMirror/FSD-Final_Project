@@ -21,11 +21,13 @@ const DashboardExtended = () => {
   const navigate = useNavigate();
   const user = getUser();
 
-  const getLinkClass = (path, bgColorClass) => {
+  const getLinkClass = (path, colorGrad) => {
     const currentPath = location.pathname;
     let isActive = currentPath.includes(path);
-    if (path === '/topic' && currentPath.endsWith('/dashboard')) isActive = true;
-    return `block p-4 border-4 transition-transform active:translate-y-1 active:translate-x-1 font-black uppercase text-lg ${isActive ? `border-black ${bgColorClass} shadow-lg` : 'border-transparent hover:border-black bg-white hover:bg-gray-100'}`;
+    if (path === '/home' && (currentPath === '/dashboard' || currentPath === '/dashboard/')) isActive = true;
+    if (path === '/topic' && currentPath.startsWith('/dashboard/topic')) isActive = true;
+    const colors = isActive ? `bg-gradient-to-r ${colorGrad} text-white shadow-md` : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200';
+    return `block px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${colors}`;
   };
 
   const handleLogout = () => {
@@ -39,38 +41,40 @@ const DashboardExtended = () => {
       <MobileNavigation />
 
       {/* Sidebar (hidden on mobile) */}
-      <aside className="hidden lg:flex lg:flex-col w-72 border-r-4 border-black bg-white z-20 relative">
-        <div className="p-8 border-b-4 border-black bg-gradient-to-r from-pink-500 to-rose-500 text-white">
-          <Link to="/" className="font-black text-3xl tracking-tighter block hover:underline ">AI TUTOR</Link>
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-white z-20 relative shadow-lg">
+        <div className="p-6 bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white">
+          <Link to="/" className="font-black text-2xl tracking-tight block hover:opacity-80 transition-opacity">AI TUTOR</Link>
         </div>
-        <nav className="flex-1 p-6 space-y-4 flex flex-col overflow-y-auto">
-          <Link to="/dashboard"              className={getLinkClass('/home', 'bg-gradient-to-r from-amber-400 to-orange-400')}>🏠 Home</Link>
-          <Link to="/dashboard/quick-quiz"   className={getLinkClass('/quick-quiz', 'bg-green-400')}>⚡ Quick Quiz</Link>
-          <Link to="/dashboard/topic"        className={getLinkClass('/topic',        'bg-gradient-to-r from-blue-400 to-cyan-400')}>📚 Curriculum</Link>
-          <Link to="/dashboard/concept-map"  className={getLinkClass('/concept-map',  'bg-green-400')}>🧠 Concept Map</Link>
-          <Link to="/dashboard/review"       className={getLinkClass('/review',       'bg-purple-400 text-white')}>🔄 Review Hub</Link>
-          <Link to="/dashboard/feynman"      className={getLinkClass('/feynman',      'bg-orange-300')}>💡 Feynman Sandbox</Link>
-          <Link to="/dashboard/progress"     className={getLinkClass('/progress',     'bg-gradient-to-r from-pink-500 to-rose-500 text-white')}>📈 Progress</Link>
-          <Link to="/dashboard/saved-links"  className={getLinkClass('/saved-links',  'bg-gradient-to-r from-amber-400 to-orange-400')}>🔗 Saved Links</Link>
-          <Link to="/dashboard/leaderboard"  className={getLinkClass('/leaderboard',  'bg-gray-800 text-white')}>🏆 Leaderboard</Link>
-          <Link to="/dashboard/achievements" className={getLinkClass('/achievements','bg-gradient-to-r from-yellow-400 to-amber-500')}>🏆 Achievements</Link>
+        <nav className="flex-1 p-5 space-y-2 flex flex-col overflow-y-auto">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-2 mb-1">Learn</p>
+          <Link to="/dashboard"              className={getLinkClass('/home', 'from-amber-400 to-orange-400')}>🏠 Home</Link>
+          <Link to="/dashboard/topic"        className={getLinkClass('/topic', 'from-blue-400 to-cyan-400')}>📚 Curriculum</Link>
+          <Link to="/dashboard/review"       className={getLinkClass('/review', 'from-purple-400 to-violet-500 text-white')}>🧠 Daily Practice</Link>
+          <Link to="/dashboard/quick-quiz"   className={getLinkClass('/quick-quiz', 'from-green-400 to-emerald-500 text-white')}>⚡ Quick Quiz</Link>
+
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1">Track</p>
+          <Link to="/dashboard/progress"     className={getLinkClass('/progress', 'from-pink-500 to-rose-500 text-white')}>📈 Progress</Link>
+          <Link to="/dashboard/achievements" className={getLinkClass('/achievements','from-yellow-400 to-amber-500')}>🏆 Achievements</Link>
+          <Link to="/dashboard/leaderboard"  className={getLinkClass('/leaderboard', 'from-gray-700 to-gray-900 text-white')}>🏆 Leaderboard</Link>
+
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1">Explore</p>
+          <Link to="/dashboard/concept-map"  className={getLinkClass('/concept-map', 'from-green-400 to-teal-500')}>🧠 Concept Map</Link>
+          <Link to="/dashboard/saved-links"  className={getLinkClass('/saved-links', 'from-amber-400 to-yellow-500')}>🔗 Saved Links</Link>
           {(user?.role === 'teacher' || user?.role === 'admin') && (
-            <Link to="/dashboard/teacher"    className={getLinkClass('/teacher', 'bg-red-400 text-white')}>🏫 Teacher Dashboard</Link>
+            <Link to="/dashboard/teacher"    className={getLinkClass('/teacher', 'from-red-400 to-rose-500 text-white')}>🏫 Teacher</Link>
           )}
         </nav>
 
         {/* Profile Button at bottom */}
-        <div className="p-6 border-t-4 border-black">
-          <Link
-            to="/dashboard/profile"
-            className="w-full flex items-center gap-4  p-4 bg-amber-50 hover:bg-gradient-to-r from-amber-400 to-orange-400 hover:shadow-lg transition-all active:translate-y-1 active:translate-x-1"
-          >
-            <div className="w-10 h-10 rounded-full  bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black flex items-center justify-center text-lg flex-shrink-0">
+        <div className="p-4 border-t border-gray-100">
+          <Link to="/dashboard/profile"
+            className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-violet-50 transition-all hover:shadow-sm">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
               {user?.fullName?.[0]?.toUpperCase() || '?'}
             </div>
             <div className="text-left overflow-hidden">
-              <p className="font-black uppercase text-sm leading-none truncate">{user?.fullName || 'Scholar'}</p>
-              <p className="text-xs font-bold text-gray-500 mt-1">Std {user?.std} · {user?.board}</p>
+              <p className="font-bold text-sm leading-none truncate">{user?.fullName || 'Scholar'}</p>
+              <p className="text-xs text-gray-500 mt-0.5">Std {user?.std} · {user?.board}</p>
             </div>
           </Link>
         </div>
