@@ -37,7 +37,7 @@ const MobileNavigation = () => {
     <>
       <button
         onClick={() => setDrawerOpen(true)}
-        className="fixed top-3 left-3 z-40 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border-2 border-black shadow-lg lg:hidden"
+        className="fixed top-3 left-3 z-40 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border border-gray-200 shadow-lg lg:hidden"
         aria-label="Open menu"
       >
         <span className="text-xl">☰</span>
@@ -80,7 +80,7 @@ const MobileNavigation = () => {
                     onClick={() => setDrawerOpen(false)}
                     className={`flex items-center gap-4 min-h-[44px] px-4 font-black uppercase text-base transition-all active:translate-y-0.5 active:translate-x-0.5 ${
                       isActive(item.path)
-                        ? 'bg-gradient-to-r from-blue-400 to-cyan-400 border-2 border-black shadow-md'
+                        ? 'bg-gradient-to-r from-blue-400 to-cyan-400 border border-gray-200 shadow-md'
                         : 'hover:bg-gray-100 border-2 border-transparent'
                     }`}
                   >
@@ -94,7 +94,7 @@ const MobileNavigation = () => {
                     onClick={() => setDrawerOpen(false)}
                     className={`flex items-center gap-4 min-h-[44px] px-4 font-black uppercase text-base transition-all active:translate-y-0.5 active:translate-x-0.5 ${
                       isActive('/dashboard/teacher')
-                        ? 'bg-gradient-to-r from-red-400 to-red-500 text-white border-2 border-black shadow-md'
+                        ? 'bg-gradient-to-r from-red-400 to-red-500 text-white border border-gray-200 shadow-md'
                         : 'hover:bg-gray-100 border-2 border-transparent'
                     }`}
                   >

@@ -475,7 +475,7 @@ const LearnPage = () => {
         {/* Floating resource button (mobile) */}
         <button
           onClick={() => setShowResourceDrawer(true)}
-          className="lg:hidden fixed bottom-24 right-4 z-30 min-w-[48px] min-h-[48px] bg-gradient-to-r from-amber-400 to-orange-400 border-2 border-black shadow-lg flex items-center justify-center text-xl font-black"
+          className="lg:hidden fixed bottom-24 right-4 z-30 min-w-[48px] min-h-[48px] bg-gradient-to-r from-amber-400 to-orange-400 border border-gray-200 shadow-lg flex items-center justify-center text-xl font-black"
           aria-label="Show resources"
         >
           📎
@@ -483,7 +483,7 @@ const LearnPage = () => {
 
         <div className="border-b-4 border-black pb-4 mb-4 flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-400 p-3 md:p-4 transform rotate-1 rounded-sm shadow-lg">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/dashboard/topic')} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/30 hover:bg-white/50 border-2 border-black rounded-sm text-xl font-black transition-colors" aria-label="Back to topics">←</button>
+            <button onClick={() => navigate('/dashboard/topic')} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/30 hover:bg-white/50 border border-gray-200 rounded-sm text-xl font-black transition-colors" aria-label="Back to topics">←</button>
             <div>
                <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight">{chapter}</h1>
                <p className="font-bold text-xs md:text-sm">{subject} • Session Active</p>
