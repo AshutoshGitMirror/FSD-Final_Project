@@ -256,7 +256,7 @@ const QuizPage = () => {
       </div>
 
       <div className="card-bub-solid p-4 md:p-10 relative">
-        <span className="absolute -top-5 md:-top-6 -left-5 md:-left-6 w-10 h-10 md:w-12 md:h-12 bg-black text-white font-black text-xl md:text-2xl flex items-center justify-center border-4 border-white shadow-[0_0_0_4px_#000]">
+        <span className="absolute -top-5 md:-top-6 -left-5 md:-left-6 w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-black flex items-center justify-center shadow-lg">
           ?
         </span>
         <h2 className="text-lg md:text-2xl font-bold mb-6 md:mb-10 leading-snug pt-2 md:pt-0">{currentQ.q}</h2>
