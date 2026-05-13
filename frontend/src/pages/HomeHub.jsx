@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
+import confetti from 'canvas-confetti';
 
 const STAR_LABELS = { 1:'🌱 Sprout', 2:'🌿 Learner', 3:'🌳 Star', 4:'⭐ Superstar', 5:'👑 Genius' };
 const SUBJECT_ICONS = { 'Mathematics':'🔢','Science':'🔬','English':'📝','Hindi':'🇮🇳','Social Studies':'🌍','EVS':'🌿' };
@@ -180,7 +181,10 @@ const HomeHub = () => {
             {gamification.canClaimDaily ? (
               <button onClick={async () => {
                 const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
-                if (res.ok) setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
+                if (res.ok) {
+                  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+                  setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
+                }
               }} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold py-3 rounded-full hover:shadow-lg transition-all active:scale-95 animate-pulse">
                 🎁 Claim Daily Reward
               </button>
