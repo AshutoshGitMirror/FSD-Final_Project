@@ -157,8 +157,9 @@ const TopicPage = () => {
             <div className="card-bub-solid bg-white max-w-lg w-full p-8 text-center">
               <span className="text-5xl block mb-4">📄</span>
               <h3 className="font-black text-xl uppercase mb-2">PDF Not Available</h3>
-              <p className="font-bold text-gray-600 mb-4">No NCERT PDF mapped for this chapter yet.</p>
-              <button onClick={() => setShowPdf(false)} className="btn-bub-primary px-6 py-3">Close</button>
+              <p className="font-bold text-gray-600 mb-4">NCERT does not publish chapter PDFs for this grade yet. View the book online instead.</p>
+              <a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noreferrer" className="btn-bub-secondary px-6 py-3 inline-block mb-3">📖 Open NCERT Textbook Viewer</a>
+              <button onClick={() => setShowPdf(false)} className="btn-bub-ghost px-6 py-3 ml-2">Close</button>
             </div>
           </div>
         ) : (
