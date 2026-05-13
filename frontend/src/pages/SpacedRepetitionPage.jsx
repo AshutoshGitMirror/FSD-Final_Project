@@ -17,10 +17,12 @@ const SpacedRepetitionPage = () => {
   // Load due items and stats
   const loadData = useCallback(async () => {
     try {
-      const [due, s] = await Promise.all([
-        authFetch(backendUrl('/api/spaced-repetition/due')).then(r => r.json()),
-        authFetch(backendUrl('/api/spaced-repetition/stats')).then(r => r.json())
+      const [dueRes, statsRes] = await Promise.all([
+        authFetch(backendUrl('/api/spaced-repetition/due')),
+        authFetch(backendUrl('/api/spaced-repetition/stats'))
       ]);
+      const due = dueRes.ok ? await dueRes.json() : { items: [], totalDue: 0, bySubject: {} };
+      const s = statsRes.ok ? await statsRes.json() : { streak: 0, subjectStats: {}, totalConcepts: 0 };
       setDueData(due);
       setStats(s);
     } catch (err) {
