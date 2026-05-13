@@ -66,6 +66,26 @@
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
 
+@plugin "daisyui/theme" {
+  name: "bubbly";
+  default: true;
+  --color-primary: #8B5CF6;
+  --color-secondary: #F472B6;
+  --color-accent: #FBBF24;
+  --color-neutral: #1F2937;
+  --color-base-100: #FFFFFF;
+  --color-base-200: #FFFBEB;
+  --color-base-300: #FEF3C7;
+  --color-info: #60A5FA;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-error: #FB7185;
+  --radius-box: 1rem;
+  --radius-btn: 9999px;
+  --radius-field: 1rem;
+  --border: 1px;
+}
+
 /* ── Theme Tokens ──────────────────────────────────── */
 @theme {
   /* Subject Colors */
