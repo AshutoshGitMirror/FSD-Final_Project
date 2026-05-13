@@ -13,13 +13,7 @@ async function buildContext({ std, board, subject, chapter }) {
     const ncert = await NcertContent.findOne(query);
     if (!ncert || !ncert.content) return null;
 
-    let context = `Here is the NCERT textbook content for ${ncert.subjectName} - ${ncert.chapterName}:\n\n`;
-    context += ncert.content.substring(0, 3000);
-
-    if (ncert.keyPoints && ncert.keyPoints.length > 0) {
-      context += `\n\nKey points:\n`;
-      ncert.keyPoints.forEach((kp, i) => { context += `${i + 1}. ${kp}\n`; });
-    }
+    const context = `Here is the NCERT textbook content for ${ncert.subjectName} - ${ncert.chapterName}:\n\n${ncert.content}`;
 
     return { context, source: ncert.subjectName, chapter: ncert.chapterName };
   } catch (err) {
