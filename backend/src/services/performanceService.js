@@ -51,10 +51,10 @@ async function updateAfterQuiz(userId, subjectName, score, totalQuestions) {
   const oldLevel = perf.starLevel;
   const result = calculateStarLevel(newAvg, oldLevel, newTotal);
 
-  const updateFields = { averageScore: newAvg, confidence: Math.min(1, perf.confidence + 0.05) };
+  const updateFields = { $set: { averageScore: newAvg, confidence: Math.min(1, perf.confidence + 0.05) } };
 
   if (result.changed) {
-    updateFields.starLevel = result.level;
+    updateFields.$set.starLevel = result.level;
     updateFields.$push = {
       levelHistory: {
         fromLevel: oldLevel,

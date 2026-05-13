@@ -1,11 +1,11 @@
-require('dotenv').config({ path: '/home/RatAnon/Code/TISD/tisd/backend/.env' });
+require('dotenv').config();
 const { GoogleGenAI } = require('@google/genai');
 
 async function run() {
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-3.0-flash-preview",
       contents: "Why is the sky blue?",
       config: {
         thinkingConfig: {
