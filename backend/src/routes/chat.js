@@ -449,7 +449,7 @@ router.post('/', async (req, res) => {
 
         if (wantsStream) {
           const response = await ai.models.generateContentStream({
-            model: "gemini-3.0-flash-preview",
+            model: "gemini-3-flash-preview",
             contents: `Student: ${prompt}`,
             config: configObj
           });
@@ -460,7 +460,7 @@ router.post('/', async (req, res) => {
         }
 
         const response = await ai.models.generateContent({
-          model: "gemini-3.0-flash-preview",
+          model: "gemini-3-flash-preview",
           contents: `Student: ${prompt}`,
           config: configObj
         });
@@ -481,7 +481,7 @@ router.post('/', async (req, res) => {
         try {
           const { GoogleGenerativeAI } = require("@google/generative-ai");
           const genAI = new GoogleGenerativeAI(currentKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-3.0-flash-preview" });
+          const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
           if (wantsStream) {
             const streamResult = await model.generateContentStream(`${systemContext}\n\nStudent: ${prompt}`);
