@@ -2,13 +2,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const signUserToken = (user) => (
-  jwt.sign(
+const signUserToken = (user) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+  return jwt.sign(
     { userId: user._id, fullName: user.fullName, std: user.std, board: user.board, role: user.role || 'student' },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
-  )
-);
+  );
+};
 
 const registerUser = async ({ fullName, email, password, std, board }) => {
   if (!fullName || !email || !password || !std || !board) {
