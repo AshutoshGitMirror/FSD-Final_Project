@@ -1,65 +1,40 @@
-const CHROMA_URL = process.env.CHROMA_URL || 'http://127.0.0.1:8081';
+const NcertContent = require('../models/NcertContent');
 
-async function search(query, nResults = 3) {
+async function buildContext({ std, board, subject, chapter }) {
+  if (!subject && !chapter) return null;
+
+  const query = {};
+  if (std) query.std = Number(std);
+  if (board) query.board = board;
+  if (subject) query.subjectName = { $regex: new RegExp('^' + subject.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+  if (chapter) query.chapterName = { $regex: new RegExp('^' + chapter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1500);
+    const ncert = await NcertContent.findOne(query);
+    if (!ncert || !ncert.content) return null;
 
-    const res = await fetch(`${CHROMA_URL}/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, n_results: nResults }),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
+    let context = `Here is the NCERT textbook content for ${ncert.subjectName} - ${ncert.chapterName}:\n\n`;
+    context += ncert.content.substring(0, 3000);
 
-    if (!res.ok) {
-      console.warn(`ChromaDB search failed: ${res.status}`);
-      return null;
+    if (ncert.keyPoints && ncert.keyPoints.length > 0) {
+      context += `\n\nKey points:\n`;
+      ncert.keyPoints.forEach((kp, i) => { context += `${i + 1}. ${kp}\n`; });
     }
 
-    const data = await res.json();
-    return data.results || [];
+    return { context, source: ncert.subjectName, chapter: ncert.chapterName };
   } catch (err) {
-    if (err.name === 'AbortError') {
-      console.warn('ChromaDB search timed out (1.5s), skipping RAG');
-    } else {
-      console.warn('ChromaDB unavailable, skipping RAG:', err.message);
-    }
+    console.warn('NcertContent lookup failed:', err.message);
     return null;
   }
 }
 
-async function buildContext(query) {
-  const results = await search(query);
-  if (!results || results.length === 0) return null;
-
-  const sources = [];
-  const context = results
-    .filter(r => (r.similarity ?? r.score ?? 0) > 0.5)
-    .map((r, i) => {
-      const source = r.metadata?.source || 'reference';
-      if (!sources.includes(source)) sources.push(source);
-      return `[Source ${i + 1}] ${r.document}`;
-    })
-    .join('\n\n');
-
-  if (!context) return null;
-
-  return {
-    context,
-    sources,
-    resultCount: results.length
-  };
-}
-
 async function health() {
   try {
-    const res = await fetch(`${CHROMA_URL}/health`);
-    return res.ok;
+    const count = await NcertContent.countDocuments();
+    return { ok: true, documents: count };
   } catch {
-    return false;
+    return { ok: false, documents: 0 };
   }
 }
 
-module.exports = { search, buildContext, health };
+module.exports = { buildContext, health };
