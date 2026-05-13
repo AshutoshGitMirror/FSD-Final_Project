@@ -111,6 +111,14 @@ const SpacedRepetitionPage = () => {
       setStats(s);
       setActiveReview(null);
       setQuestionData(null);
+      // Award XP for completing a review
+      try {
+        await authFetch(backendUrl('/api/gamification/check'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'review_complete', metadata: { quality } })
+        });
+      } catch {}
     } catch (err) {
       console.error('Review save error:', err);
     }
@@ -121,8 +129,8 @@ const SpacedRepetitionPage = () => {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-2">🔄 Review Hub</h1>
-          <p className="font-bold text-gray-500 text-xs md:text-sm">Spaced Repetition — AI-powered recall for lasting memory</p>
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight mb-2">🧠 Daily Practice</h1>
+          <p className="font-bold text-gray-500 text-xs md:text-sm">Boost your memory — each review earns you <span className="text-amber-600">+10 XP</span>!</p>
         </div>
 
         {/* Streak Badge */}
@@ -226,13 +234,13 @@ const SpacedRepetitionPage = () => {
                   ? 'No concepts due for review right now. Great job staying on top of your studies!'
                   : 'Initialize your spaced repetition concepts from your curriculum to start reviewing!'}
               </p>
-              {(!stats || stats.totalConcepts === 0) && (
+              {                (!stats || stats.totalConcepts === 0) && (
                 <button
                   onClick={initializeAllConcepts}
                   disabled={initializing}
-                  className="btn-bub-primary py-4 px-8 text-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:bg-pink-600"
+                  className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transition-all active:scale-95"
                 >
-                  {initializing ? '⏳ Initializing...' : '🧠 Initialize My Reviews'}
+                  {initializing ? '⏳ Setting up...' : '🚀 Start Daily Practice'}
                 </button>
               )}
             </div>
