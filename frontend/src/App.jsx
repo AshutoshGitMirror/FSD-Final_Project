@@ -6,10 +6,12 @@ import DashboardExtended from './pages/DashboardExtended';
 import EthicsPage from './pages/EthicsPage';
 import OnboardingWizard from './pages/OnboardingWizard';
 import NotFoundPage from './pages/NotFoundPage';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
     <Router>
+      <ErrorBoundary>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -19,6 +21,7 @@ function App() {
         <Route path="/dashboard/*" element={<DashboardExtended />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </ErrorBoundary>
     </Router>
   );
 }
