@@ -41,7 +41,8 @@ router.get('/proxy', (req, res) => {
     if (parsed.hostname !== 'ncert.nic.in') {
       return res.status(403).json({ error: 'Only NCERT URLs are allowed' });
     }
-  } catch {
+  } catch (err) {
+    console.error('PDF proxy invalid URL:', err?.message);
     return res.status(400).json({ error: 'Invalid URL' });
   }
   res.redirect(301, url);
