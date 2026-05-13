@@ -201,11 +201,13 @@ const HomeHub = () => {
             </div>
             {gamification.canClaimDaily ? (
               <button onClick={async () => {
-                const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
-                if (res.ok) {
-                  confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
-                  setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
-                }
+                try {
+                  const res = await authFetch(backendUrl('/api/gamification/claim-daily'), { method: 'POST' });
+                  if (res.ok) {
+                    confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+                    setGamification(prev => ({ ...prev, canClaimDaily: false, streak: prev.streak + 1 }));
+                  }
+                } catch (e) { console.warn('Daily reward claim failed:', e); }
               }} className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold py-3 rounded-full hover:shadow-lg transition-all active:scale-95 animate-pulse">
                 🎁 Claim Daily Reward
               </button>
