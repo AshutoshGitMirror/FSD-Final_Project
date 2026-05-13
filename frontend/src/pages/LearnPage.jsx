@@ -274,7 +274,7 @@ const LearnPage = () => {
     try {
       const endpoint = isTeaching ? '/api/feynman/chat' : '/api/chat';
       const body = isTeaching
-        ? JSON.stringify({ concept: chapter, messages: [...messages, userMessage] })
+        ? JSON.stringify({ concept: chapter, subject, chapter: chapter, std, board, messages: [...messages, userMessage] })
         : JSON.stringify({ prompt: currentInput, isThinking, subject, chapter, std, board });
 
       const response = await authFetch(backendUrl(endpoint), {
@@ -575,10 +575,10 @@ const LearnPage = () => {
                   <input type="checkbox" className="appearance-none w-5 h-5 border-2 border-gray-300 rounded bg-white checked:border-sky-500 checked:bg-sky-500 transition-all" checked={showLinks} onChange={e => setShowLinks(e.target.checked)} disabled={isLoading} />
                   🔗 Fetch Links
                </label>
-               <label className="flex items-center gap-2 cursor-pointer font-bold text-xs md:text-sm min-h-[44px] select-none">
-                  <input type="checkbox" className="appearance-none w-5 h-5 border-2 border-gray-300 rounded bg-white checked:border-green-500 checked:bg-green-500 transition-all" checked={isTeaching} onChange={e => { setIsTeaching(e.target.checked); setMessages([{ role: 'ai', text: `👋 Hi! I'm a student. Teach me about "${chapter}" like I'm your classmate!` }]); }} disabled={isLoading} />
-                  🧑‍🏫 Teach Mode
-               </label>
+                <label className="flex items-center gap-2 cursor-pointer font-bold text-xs md:text-sm min-h-[44px] select-none">
+                   <input type="checkbox" className="appearance-none w-5 h-5 border-2 border-gray-300 rounded bg-white checked:border-green-500 checked:bg-green-500 transition-all" checked={isTeaching} onChange={e => { setIsTeaching(e.target.checked); setMessages([{ role: 'ai', text: `👋 Teach Mode on! I will guide you through "${chapter}" step by step. Ask me anything.` }]); }} disabled={isLoading} />
+                   🧑‍🏫 Teach Mode
+                </label>
             </div>
            
            <div className="flex gap-2">
