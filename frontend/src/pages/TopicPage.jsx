@@ -164,7 +164,7 @@ const TopicPage = () => {
           </div>
         ) : (
           <PdfViewer
-            pdfUrl={backendUrl(`/api/pdf/proxy?url=${encodeURIComponent(pdfInfo.ncertUrl)}`)}
+            directUrl={pdfInfo.ncertUrl}
             title={`NCERT Std ${std} ${pdfInfo.subjectName} - ${pdfInfo.chapterName}`}
             onClose={() => setShowPdf(false)}
           />
