@@ -99,6 +99,9 @@ const LearnPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [feedbacks, setFeedbacks] = useState({});
   const [diagrams, setDiagrams] = useState([]);
+  const [loadingDiagrams, setLoadingDiagrams] = useState(false);
+  const [chapterVideos, setChapterVideos] = useState([]);
+  const [isTeaching, setIsTeaching] = useState(false);
   const [loadingMessage] = useState(() => {
     const msgs = [
       'Warming up the AI brain... 🧠',
@@ -114,8 +117,6 @@ const LearnPage = () => {
     ];
     return msgs[Math.floor(Math.random() * msgs.length)];
   });
-  const [loadingDiagrams, setLoadingDiagrams] = useState(false);
-  const [chapterVideos, setChapterVideos] = useState([]);
   const bottomRef = useRef(null);
   const knownConceptsRef = useRef(new Set());
 
@@ -267,13 +268,15 @@ const LearnPage = () => {
     };
 
     try {
-      const response = await fetch(backendUrl('/api/chat'), {
+      const endpoint = isTeaching ? '/api/feynman/chat' : '/api/chat';
+      const body = isTeaching
+        ? JSON.stringify({ concept: chapter, messages: [...messages, userMessage] })
+        : JSON.stringify({ prompt: currentInput, isThinking, subject, chapter });
+
+      const response = await authFetch(backendUrl(endpoint), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Chat-Stream': '1'
-        },
-        body: JSON.stringify({ prompt: currentInput, isThinking, subject, chapter })
+        headers: { 'Content-Type': 'application/json' },
+        body
       });
 
       const contentType = response.headers.get('content-type') || '';
@@ -540,16 +543,20 @@ const LearnPage = () => {
         {/* Custom Input Box */}
         <div className="mt-6  p-4 bg-amber-50 flex flex-col gap-4">
            {/* Toggles */}
-           <div className="flex gap-4 border-b-2 border-black pb-4">
-              <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
-                 <input type="checkbox" className="w-5 h-5 accent-violet-500 border border-gray-200" checked={isThinking} onChange={e => setIsThinking(e.target.checked)} disabled={isLoading} />
-                 🧠 Deep Thinking Mode
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
-                 <input type="checkbox" className="w-5 h-5 accent-sky-500 border border-gray-200" checked={showLinks} onChange={e => setShowLinks(e.target.checked)} disabled={isLoading} />
-                 🔗 Fetch YT/Shaalaa Links
-              </label>
-           </div>
+           <div className="flex gap-4 pb-4">
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
+                  <input type="checkbox" className="w-5 h-5 accent-violet-500 border border-gray-200 rounded" checked={isThinking} onChange={e => setIsThinking(e.target.checked)} disabled={isLoading || isTeaching} />
+                  🧠 Deep Thinking
+               </label>
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
+                  <input type="checkbox" className="w-5 h-5 accent-sky-500 border border-gray-200 rounded" checked={showLinks} onChange={e => setShowLinks(e.target.checked)} disabled={isLoading} />
+                  🔗 Fetch Links
+               </label>
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm ml-auto">
+                  <input type="checkbox" className="w-5 h-5 accent-green-500 border border-gray-200 rounded" checked={isTeaching} onChange={e => { setIsTeaching(e.target.checked); setMessages([{ role: 'ai', text: `👋 Hi! I'm a student. Teach me about "${chapter}" like I'm your classmate!` }]); }} disabled={isLoading} />
+                  🧑‍🏫 Teach Mode
+               </label>
+            </div>
            
            <div className="flex gap-2">
              <button className="bg-red-200 border border-gray-200 p-3 hover:bg-red-300 font-bold disabled:opacity-50" title="Speech to text (Mocked)" disabled={isLoading}>🎤</button>

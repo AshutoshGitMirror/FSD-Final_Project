@@ -9,7 +9,8 @@ const KnowledgeGraphSchema = new mongoose.Schema({
       chapterName: { type: String, required: true },
       concepts: [{ type: String }],
       prerequisites: [{ type: String }],
-      difficulty: { type: Number, default: 3, min: 1, max: 5 }
+      difficulty: { type: Number, default: 3, min: 1, max: 5 },
+      minStarLevel: { type: Number, default: 1, min: 1, max: 5 }
     }
   ],
   conceptDiagrams: [{
