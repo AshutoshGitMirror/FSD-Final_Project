@@ -8,12 +8,16 @@ const STAR_NAMES = {
   5: '👑 Genius'
 };
 
-function calculateStarLevel(averageScore, currentLevel) {
+function calculateStarLevel(averageScore, currentLevel, totalQuizzes) {
   let raw = 1;
   if (averageScore >= 90) raw = 5;
   else if (averageScore >= 75) raw = 4;
   else if (averageScore >= 55) raw = 3;
   else if (averageScore >= 35) raw = 2;
+
+  // Cap level by total quizzes: you can't reach high levels with just 1-2 quizzes
+  const maxByQuizzes = Math.min(5, 1 + Math.floor((totalQuizzes || 1) / 2));
+  raw = Math.min(raw, maxByQuizzes);
 
   // Hysteresis: prevent oscillation at boundaries
   if (raw > currentLevel) return { level: raw, changed: raw > currentLevel };
@@ -45,7 +49,7 @@ async function updateAfterQuiz(userId, subjectName, score, totalQuestions) {
   const newTotal = perf.totalQuizzes;
   const newAvg = Math.round(((perf.averageScore * (newTotal - 1)) + pct) / newTotal);
   const oldLevel = perf.starLevel;
-  const result = calculateStarLevel(newAvg, oldLevel);
+  const result = calculateStarLevel(newAvg, oldLevel, newTotal);
 
   const updateFields = { averageScore: newAvg, confidence: Math.min(1, perf.confidence + 0.05) };
 
