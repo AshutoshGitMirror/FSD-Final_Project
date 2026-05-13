@@ -34,12 +34,16 @@ async def get_images(query:str = ""):
     images = await run_in_threadpool(ddgs_images, query)
 
     if len(images) < 3:
-        fallback = await run_in_threadpool(wikimedia_images, query)
-        for img in fallback:
-            if img not in images:
-                images.append(img)
-            if len(images) == 5:
-                break
+        try:
+            fallback = await run_in_threadpool(wikimedia_images, query)
+            if isinstance(fallback, list):
+                for img in fallback:
+                    if img not in images and isinstance(img, str):
+                        images.append(img)
+                    if len(images) == 5:
+                        break
+        except Exception:
+            pass
 
     return {"images": images[:5]}
 
