@@ -53,32 +53,32 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 1, board: BOARD,
     chapters: [
-      { chapterName: 'Finding the Furry Cat', description: 'Identifying basic shapes — circles, squares, triangles, rectangles in surroundings' },
-      { chapterName: 'What is Long?', description: 'Counting, reading and writing numbers 1-9' },
-      { chapterName: 'Mango Treat', description: 'Adding single-digit numbers using objects and pictures' },
-      { chapterName: 'Making 10', description: 'Taking away — understanding subtraction with visuals' },
-      { chapterName: 'How Many?', description: 'Place value introduction, teen numbers' },
-      { chapterName: 'Vegetable Farm', description: 'Understanding earlier, later, morning, evening concepts' },
-      { chapterName: 'Linas Family', description: 'Comparing lengths, weights — longer, shorter, heavier, lighter' },
-      { chapterName: 'How Much Can We Hold?', description: 'Reading, writing and ordering numbers to 50' },
-      { chapterName: 'Patterns', description: 'Collecting and recording simple data using pictures' },
-      { chapterName: 'How Many Times?', description: 'Recognizing and extending simple patterns' }
+      { chapterName: 'Finding the Furry Cat', description: 'Explore concepts and exercises from Finding the Furry Cat' },
+      { chapterName: 'What is Long?', description: 'Explore concepts and exercises from What is Long?' },
+      { chapterName: 'Mango Treat', description: 'Explore concepts and exercises from Mango Treat' },
+      { chapterName: 'Making 10', description: 'Explore concepts and exercises from Making 10' },
+      { chapterName: 'How Many?', description: 'Counting in groups, estimation' },
+      { chapterName: 'Vegetable Farm', description: 'Explore concepts and exercises from Vegetable Farm' },
+      { chapterName: 'Linas Family', description: 'Explore concepts and exercises from Linas Family' },
+      { chapterName: 'How Much Can We Hold?', description: 'Explore concepts and exercises from How Much Can We Hold?' },
+      { chapterName: 'Patterns', description: 'Growing patterns, number patterns, tiling' },
+      { chapterName: 'How Many Times?', description: 'Introduction to multiplication — groups and repeated addition' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'English', std: 1, board: BOARD,
     chapters: [
-      { chapterName: 'My Family and Me', description: 'Poem — rhyming words, basic vocabulary' },
-      { chapterName: 'Picture Time', description: 'Story — reading comprehension, animal vocabulary' },
-      { chapterName: 'Friends Together', description: 'Poem — daily routine vocabulary, action words' },
-      { chapterName: 'The Cap-seller and the Monkeys', description: 'Story — friendship, cooperation' },
-      { chapterName: 'A Farm', description: 'Poem — counting, animal names' },
-      { chapterName: 'My Home', description: 'Story — colours, descriptions' },
-      { chapterName: 'The Park', description: 'Poem — nature, observation' },
-      { chapterName: 'Funny Bunny', description: 'Story — fruits, sharing' },
-      { chapterName: 'A Greeting Card', description: 'Poem — playground, fun activities' },
-      { chapterName: 'A Visit to the Doctor', description: 'Story — shapes in everyday life' }
+      { chapterName: 'My Family and Me', description: 'Family members, relationships, living together' },
+      { chapterName: 'Picture Time', description: 'Understanding earlier, later, morning, evening concepts' },
+      { chapterName: 'Friends Together', description: 'Explore concepts and exercises from Friends Together' },
+      { chapterName: 'The Cap-seller and the Monkeys', description: 'Explore concepts and exercises from The Cap-seller and the Monkeys' },
+      { chapterName: 'A Farm', description: 'Explore concepts and exercises from A Farm' },
+      { chapterName: 'My Home', description: 'Diversity, religions, languages' },
+      { chapterName: 'The Park', description: 'Explore concepts and exercises from The Park' },
+      { chapterName: 'Funny Bunny', description: 'Explore concepts and exercises from Funny Bunny' },
+      { chapterName: 'A Greeting Card', description: 'Explore concepts and exercises from A Greeting Card' },
+      { chapterName: 'A Visit to the Doctor', description: 'Explore concepts and exercises from A Visit to the Doctor' }
     ]
   });
 
@@ -122,32 +122,32 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 2, board: BOARD,
     chapters: [
-      { chapterName: 'Fun with Numbers', description: 'Shapes and their properties, 3D shapes introduction' },
+      { chapterName: 'Fun with Numbers', description: 'Numbers up to 1000, comparison, ordering' },
       { chapterName: 'Counting in Groups', description: 'Skip counting, grouping objects in 2s, 5s, 10s' },
-      { chapterName: 'How Much?', description: 'Weight comparison — heavier, lighter, balancing' },
-      { chapterName: 'Tens and Ones', description: 'Place value — tens and ones, numbers up to 100' },
+      { chapterName: 'How Much?', description: 'Explore concepts and exercises from How Much?' },
+      { chapterName: 'Tens and Ones', description: 'Two-digit numbers, expanded form' },
       { chapterName: 'Patterns', description: 'Growing patterns, number patterns, tiling' },
       { chapterName: 'Footprints', description: 'Measurement using non-standard units — foot lengths, handspans' },
-      { chapterName: 'Jugs and Mugs', description: 'Capacity — comparing volumes, full, half, empty' },
-      { chapterName: 'Multiply Me', description: 'Two-digit numbers, expanded form' },
-      { chapterName: 'Shapes', description: 'Reading a calendar, days of the week, dates' },
-      { chapterName: 'How Many?', description: 'Addition of two-digit numbers with and without carry' }
+      { chapterName: 'Jugs and Mugs', description: 'Volume and capacity, litres and ml' },
+      { chapterName: 'Multiply Me', description: 'Explore concepts and exercises from Multiply Me' },
+      { chapterName: 'Shapes', description: 'Identifying basic shapes — circles, squares, triangles, rectangles in surroundings' },
+      { chapterName: 'How Many?', description: 'Counting in groups, estimation' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'English', std: 2, board: BOARD,
     chapters: [
-      { chapterName: 'My Bicycle', description: 'Poem — school life, feelings, rhyming' },
-      { chapterName: 'Picture Reading', description: 'Poem — gratitude, self-awareness' },
-      { chapterName: 'It Is Fun', description: 'Story — wishes, imagination, descriptive writing' },
-      { chapterName: 'Seeing without Seeing', description: 'Poem — kindness, happiness' },
-      { chapterName: 'Come Back Soon', description: 'Poem — weather, nature vocabulary' },
-      { chapterName: 'Between Home and School', description: 'Story — animals, proper behavior' },
-      { chapterName: 'This is My Town', description: 'Poem — social skills, politeness' },
-      { chapterName: 'A Show of Clouds', description: 'Story — hard work, planning ahead' },
-      { chapterName: 'My Name', description: 'Concepts from My Name' },
-      { chapterName: 'The Crow', description: 'Concepts from The Crow' }
+      { chapterName: 'My Bicycle', description: 'Explore concepts and exercises from My Bicycle' },
+      { chapterName: 'Picture Reading', description: 'Explore concepts and exercises from Picture Reading' },
+      { chapterName: 'It Is Fun', description: 'Explore concepts and exercises from It Is Fun' },
+      { chapterName: 'Seeing without Seeing', description: 'Explore concepts and exercises from Seeing without Seeing' },
+      { chapterName: 'Come Back Soon', description: 'Explore concepts and exercises from Come Back Soon' },
+      { chapterName: 'Between Home and School', description: 'Explore concepts and exercises from Between Home and School' },
+      { chapterName: 'This is My Town', description: 'Explore concepts and exercises from This is My Town' },
+      { chapterName: 'A Show of Clouds', description: 'Explore concepts and exercises from A Show of Clouds' },
+      { chapterName: 'My Name', description: 'Explore concepts and exercises from My Name' },
+      { chapterName: 'The Crow', description: 'Explore concepts and exercises from The Crow' }
     ]
   });
 
@@ -195,45 +195,45 @@ async function seedAll() {
       { chapterName: 'Where to Look From', description: 'Perspective and viewpoints, top view, front view' },
       { chapterName: 'Fun with Numbers', description: 'Numbers up to 1000, comparison, ordering' },
       { chapterName: 'Give and Take', description: 'Addition and subtraction of 3-digit numbers' },
-      { chapterName: 'Long and Short', description: 'Measuring length in cm and m, estimation' },
+      { chapterName: 'Long and Short', description: 'Measuring length, converting km-m-cm' },
       { chapterName: 'Shapes and Designs', description: 'Tiling patterns, symmetry, rangoli' },
       { chapterName: 'Fun with Give and Take', description: 'Word problems on addition and subtraction' },
       { chapterName: 'Time Goes On', description: 'Reading clock — hours and minutes, calendar' },
       { chapterName: 'Who is Heavier?', description: 'Weighing in grams and kilograms' },
       { chapterName: 'How Many Times?', description: 'Introduction to multiplication — groups and repeated addition' },
-      { chapterName: 'Play with Patterns', description: 'Number patterns, growing patterns, magic squares' }
+      { chapterName: 'Play with Patterns', description: 'Number sequences, magic triangles, tessellations' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'English', std: 3, board: BOARD,
     chapters: [
-      { chapterName: 'The Magic Garden', description: 'Poem — greetings, nature in the morning' },
-      { chapterName: 'Nina and the Baby Sparrows', description: 'Story — imagination, descriptive vocabulary' },
-      { chapterName: 'Little by Little', description: 'Poem — birds, sounds of nature' },
-      { chapterName: 'The Enormous Turnip', description: 'Story — caring for animals, empathy' },
-      { chapterName: 'Sea Song', description: 'Poem — contentment, moral values' },
-      { chapterName: 'A Little Fish Story', description: 'Story — teamwork, cooperation' },
-      { chapterName: 'The Yellow Butterfly', description: 'Poem — ocean, marine life vocabulary' },
-      { chapterName: 'The Ship of the Desert', description: 'Poem — animals, movement verbs' },
-      { chapterName: 'Good Morning', description: 'Poem — colours, festival atmosphere' },
-      { chapterName: 'Bird Talk', description: 'Story — transportation, community helpers' }
+      { chapterName: 'The Magic Garden', description: 'Story — imagination, descriptive vocabulary' },
+      { chapterName: 'Nina and the Baby Sparrows', description: 'Story — caring for animals, empathy' },
+      { chapterName: 'Little by Little', description: 'Explore concepts and exercises from Little by Little' },
+      { chapterName: 'The Enormous Turnip', description: 'Story — teamwork, cooperation' },
+      { chapterName: 'Sea Song', description: 'Poem — ocean, marine life vocabulary' },
+      { chapterName: 'A Little Fish Story', description: 'Explore concepts and exercises from A Little Fish Story' },
+      { chapterName: 'The Yellow Butterfly', description: 'Explore concepts and exercises from The Yellow Butterfly' },
+      { chapterName: 'The Ship of the Desert', description: 'Explore concepts and exercises from The Ship of the Desert' },
+      { chapterName: 'Good Morning', description: 'Poem — greetings, nature in the morning' },
+      { chapterName: 'Bird Talk', description: 'Poem — birds, sounds of nature' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 3, board: BOARD,
     chapters: [
-      { chapterName: 'Seedi Bachchi', description: 'कविता — पक्षी कोयल, ऋतु बसंत' },
-      { chapterName: 'Shekhibaaz Makkhi', description: 'कहानी — घमंड का परिणाम' },
-      { chapterName: 'Chand Wali Amma', description: 'कहानी — दादी माँ, पारिवारिक प्रेम' },
-      { chapterName: 'Man Karta Hai', description: 'कविता — बचपन की इच्छाएँ' },
-      { chapterName: 'Bahadur Bitto', description: 'कहानी — बच्चों की जिज्ञासा' },
-      { chapterName: 'Hamse Sab Kahte', description: 'कहानी — पेड़ों का महत्व, पर्यावरण' },
-      { chapterName: 'Tapr Toap', description: 'कविता — बारिश, मौसम' },
-      { chapterName: 'Mujhe Peero!', description: 'कहानी — न्याय, बँटवारा' },
-      { chapterName: 'Kya Dharu Kya Naa', description: 'कहानी — बुद्धि का उपयोग' },
-      { chapterName: 'Kyonjimal', description: 'कहानी — जिज्ञासा, प्रश्न पूछना' }
+      { chapterName: 'Seedi Bachchi', description: 'Explore concepts and exercises from Seedi Bachchi' },
+      { chapterName: 'Shekhibaaz Makkhi', description: 'Explore concepts and exercises from Shekhibaaz Makkhi' },
+      { chapterName: 'Chand Wali Amma', description: 'Explore concepts and exercises from Chand Wali Amma' },
+      { chapterName: 'Man Karta Hai', description: 'Explore concepts and exercises from Man Karta Hai' },
+      { chapterName: 'Bahadur Bitto', description: 'Explore concepts and exercises from Bahadur Bitto' },
+      { chapterName: 'Hamse Sab Kahte', description: 'Explore concepts and exercises from Hamse Sab Kahte' },
+      { chapterName: 'Tapr Toap', description: 'Explore concepts and exercises from Tapr Toap' },
+      { chapterName: 'Mujhe Peero!', description: 'Explore concepts and exercises from Mujhe Peero!' },
+      { chapterName: 'Kya Dharu Kya Naa', description: 'Explore concepts and exercises from Kya Dharu Kya Naa' },
+      { chapterName: 'Kyonjimal', description: 'Explore concepts and exercises from Kyonjimal' }
     ]
   });
 
@@ -267,12 +267,12 @@ async function seedAll() {
       { chapterName: 'Long and Short', description: 'Measuring length, converting km-m-cm' },
       { chapterName: 'A Trip to Bhopal', description: 'Reading maps, distance, fare charts' },
       { chapterName: 'Tick Tick Tick', description: 'Time — reading clocks, duration, timetables' },
-      { chapterName: 'The Way the World Looks', description: 'Weight — kg and g, weighing balance' },
-      { chapterName: 'The Junk Seller', description: 'Volume and capacity, litres and ml' },
-      { chapterName: 'Jugs and Mugs', description: 'Circles, radius, drawing circles' },
-      { chapterName: 'Carts and Wheels', description: 'Fractions — half, quarter, three-fourths' },
-      { chapterName: 'Halves and Quarters', description: 'Number sequences, magic triangles, tessellations' },
-      { chapterName: 'Play with Patterns', description: 'Multiplication tables up to 10, division' }
+      { chapterName: 'The Way the World Looks', description: 'Explore concepts and exercises from The Way the World Looks' },
+      { chapterName: 'The Junk Seller', description: 'Weight — kg and g, weighing balance' },
+      { chapterName: 'Jugs and Mugs', description: 'Volume and capacity, litres and ml' },
+      { chapterName: 'Carts and Wheels', description: 'Circles, radius, drawing circles' },
+      { chapterName: 'Halves and Quarters', description: 'Fractions — half, quarter, three-fourths' },
+      { chapterName: 'Play with Patterns', description: 'Number sequences, magic triangles, tessellations' }
     ]
   });
 
@@ -280,15 +280,15 @@ async function seedAll() {
     subjectName: 'English', std: 4, board: BOARD,
     chapters: [
       { chapterName: 'Wake Up', description: 'Poem — morning, nature, seasons' },
-      { chapterName: 'Nehas Alarm Clock', description: 'Poem — animals and their noses, comparisons' },
-      { chapterName: 'Noses', description: 'Story — contentment, wishing for change' },
-      { chapterName: 'The Little Fir Tree', description: 'Poem — exercise, outdoor activities' },
-      { chapterName: 'Run', description: 'Poem — curiosity, questioning nature' },
-      { chapterName: 'Nasruddins Aim', description: 'Story — fantasy, imagination, adventure' },
-      { chapterName: 'Why', description: 'Biography — determination, overcoming disability' },
-      { chapterName: 'Alice in Wonderland', description: 'Concepts from Alice in Wonderland' },
-      { chapterName: 'Dont Be Afraid of the Dark', description: 'Concepts from Dont Be Afraid of the Dark' },
-      { chapterName: 'A Watering Rhyme', description: 'Concepts from A Watering Rhyme' }
+      { chapterName: 'Nehas Alarm Clock', description: 'Explore concepts and exercises from Nehas Alarm Clock' },
+      { chapterName: 'Noses', description: 'Poem — animals and their noses, comparisons' },
+      { chapterName: 'The Little Fir Tree', description: 'Story — contentment, wishing for change' },
+      { chapterName: 'Run', description: 'Poem — exercise, outdoor activities' },
+      { chapterName: 'Nasruddins Aim', description: 'Explore concepts and exercises from Nasruddins Aim' },
+      { chapterName: 'Why', description: 'Poem — curiosity, questioning nature' },
+      { chapterName: 'Alice in Wonderland', description: 'Story — fantasy, imagination, adventure' },
+      { chapterName: 'Dont Be Afraid of the Dark', description: 'Explore concepts and exercises from Dont Be Afraid of the Dark' },
+      { chapterName: 'A Watering Rhyme', description: 'Water cycle, ocean movements, tides, currents' }
     ]
   });
 
@@ -315,29 +315,29 @@ async function seedAll() {
       { chapterName: 'Ear to Ear', description: 'Hearing, sound, caring for ears' },
       { chapterName: 'A Day with Nandu', description: 'Elephants — habitat, family, conservation' },
       { chapterName: 'The Story of Amrita', description: 'Trees, Bishnoi community, environmental protection' },
-      { chapterName: 'Anitas Kitchen', description: 'Bees, honey making, pollination' },
-      { chapterName: 'OManas Journey', description: 'Observing from a train, landscapes' },
-      { chapterName: 'From the Window', description: 'Family structures, joint and nuclear families' },
-      { chapterName: 'Reaching Grandmothers House', description: 'Diversity, religions, languages' },
-      { chapterName: 'Changing Families', description: 'Mountains, flora, national parks' },
-      { chapterName: 'Hu Tu Tu Hu Tu Tu', description: 'How things have changed — then and now' },
-      { chapterName: 'The Valley of Flowers', description: 'Concepts from The Valley of Flowers' },
-      { chapterName: 'Changing Times', description: 'Concepts from Changing Times' },
-      { chapterName: 'A Rivers Tale', description: 'Concepts from A Rivers Tale' },
-      { chapterName: 'Basvas Farm', description: 'Concepts from Basvas Farm' },
-      { chapterName: 'Poet and Farmer', description: 'Concepts from Poet and Farmer' },
-      { chapterName: 'A Busy Month', description: 'Concepts from A Busy Month' },
-      { chapterName: 'Nandita in Mumbai', description: 'Concepts from Nandita in Mumbai' },
-      { chapterName: 'Too Much Water Too Little Water', description: 'Concepts from Too Much Water Too Little Water' },
-      { chapterName: 'Abdul in the Garden', description: 'Concepts from Abdul in the Garden' },
-      { chapterName: 'Eating Together', description: 'Concepts from Eating Together' },
-      { chapterName: 'Food and Fun', description: 'Concepts from Food and Fun' },
-      { chapterName: 'The World in My Home', description: 'Concepts from The World in My Home' },
-      { chapterName: 'Pochampalli', description: 'Concepts from Pochampalli' },
-      { chapterName: 'Home and Abroad', description: 'Concepts from Home and Abroad' },
-      { chapterName: 'Spicy Riddles', description: 'Concepts from Spicy Riddles' },
-      { chapterName: 'Defence Officer Wahida', description: 'Concepts from Defence Officer Wahida' },
-      { chapterName: 'Chuskit Goes to School', description: 'Concepts from Chuskit Goes to School' }
+      { chapterName: 'Anitas Kitchen', description: 'Explore concepts and exercises from Anitas Kitchen' },
+      { chapterName: 'OManas Journey', description: 'Explore concepts and exercises from OManas Journey' },
+      { chapterName: 'From the Window', description: 'Observing from a train, landscapes' },
+      { chapterName: 'Reaching Grandmothers House', description: 'Explore concepts and exercises from Reaching Grandmothers House' },
+      { chapterName: 'Changing Families', description: 'Family structures, joint and nuclear families' },
+      { chapterName: 'Hu Tu Tu Hu Tu Tu', description: 'Explore concepts and exercises from Hu Tu Tu Hu Tu Tu' },
+      { chapterName: 'The Valley of Flowers', description: 'Mountains, flora, national parks' },
+      { chapterName: 'Changing Times', description: 'How things have changed — then and now' },
+      { chapterName: 'A Rivers Tale', description: 'Explore concepts and exercises from A Rivers Tale' },
+      { chapterName: 'Basvas Farm', description: 'Explore concepts and exercises from Basvas Farm' },
+      { chapterName: 'Poet and Farmer', description: 'Explore concepts and exercises from Poet and Farmer' },
+      { chapterName: 'A Busy Month', description: 'Explore concepts and exercises from A Busy Month' },
+      { chapterName: 'Nandita in Mumbai', description: 'Explore concepts and exercises from Nandita in Mumbai' },
+      { chapterName: 'Too Much Water Too Little Water', description: 'Water cycle, ocean movements, tides, currents' },
+      { chapterName: 'Abdul in the Garden', description: 'Explore concepts and exercises from Abdul in the Garden' },
+      { chapterName: 'Eating Together', description: 'Explore concepts and exercises from Eating Together' },
+      { chapterName: 'Food and Fun', description: 'Explore concepts and exercises from Food and Fun' },
+      { chapterName: 'The World in My Home', description: 'Diversity, religions, languages' },
+      { chapterName: 'Pochampalli', description: 'Explore concepts and exercises from Pochampalli' },
+      { chapterName: 'Home and Abroad', description: 'Explore concepts and exercises from Home and Abroad' },
+      { chapterName: 'Spicy Riddles', description: 'Explore concepts and exercises from Spicy Riddles' },
+      { chapterName: 'Defence Officer Wahida', description: 'Explore concepts and exercises from Defence Officer Wahida' },
+      { chapterName: 'Chuskit Goes to School', description: 'Explore concepts and exercises from Chuskit Goes to School' }
     ]
   });
 
@@ -354,47 +354,47 @@ async function seedAll() {
       { chapterName: 'How Many Squares?', description: 'Area — counting squares, sq cm, sq m' },
       { chapterName: 'Parts and Wholes', description: 'Fractions — equivalent, comparing, mixed numbers' },
       { chapterName: 'Does it Look the Same?', description: 'Symmetry — line of symmetry, mirror images' },
-      { chapterName: 'Be My Multiple Ill Be Your Factor', description: 'Number and shape patterns, rules of patterns' },
-      { chapterName: 'Can You See the Pattern?', description: 'Maps, scale, directions, coordinates' },
-      { chapterName: 'Mapping Your Way', description: '3D shapes — cubes, cuboids, nets of shapes' },
-      { chapterName: 'Boxes and Sketches', description: 'Decimals — introduction, place value, money' },
-      { chapterName: 'Tenths and Hundredths', description: 'Area vs perimeter, composite shapes' },
-      { chapterName: 'Area and its Boundary', description: 'Pie charts, bar graphs, data interpretation' },
-      { chapterName: 'Smart Charts', description: 'Multi-digit multiplication and long division' },
-      { chapterName: 'Ways to Multiply and Divide', description: 'Volume, weight, real-life measurement problems' },
-      { chapterName: 'How Big How Heavy', description: 'Concepts from How Big How Heavy' }
+      { chapterName: 'Be My Multiple Ill Be Your Factor', description: 'Explore concepts and exercises from Be My Multiple Ill Be Your Factor' },
+      { chapterName: 'Can You See the Pattern?', description: 'Number and shape patterns, rules of patterns' },
+      { chapterName: 'Mapping Your Way', description: 'Maps, scale, directions, coordinates' },
+      { chapterName: 'Boxes and Sketches', description: '3D shapes — cubes, cuboids, nets of shapes' },
+      { chapterName: 'Tenths and Hundredths', description: 'Decimals — introduction, place value, money' },
+      { chapterName: 'Area and its Boundary', description: 'Area vs perimeter, composite shapes' },
+      { chapterName: 'Smart Charts', description: 'Pie charts, bar graphs, data interpretation' },
+      { chapterName: 'Ways to Multiply and Divide', description: 'Multi-digit multiplication and long division' },
+      { chapterName: 'How Big How Heavy', description: 'Explore concepts and exercises from How Big How Heavy' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'English', std: 5, board: BOARD,
     chapters: [
-      { chapterName: 'Ice-Cream Man', description: 'Poem — summer, ice cream vendor' },
+      { chapterName: 'Ice-Cream Man', description: 'Explore concepts and exercises from Ice-Cream Man' },
       { chapterName: 'Wonderful Waste', description: 'Story — recycling, composting, waste management' },
-      { chapterName: 'My Shadow', description: 'Poem — cooperation, working together' },
-      { chapterName: 'Robinson Crusoe Discovers a Footprint', description: 'Story — birds, migration, unity' },
-      { chapterName: 'Rip Van Winkle', description: 'Poem — Robert Louis Stevenson, observation' },
-      { chapterName: 'Talkative Barber', description: 'Story — adventure, survival, resilience' },
-      { chapterName: 'Gullivers Travels', description: 'Poem — emotions, expression' },
-      { chapterName: 'The Little Bully', description: 'Story — Premchand, sibling relationships' },
-      { chapterName: 'Around the World', description: 'Poem — humor, laziness' },
-      { chapterName: 'Who Will be Ningthou', description: 'Story — classic tale, passage of time' }
+      { chapterName: 'My Shadow', description: 'Poem — Robert Louis Stevenson, observation' },
+      { chapterName: 'Robinson Crusoe Discovers a Footprint', description: 'Story — adventure, survival, resilience' },
+      { chapterName: 'Rip Van Winkle', description: 'Story — classic tale, passage of time' },
+      { chapterName: 'Talkative Barber', description: 'Explore concepts and exercises from Talkative Barber' },
+      { chapterName: 'Gullivers Travels', description: 'Explore concepts and exercises from Gullivers Travels' },
+      { chapterName: 'The Little Bully', description: 'Explore concepts and exercises from The Little Bully' },
+      { chapterName: 'Around the World', description: 'Explore concepts and exercises from Around the World' },
+      { chapterName: 'Who Will be Ningthou', description: 'Explore concepts and exercises from Who Will be Ningthou' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 5, board: BOARD,
     chapters: [
-      { chapterName: 'Rakh Ki Rassi', description: 'कहानी — अकबर-बीरबल, बुद्धिमत्ता' },
-      { chapterName: 'Faslon Ke Tyohaar', description: 'लेख — भारत के त्योहार, खेती' },
-      { chapterName: 'Khilaune Vaala', description: 'कविता — बचपन, खिलौने' },
-      { chapterName: 'Nanha Phankar', description: 'कहानी — कला, प्रतिभा' },
-      { chapterName: 'Jaahan Chaah Vahaan Raah', description: 'कहानी — संकल्प, मेहनत' },
-      { chapterName: 'Chitthi Ka Safar', description: 'लेख — डाक सेवा, संचार का इतिहास' },
-      { chapterName: 'Daaktar Ka Aaana', description: 'साक्षात्कार — सेवा, समर्पण' },
-      { chapterName: 'Dino Ke Baad', description: 'कहानी — विज्ञान कथा, भविष्य' },
-      { chapterName: 'Mela', description: 'लेख — जल संरक्षण, जल संकट' },
-      { chapterName: 'Gurur aur Kisaan', description: 'कहानी — बहादुरी, साहस' }
+      { chapterName: 'Rakh Ki Rassi', description: 'Explore concepts and exercises from Rakh Ki Rassi' },
+      { chapterName: 'Faslon Ke Tyohaar', description: 'Explore concepts and exercises from Faslon Ke Tyohaar' },
+      { chapterName: 'Khilaune Vaala', description: 'Explore concepts and exercises from Khilaune Vaala' },
+      { chapterName: 'Nanha Phankar', description: 'Explore concepts and exercises from Nanha Phankar' },
+      { chapterName: 'Jaahan Chaah Vahaan Raah', description: 'Explore concepts and exercises from Jaahan Chaah Vahaan Raah' },
+      { chapterName: 'Chitthi Ka Safar', description: 'Explore concepts and exercises from Chitthi Ka Safar' },
+      { chapterName: 'Daaktar Ka Aaana', description: 'Explore concepts and exercises from Daaktar Ka Aaana' },
+      { chapterName: 'Dino Ke Baad', description: 'Explore concepts and exercises from Dino Ke Baad' },
+      { chapterName: 'Mela', description: 'Explore concepts and exercises from Mela' },
+      { chapterName: 'Gurur aur Kisaan', description: 'Explore concepts and exercises from Gurur aur Kisaan' }
     ]
   });
 
@@ -402,15 +402,15 @@ async function seedAll() {
     subjectName: 'EVS', std: 5, board: BOARD,
     chapters: [
       { chapterName: 'Super Senses', description: 'Animal senses — sight, smell, hearing compared to humans' },
-      { chapterName: 'A Snake Charmers Story', description: 'Digestive system, taste buds, nutrition' },
-      { chapterName: 'From Tasting to Digesting', description: 'Food preservation — drying, pickling, freezing' },
-      { chapterName: 'Mangoes Round the Year', description: 'Seed dispersal, germination, plant reproduction' },
-      { chapterName: 'Seeds and Seeds', description: 'Water scarcity, rainwater harvesting, conservation' },
-      { chapterName: 'Every Drop Counts', description: 'Solubility, filtration, sedimentation' },
-      { chapterName: 'Experiments with Water', description: 'Malaria, dengue, disease prevention' },
-      { chapterName: 'A Treat for Mosquitoes', description: 'Mountains, altitude, life in hilly areas' },
-      { chapterName: 'Up You Go', description: 'Historical monuments, architecture, heritage' },
-      { chapterName: 'Walls Tell Stories', description: 'Sunita Williams, space exploration, gravity' }
+      { chapterName: 'A Snake Charmers Story', description: 'Explore concepts and exercises from A Snake Charmers Story' },
+      { chapterName: 'From Tasting to Digesting', description: 'Digestive system, taste buds, nutrition' },
+      { chapterName: 'Mangoes Round the Year', description: 'Food preservation — drying, pickling, freezing' },
+      { chapterName: 'Seeds and Seeds', description: 'Seed dispersal, germination, plant reproduction' },
+      { chapterName: 'Every Drop Counts', description: 'Water scarcity, rainwater harvesting, conservation' },
+      { chapterName: 'Experiments with Water', description: 'Solubility, filtration, sedimentation' },
+      { chapterName: 'A Treat for Mosquitoes', description: 'Malaria, dengue, disease prevention' },
+      { chapterName: 'Up You Go', description: 'Mountains, altitude, life in hilly areas' },
+      { chapterName: 'Walls Tell Stories', description: 'Historical monuments, architecture, heritage' }
     ]
   });
 
@@ -424,14 +424,14 @@ async function seedAll() {
     chapters: [
       { chapterName: 'Knowing Our Numbers', description: 'Comparing numbers, Indian and International place value, estimation' },
       { chapterName: 'Whole Numbers', description: 'Natural numbers, whole numbers, number line, properties' },
-      { chapterName: 'Playing with Numbers', description: 'Factors, multiples, prime, composite, HCF, LCM' },
+      { chapterName: 'Playing with Numbers', description: 'Divisibility rules, puzzles with numbers' },
       { chapterName: 'Basic Geometrical Ideas', description: 'Points, lines, line segments, rays, curves, polygons' },
       { chapterName: 'Understanding Elementary Shapes', description: 'Angles, triangles, quadrilaterals, 3D shapes' },
-      { chapterName: 'Integers', description: 'Negative numbers, number line, addition and subtraction of integers' },
+      { chapterName: 'Integers', description: 'Properties of integers, multiplication and division of integers' },
       { chapterName: 'Fractions', description: 'Types of fractions, comparison, addition, subtraction' },
       { chapterName: 'Decimals', description: 'Place value, comparison, operations on decimals' },
-      { chapterName: 'Data Handling', description: 'Pictograph, bar graph, mean, median, mode basics' },
-      { chapterName: 'Mensuration', description: 'Perimeter and area of rectangles, squares, composite figures' }
+      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
+      { chapterName: 'Mensuration', description: 'Area of trapezium, polygon; surface area and volume of cube, cuboid, cylinder' }
     ]
   });
 
@@ -440,7 +440,7 @@ async function seedAll() {
     chapters: [
       { chapterName: 'Food: Where Does It Come From?', description: 'Sources of food, food variety, herbivores, carnivores, omnivores' },
       { chapterName: 'Components of Food', description: 'Nutrients — carbohydrates, proteins, fats, vitamins, minerals' },
-      { chapterName: 'Fibre to Fabric', description: 'Plant and animal fibres, spinning, weaving' },
+      { chapterName: 'Fibre to Fabric', description: 'Animal fibres — wool, silk, sericulture' },
       { chapterName: 'Sorting Materials into Groups', description: 'Properties of materials — transparency, solubility, appearance' },
       { chapterName: 'Separation of Substances', description: 'Handpicking, sieving, filtration, evaporation, sedimentation' },
       { chapterName: 'Changes Around Us', description: 'Reversible and irreversible changes' },
@@ -448,7 +448,7 @@ async function seedAll() {
       { chapterName: 'Body Movements', description: 'Human skeletal system, joints, movement in animals' },
       { chapterName: 'The Living Organisms and Their Surroundings', description: 'Habitat, adaptation, biotic and abiotic' },
       { chapterName: 'Motion and Measurement of Distances', description: 'Types of motion, standard units of measurement' },
-      { chapterName: 'Light Shadows and Reflections', description: 'Sources of light, shadows, transparent, translucent, opaque' },
+      { chapterName: 'Light Shadows and Reflections', description: 'Laws of reflection, regular and diffuse reflection, human eye, Braille' },
       { chapterName: 'Electricity and Circuits', description: 'Electric cell, circuits, conductors, insulators' }
     ]
   });
@@ -475,32 +475,32 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'English', std: 6, board: BOARD,
     chapters: [
-      { chapterName: 'A New Day', description: 'Story — a dog seeking the most powerful master' },
-      { chapterName: 'The Journey Begins', description: 'Biography — space, inspiration, perseverance' },
-      { chapterName: 'The Power of Words', description: 'Story — empathy, understanding disabilities' },
-      { chapterName: 'Discovering the World', description: 'Self-descriptions — identity, aspirations, diversity' },
-      { chapterName: 'Nature and Us', description: 'Story — justice, cricket, sportsmanship' },
-      { chapterName: 'Stories from Around the World', description: 'Story — village fair, luck vs skill' },
-      { chapterName: 'Dreams and Aspirations', description: 'Informational — camels, snakes, desert adaptations' },
-      { chapterName: 'The Gift of Friendship', description: 'Story — nature, animals, observation of a fight' },
-      { chapterName: 'Exploring the Unknown', description: 'Concepts from Exploring the Unknown' },
-      { chapterName: 'The World of Imagination', description: 'Concepts from The World of Imagination' }
+      { chapterName: 'A New Day', description: 'Explore concepts and exercises from A New Day' },
+      { chapterName: 'The Journey Begins', description: 'Explore concepts and exercises from The Journey Begins' },
+      { chapterName: 'The Power of Words', description: 'Explore concepts and exercises from The Power of Words' },
+      { chapterName: 'Discovering the World', description: 'Explore concepts and exercises from Discovering the World' },
+      { chapterName: 'Nature and Us', description: 'Explore concepts and exercises from Nature and Us' },
+      { chapterName: 'Stories from Around the World', description: 'Explore concepts and exercises from Stories from Around the World' },
+      { chapterName: 'Dreams and Aspirations', description: 'Explore concepts and exercises from Dreams and Aspirations' },
+      { chapterName: 'The Gift of Friendship', description: 'Explore concepts and exercises from The Gift of Friendship' },
+      { chapterName: 'Exploring the Unknown', description: 'Explore concepts and exercises from Exploring the Unknown' },
+      { chapterName: 'The World of Imagination', description: 'Explore concepts and exercises from The World of Imagination' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 6, board: BOARD,
     chapters: [
-      { chapterName: 'Vasant Ch 1', description: 'कविता — प्रकृति प्रेम, स्वतंत्रता' },
-      { chapterName: 'Vasant Ch 2', description: 'संस्मरण — बचपन की यादें' },
-      { chapterName: 'Vasant Ch 3', description: 'कहानी — पक्षी, करुणा' },
-      { chapterName: 'Vasant Ch 4', description: 'कविता — चाँद, कल्पना' },
-      { chapterName: 'Vasant Ch 5', description: 'निबंध — लिपि, भाषा का विकास' },
-      { chapterName: 'Vasant Ch 6', description: 'कहानी — विज्ञान कथा' },
-      { chapterName: 'Vasant Ch 7', description: 'कविता — सहयोग, एकता' },
-      { chapterName: 'Vasant Ch 8', description: 'एकांकी — हास्य, नाटक' },
-      { chapterName: 'Vasant Ch 9', description: 'कहानी — शौक, दोस्ती' },
-      { chapterName: 'Vasant Ch 10', description: 'कविता — वीरता, देशभक्ति' }
+      { chapterName: 'Vasant Ch 1', description: 'Explore concepts and exercises from Vasant Ch 1' },
+      { chapterName: 'Vasant Ch 2', description: 'Explore concepts and exercises from Vasant Ch 2' },
+      { chapterName: 'Vasant Ch 3', description: 'Explore concepts and exercises from Vasant Ch 3' },
+      { chapterName: 'Vasant Ch 4', description: 'Explore concepts and exercises from Vasant Ch 4' },
+      { chapterName: 'Vasant Ch 5', description: 'Explore concepts and exercises from Vasant Ch 5' },
+      { chapterName: 'Vasant Ch 6', description: 'Explore concepts and exercises from Vasant Ch 6' },
+      { chapterName: 'Vasant Ch 7', description: 'Explore concepts and exercises from Vasant Ch 7' },
+      { chapterName: 'Vasant Ch 8', description: 'Explore concepts and exercises from Vasant Ch 8' },
+      { chapterName: 'Vasant Ch 9', description: 'Explore concepts and exercises from Vasant Ch 9' },
+      { chapterName: 'Vasant Ch 10', description: 'Explore concepts and exercises from Vasant Ch 10' }
     ]
   });
 
@@ -513,13 +513,13 @@ async function seedAll() {
     subjectName: 'Mathematics', std: 7, board: BOARD,
     chapters: [
       { chapterName: 'Integers', description: 'Properties of integers, multiplication and division of integers' },
-      { chapterName: 'Fractions', description: 'Multiplication and division of fractions and decimals' },
-      { chapterName: 'Data Handling', description: 'Mean, median, mode, bar graphs, probability introduction' },
+      { chapterName: 'Fractions', description: 'Types of fractions, comparison, addition, subtraction' },
+      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
       { chapterName: 'Simple Equations', description: 'Solving linear equations in one variable' },
-      { chapterName: 'Lines and Angles', description: 'Pairs of angles, parallel lines with transversal' },
+      { chapterName: 'Lines and Angles', description: 'Types of angles, parallel lines and transversal, angle sum' },
       { chapterName: 'The Triangle and Its Properties', description: 'Medians, altitudes, angle sum, Pythagoras intro' },
-      { chapterName: 'Comparing Quantities', description: 'SSS, SAS, ASA, RHS congruence criteria' },
-      { chapterName: 'Rational Numbers', description: 'Ratio, percentage, profit-loss, simple interest' }
+      { chapterName: 'Comparing Quantities', description: 'Ratios, percentages, compound interest, discount, tax' },
+      { chapterName: 'Rational Numbers', description: 'Properties of rational numbers, representation on number line' }
     ]
   });
 
@@ -530,10 +530,10 @@ async function seedAll() {
       { chapterName: 'Nutrition in Animals', description: 'Digestive system, digestion in ruminants, amoeba' },
       { chapterName: 'Fibre to Fabric', description: 'Animal fibres — wool, silk, sericulture' },
       { chapterName: 'Heat', description: 'Conduction, convection, radiation, thermometer' },
-      { chapterName: 'Acids Bases and Salts', description: 'Indicators, neutralization, everyday uses' },
+      { chapterName: 'Acids Bases and Salts', description: 'Explore concepts and exercises from Acids Bases and Salts' },
       { chapterName: 'Physical and Chemical Changes', description: 'Types of changes, rusting, crystallization' },
-      { chapterName: 'Weather Climate and Adaptations', description: 'Weather elements, climate zones, animal adaptations' },
-      { chapterName: 'Winds Storms and Cyclones', description: 'Air pressure, wind currents, cyclone structure, safety' },
+      { chapterName: 'Weather Climate and Adaptations', description: 'Monsoon mechanism, seasons, climate controls' },
+      { chapterName: 'Winds Storms and Cyclones', description: 'Explore concepts and exercises from Winds Storms and Cyclones' },
       { chapterName: 'Soil', description: 'Soil profile, types of soil, soil erosion, conservation' },
       { chapterName: 'Respiration in Organisms', description: 'Aerobic, anaerobic, breathing in different organisms' },
       { chapterName: 'Transportation in Animals and Plants', description: 'Circulatory system, blood, xylem, phloem' },
@@ -566,26 +566,26 @@ async function seedAll() {
     subjectName: 'English', std: 7, board: BOARD,
     chapters: [
       { chapterName: 'Three Questions', description: 'Story — Leo Tolstoy, wisdom, present moment' },
-      { chapterName: 'Making a Difference', description: 'Story — kindness, children sharing with a music teacher' },
-      { chapterName: 'A New Chapter', description: 'Story — wit, humor, problem solving' },
-      { chapterName: 'Exploring the World', description: 'Story — Japanese tale, kindness rewarded' },
-      { chapterName: 'The Future', description: 'Story — John Galsworthy, craftsmanship, dedication' }
+      { chapterName: 'Making a Difference', description: 'Explore concepts and exercises from Making a Difference' },
+      { chapterName: 'A New Chapter', description: 'Explore concepts and exercises from A New Chapter' },
+      { chapterName: 'Exploring the World', description: 'Explore concepts and exercises from Exploring the World' },
+      { chapterName: 'The Future', description: 'Explore concepts and exercises from The Future' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 7, board: BOARD,
     chapters: [
-      { chapterName: 'Malhar Ch 1', description: 'कविता — स्वतंत्रता, पक्षी' },
-      { chapterName: 'Malhar Ch 2', description: 'कहानी — दादी का प्रेम, पारिवारिक मूल्य' },
-      { chapterName: 'Malhar Ch 3', description: 'निबंध — नदियाँ, हिमालय' },
-      { chapterName: 'Malhar Ch 4', description: 'कविता — स्वतंत्रता, बंधन' },
-      { chapterName: 'Malhar Ch 5', description: 'कहानी — त्याग, बच्चों से प्रेम' },
-      { chapterName: 'Malhar Ch 6', description: 'लेख — रक्त, स्वास्थ्य' },
-      { chapterName: 'Malhar Ch 7', description: 'नाटक — बाल श्रम, सामाजिक चिंता' },
-      { chapterName: 'Malhar Ch 8', description: 'कविता — प्रकृति, किसान' },
-      { chapterName: 'Malhar Ch 9', description: 'कहानी — स्वतंत्रता, करुणा' },
-      { chapterName: 'Malhar Ch 10', description: 'कहानी — साइकिल चलाना, आत्मविश्वास' }
+      { chapterName: 'Malhar Ch 1', description: 'Explore concepts and exercises from Malhar Ch 1' },
+      { chapterName: 'Malhar Ch 2', description: 'Explore concepts and exercises from Malhar Ch 2' },
+      { chapterName: 'Malhar Ch 3', description: 'Explore concepts and exercises from Malhar Ch 3' },
+      { chapterName: 'Malhar Ch 4', description: 'Explore concepts and exercises from Malhar Ch 4' },
+      { chapterName: 'Malhar Ch 5', description: 'Explore concepts and exercises from Malhar Ch 5' },
+      { chapterName: 'Malhar Ch 6', description: 'Explore concepts and exercises from Malhar Ch 6' },
+      { chapterName: 'Malhar Ch 7', description: 'Explore concepts and exercises from Malhar Ch 7' },
+      { chapterName: 'Malhar Ch 8', description: 'Explore concepts and exercises from Malhar Ch 8' },
+      { chapterName: 'Malhar Ch 9', description: 'Explore concepts and exercises from Malhar Ch 9' },
+      { chapterName: 'Malhar Ch 10', description: 'Explore concepts and exercises from Malhar Ch 10' }
     ]
   });
 
@@ -600,10 +600,10 @@ async function seedAll() {
       { chapterName: 'Rational Numbers', description: 'Properties of rational numbers, representation on number line' },
       { chapterName: 'Linear Equations in One Variable', description: 'Solving equations with variable on both sides' },
       { chapterName: 'Understanding Quadrilaterals', description: 'Types of quadrilaterals, angle sum property' },
-      { chapterName: 'Data Handling', description: 'Constructing quadrilaterals with given measurements' },
-      { chapterName: 'Squares and Square Roots', description: 'Organising data, pie charts, probability' },
-      { chapterName: 'Cubes and Cube Roots', description: 'Perfect squares, patterns, finding square roots' },
-      { chapterName: 'Comparing Quantities', description: 'Perfect cubes, prime factorization method' }
+      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
+      { chapterName: 'Squares and Square Roots', description: 'Perfect squares, patterns, finding square roots' },
+      { chapterName: 'Cubes and Cube Roots', description: 'Perfect cubes, prime factorization method' },
+      { chapterName: 'Comparing Quantities', description: 'Ratios, percentages, compound interest, discount, tax' }
     ]
   });
 
@@ -611,18 +611,18 @@ async function seedAll() {
     subjectName: 'Science', std: 8, board: BOARD,
     chapters: [
       { chapterName: 'Crop Production and Management', description: 'Agricultural practices, irrigation, harvesting, storage' },
-      { chapterName: 'Microorganisms Friend and Foe', description: 'Bacteria, virus, fungi, antibiotics, vaccines' },
-      { chapterName: 'Coal and Petroleum', description: 'Types of synthetic fibres, plastics, 4R principle' },
-      { chapterName: 'Combustion and Flame', description: 'Physical and chemical properties, reactivity, uses' },
-      { chapterName: 'Conservation of Plants and Animals', description: 'Fossil fuels, formation, exhaustible resources' },
-      { chapterName: 'Reproduction in Animals', description: 'Ignition temperature, types of combustion, flame zones' },
-      { chapterName: 'Reaching the Age of Adolescence', description: 'Deforestation, biodiversity, endangered species, biosphere reserves' },
-      { chapterName: 'Force and Pressure', description: 'Cell theory, organelles, plant vs animal cell' },
-      { chapterName: 'Friction', description: 'Sexual and asexual reproduction, fertilization, embryo' },
-      { chapterName: 'Sound', description: 'Puberty, hormones, reproductive health' },
-      { chapterName: 'Chemical Effects of Electric Current', description: 'Contact and non-contact forces, pressure, atmospheric pressure' },
-      { chapterName: 'Some Natural Phenomena', description: 'Types of friction, factors affecting friction, reducing friction' },
-      { chapterName: 'Light', description: 'Vibration, frequency, amplitude, human ear, noise pollution' }
+      { chapterName: 'Microorganisms Friend and Foe', description: 'Explore concepts and exercises from Microorganisms Friend and Foe' },
+      { chapterName: 'Coal and Petroleum', description: 'Fossil fuels, formation, exhaustible resources' },
+      { chapterName: 'Combustion and Flame', description: 'Ignition temperature, types of combustion, flame zones' },
+      { chapterName: 'Conservation of Plants and Animals', description: 'Deforestation, biodiversity, endangered species, biosphere reserves' },
+      { chapterName: 'Reproduction in Animals', description: 'Sexual and asexual reproduction, fertilization, embryo' },
+      { chapterName: 'Reaching the Age of Adolescence', description: 'Puberty, hormones, reproductive health' },
+      { chapterName: 'Force and Pressure', description: 'Contact and non-contact forces, pressure, atmospheric pressure' },
+      { chapterName: 'Friction', description: 'Types of friction, factors affecting friction, reducing friction' },
+      { chapterName: 'Sound', description: 'Production, propagation, reflection, echo, human ear, ultrasound, sonar' },
+      { chapterName: 'Chemical Effects of Electric Current', description: 'Conductors, electroplating, LED' },
+      { chapterName: 'Some Natural Phenomena', description: 'Lightning, earthquakes, electroscope, earthing' },
+      { chapterName: 'Light', description: 'Laws of reflection, regular and diffuse reflection, human eye, Braille' }
     ]
   });
 
@@ -650,27 +650,27 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'English', std: 8, board: BOARD,
     chapters: [
-      { chapterName: 'A New Beginning', description: 'Story — WWI, letters, peace, humanity' },
-      { chapterName: 'Courage and Determination', description: 'Real accounts — natural disaster, survival, bravery' },
-      { chapterName: 'The World of Imagination', description: 'Comic format — Indian independence movement' },
-      { chapterName: 'Nature and Us', description: 'Essay — Everest climb, inner and outer summit' },
-      { chapterName: 'Science and Discovery', description: 'Interview — Stephen Hawking, disability, achievement' }
+      { chapterName: 'A New Beginning', description: 'Explore concepts and exercises from A New Beginning' },
+      { chapterName: 'Courage and Determination', description: 'Explore concepts and exercises from Courage and Determination' },
+      { chapterName: 'The World of Imagination', description: 'Explore concepts and exercises from The World of Imagination' },
+      { chapterName: 'Nature and Us', description: 'Explore concepts and exercises from Nature and Us' },
+      { chapterName: 'Science and Discovery', description: 'Explore concepts and exercises from Science and Discovery' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 8, board: BOARD,
     chapters: [
-      { chapterName: 'Malhar Ch 1', description: 'कविता — सूर्योदय, नई शुरुआत' },
-      { chapterName: 'Malhar Ch 2', description: 'कहानी — ग्रामीण कला, आजीविका' },
-      { chapterName: 'Malhar Ch 3', description: 'व्यंग्य — खराब सड़कें, परिवहन' },
-      { chapterName: 'Malhar Ch 4', description: 'कविता — फकीरी, जीवन दर्शन' },
-      { chapterName: 'Malhar Ch 5', description: 'निबंध — पत्र लेखन, संचार' },
-      { chapterName: 'Malhar Ch 6', description: 'कविता — प्रकृति, संदेशवाहक' },
-      { chapterName: 'Malhar Ch 7', description: 'निबंध — आशावाद, मानवता' },
-      { chapterName: 'Malhar Ch 8', description: 'कविता — उम्मीद, हिम्मत' },
-      { chapterName: 'Malhar Ch 9', description: 'दोहे — कबीर, जीवन ज्ञान' },
-      { chapterName: 'Malhar Ch 10', description: 'कहानी — हास्य, आलस्य' }
+      { chapterName: 'Malhar Ch 1', description: 'Explore concepts and exercises from Malhar Ch 1' },
+      { chapterName: 'Malhar Ch 2', description: 'Explore concepts and exercises from Malhar Ch 2' },
+      { chapterName: 'Malhar Ch 3', description: 'Explore concepts and exercises from Malhar Ch 3' },
+      { chapterName: 'Malhar Ch 4', description: 'Explore concepts and exercises from Malhar Ch 4' },
+      { chapterName: 'Malhar Ch 5', description: 'Explore concepts and exercises from Malhar Ch 5' },
+      { chapterName: 'Malhar Ch 6', description: 'Explore concepts and exercises from Malhar Ch 6' },
+      { chapterName: 'Malhar Ch 7', description: 'Explore concepts and exercises from Malhar Ch 7' },
+      { chapterName: 'Malhar Ch 8', description: 'Explore concepts and exercises from Malhar Ch 8' },
+      { chapterName: 'Malhar Ch 9', description: 'Explore concepts and exercises from Malhar Ch 9' },
+      { chapterName: 'Malhar Ch 10', description: 'Explore concepts and exercises from Malhar Ch 10' }
     ]
   });
 
@@ -683,20 +683,20 @@ async function seedAll() {
     subjectName: 'Mathematics', std: 9, board: BOARD,
     chapters: [
       { chapterName: 'Number Systems', description: 'Rational and irrational numbers, real numbers, decimal expansions, number line' },
-      { chapterName: 'Polynomials', description: 'Polynomials in one variable, zeroes, remainder and factor theorems' },
-      { chapterName: 'Coordinate Geometry', description: 'Cartesian plane, plotting points, quadrants' },
+      { chapterName: 'Polynomials', description: 'Zeroes of polynomials, relationship between zeroes and coefficients, division algorithm' },
+      { chapterName: 'Coordinate Geometry', description: 'Distance formula, section formula, area of triangle' },
       { chapterName: 'Linear Equations in Two Variables', description: 'Equations, solutions, graph of linear equation' },
-      { chapterName: 'Introduction to Euclids Geometry', description: 'Types of angles, parallel lines and transversal, angle sum' },
-      { chapterName: 'Lines and Angles', description: 'Congruence, inequalities in triangles, SAS, ASA, SSS, RHS' },
-      { chapterName: 'Triangles', description: 'Properties, mid-point theorem, parallelogram theorems' },
-      { chapterName: 'Quadrilaterals', description: 'Chords, arcs, angles subtended, cyclic quadrilaterals' },
-      { chapterName: 'Areas of Parallelograms and Triangles', description: 'Cube, cuboid, cylinder, cone, sphere — SA and volume' },
-      { chapterName: 'Circles', description: 'Data collection, frequency distribution, mean, median, mode, bar/histogram' },
-      { chapterName: 'Constructions', description: 'Concepts from Constructions' },
-      { chapterName: 'Herons Formula', description: 'Concepts from Herons Formula' },
-      { chapterName: 'Surface Areas and Volumes', description: 'Concepts from Surface Areas and Volumes' },
-      { chapterName: 'Statistics', description: 'Concepts from Statistics' },
-      { chapterName: 'Probability', description: 'Concepts from Probability' }
+      { chapterName: 'Introduction to Euclids Geometry', description: 'Explore concepts and exercises from Introduction to Euclids Geometry' },
+      { chapterName: 'Lines and Angles', description: 'Types of angles, parallel lines and transversal, angle sum' },
+      { chapterName: 'Triangles', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
+      { chapterName: 'Quadrilaterals', description: 'Properties, mid-point theorem, parallelogram theorems' },
+      { chapterName: 'Areas of Parallelograms and Triangles', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
+      { chapterName: 'Circles', description: 'Tangent to a circle, number of tangents from a point, theorems' },
+      { chapterName: 'Constructions', description: 'Explore concepts and exercises from Constructions' },
+      { chapterName: 'Herons Formula', description: 'Explore concepts and exercises from Herons Formula' },
+      { chapterName: 'Surface Areas and Volumes', description: 'Combinations of solids, conversion of shapes, frustum' },
+      { chapterName: 'Statistics', description: 'Mean deviation, variance, standard deviation' },
+      { chapterName: 'Probability', description: 'Random experiments, events, axiomatic probability' }
     ]
   });
 
@@ -705,19 +705,19 @@ async function seedAll() {
     chapters: [
       { chapterName: 'Matter in Our Surroundings', description: 'States of matter, change of state, evaporation' },
       { chapterName: 'Is Matter Around Us Pure?', description: 'Mixtures, solutions, suspensions, colloids, separation techniques' },
-      { chapterName: 'Atoms and Molecules', description: 'Electrons, protons, neutrons, Thomson, Rutherford, Bohr models' },
-      { chapterName: 'Structure of the Atom', description: 'Cell structure, organelles, prokaryotic vs eukaryotic' },
-      { chapterName: 'The Fundamental Unit of Life', description: 'Plant and animal tissues — meristematic, permanent, epithelial, connective' },
-      { chapterName: 'Tissues', description: 'Classification, five kingdoms, nomenclature, hierarchy' },
-      { chapterName: 'Diversity in Living Organisms', description: 'Distance, displacement, speed, velocity, acceleration, equations of motion, graphs' },
-      { chapterName: 'Motion', description: 'Work, kinetic energy, potential energy, conservation of energy, power' },
-      { chapterName: 'Force and Laws of Motion', description: 'Production, propagation, reflection, echo, human ear, ultrasound, sonar' },
-      { chapterName: 'Gravitation', description: 'Health, disease, infectious agents, prevention, immunization' },
-      { chapterName: 'Work and Energy', description: 'Air, water, soil — biogeochemical cycles, pollution' },
-      { chapterName: 'Sound', description: 'Crop and animal husbandry, green revolution, organic farming' },
-      { chapterName: 'Why Do We Fall Ill', description: 'Concepts from Why Do We Fall Ill' },
-      { chapterName: 'Natural Resources', description: 'Concepts from Natural Resources' },
-      { chapterName: 'Improvement in Food Resources', description: 'Concepts from Improvement in Food Resources' }
+      { chapterName: 'Atoms and Molecules', description: 'Alpha particle scattering, Bohr model, hydrogen spectrum' },
+      { chapterName: 'Structure of the Atom', description: 'Electrons, protons, neutrons, Thomson, Rutherford, Bohr models' },
+      { chapterName: 'The Fundamental Unit of Life', description: 'Cell structure, organelles, prokaryotic vs eukaryotic' },
+      { chapterName: 'Tissues', description: 'Plant and animal tissues — meristematic, permanent, epithelial, connective' },
+      { chapterName: 'Diversity in Living Organisms', description: 'Classification, five kingdoms, nomenclature, hierarchy' },
+      { chapterName: 'Motion', description: 'Distance, displacement, speed, velocity, acceleration, equations of motion, graphs' },
+      { chapterName: 'Force and Laws of Motion', description: 'Distance, displacement, speed, velocity, acceleration, equations of motion, graphs' },
+      { chapterName: 'Gravitation', description: 'Explore concepts and exercises from Gravitation' },
+      { chapterName: 'Work and Energy', description: 'Work, kinetic energy, potential energy, conservation of energy, power' },
+      { chapterName: 'Sound', description: 'Production, propagation, reflection, echo, human ear, ultrasound, sonar' },
+      { chapterName: 'Why Do We Fall Ill', description: 'Health, disease, infectious agents, prevention, immunization' },
+      { chapterName: 'Natural Resources', description: 'Air, water, soil — biogeochemical cycles, pollution' },
+      { chapterName: 'Improvement in Food Resources', description: 'Crop and animal husbandry, green revolution, organic farming' }
     ]
   });
 
@@ -756,11 +756,11 @@ async function seedAll() {
       { chapterName: 'A Truly Beautiful Mind', description: 'Biography — Albert Einstein, genius, humanity' },
       { chapterName: 'The Snake and the Mirror', description: 'Story — humor, vanity, encounter with a snake' },
       { chapterName: 'My Childhood', description: 'Autobiography — APJ Abdul Kalam, early life, inspiration' },
-      { chapterName: 'Packing', description: 'Biographies — Santosh Yadav and Maria Sharapova' },
-      { chapterName: 'Reach for the Top', description: 'Travel essay — Vikram Seth, contrasts, observations' },
-      { chapterName: 'The Bond of Love', description: 'Play — suspense, identity, wit' },
-      { chapterName: 'Kathmandu', description: 'Supplementary — Mulk Raj Anand, fair, parent-child bond' },
-      { chapterName: 'If I Were You', description: 'Supplementary — Ruskin Bond, mischievous monkey' }
+      { chapterName: 'Packing', description: 'Explore concepts and exercises from Packing' },
+      { chapterName: 'Reach for the Top', description: 'Biographies — Santosh Yadav and Maria Sharapova' },
+      { chapterName: 'The Bond of Love', description: 'Explore concepts and exercises from The Bond of Love' },
+      { chapterName: 'Kathmandu', description: 'Travel essay — Vikram Seth, contrasts, observations' },
+      { chapterName: 'If I Were You', description: 'Play — suspense, identity, wit' }
     ]
   });
 
@@ -790,20 +790,20 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 10, board: BOARD,
     chapters: [
-      { chapterName: 'Real Numbers', description: 'Zeroes of polynomials, relationship between zeroes and coefficients, division algorithm' },
-      { chapterName: 'Polynomials', description: 'Graphical and algebraic methods — substitution, elimination, cross-multiplication' },
-      { chapterName: 'Pair of Linear Equations in Two Variables', description: 'Solutions by factorization, completing the square, quadratic formula, discriminant' },
-      { chapterName: 'Quadratic Equations', description: 'nth term, sum of n terms, applications' },
-      { chapterName: 'Arithmetic Progressions', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
-      { chapterName: 'Triangles', description: 'Distance formula, section formula, area of triangle' },
-      { chapterName: 'Coordinate Geometry', description: 'Trigonometric ratios, ratios of complementary angles, identities' },
-      { chapterName: 'Introduction to Trigonometry', description: 'Heights and distances, angle of elevation and depression' },
-      { chapterName: 'Some Applications of Trigonometry', description: 'Tangent to a circle, number of tangents from a point, theorems' },
-      { chapterName: 'Circles', description: 'Sector, segment, area of combinations of figures' },
-      { chapterName: 'Areas Related to Circles', description: 'Combinations of solids, conversion of shapes, frustum' },
-      { chapterName: 'Surface Areas and Volumes', description: 'Mean, median, mode of grouped data, cumulative frequency, ogives' },
-      { chapterName: 'Statistics', description: 'Classical definition, simple problems on single events' },
-      { chapterName: 'Probability', description: 'Concepts from Probability' }
+      { chapterName: 'Real Numbers', description: 'Numbers up to 100, skip counting by 2s, 5s, 10s' },
+      { chapterName: 'Polynomials', description: 'Zeroes of polynomials, relationship between zeroes and coefficients, division algorithm' },
+      { chapterName: 'Pair of Linear Equations in Two Variables', description: 'Graphical and algebraic methods — substitution, elimination, cross-multiplication' },
+      { chapterName: 'Quadratic Equations', description: 'Solutions by factorization, completing the square, quadratic formula, discriminant' },
+      { chapterName: 'Arithmetic Progressions', description: 'nth term, sum of n terms, applications' },
+      { chapterName: 'Triangles', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
+      { chapterName: 'Coordinate Geometry', description: 'Distance formula, section formula, area of triangle' },
+      { chapterName: 'Introduction to Trigonometry', description: 'Trigonometric ratios, ratios of complementary angles, identities' },
+      { chapterName: 'Some Applications of Trigonometry', description: 'Heights and distances, angle of elevation and depression' },
+      { chapterName: 'Circles', description: 'Tangent to a circle, number of tangents from a point, theorems' },
+      { chapterName: 'Areas Related to Circles', description: 'Sector, segment, area of combinations of figures' },
+      { chapterName: 'Surface Areas and Volumes', description: 'Combinations of solids, conversion of shapes, frustum' },
+      { chapterName: 'Statistics', description: 'Mean deviation, variance, standard deviation' },
+      { chapterName: 'Probability', description: 'Random experiments, events, axiomatic probability' }
     ]
   });
 
@@ -811,19 +811,19 @@ async function seedAll() {
     subjectName: 'Science', std: 10, board: BOARD,
     chapters: [
       { chapterName: 'Chemical Reactions and Equations', description: 'Types of reactions, balancing equations, effects of oxidation' },
-      { chapterName: 'Acids Bases and Salts', description: 'Properties, pH scale, indicators, salts preparation' },
+      { chapterName: 'Acids Bases and Salts', description: 'Explore concepts and exercises from Acids Bases and Salts' },
       { chapterName: 'Metals and Non-Metals', description: 'Properties, reactivity series, ionic bonding, corrosion, extraction' },
       { chapterName: 'Carbon and its Compounds', description: 'Covalent bonding, versatile carbon, homologous series, functional groups' },
       { chapterName: 'Life Processes', description: 'Nutrition, respiration, transportation, excretion in plants and animals' },
       { chapterName: 'Control and Coordination', description: 'Nervous system, reflex arc, hormones in animals and plants' },
       { chapterName: 'How do Organisms Reproduce?', description: 'Asexual and sexual reproduction, reproductive health' },
-      { chapterName: 'Heredity and Evolution', description: 'Laws of reflection/refraction, mirrors, lenses, sign convention' },
-      { chapterName: 'Light – Reflection and Refraction', description: 'Eye defects, atmospheric refraction, dispersion, scattering' },
-      { chapterName: 'The Human Eye and the Colourful World', description: 'Ecosystem, food chains and webs, ozone depletion, waste management' },
-      { chapterName: 'Electricity', description: 'Concepts from Electricity' },
-      { chapterName: 'Magnetic Effects of Electric Current', description: 'Concepts from Magnetic Effects of Electric Current' },
-      { chapterName: 'Our Environment', description: 'Concepts from Our Environment' },
-      { chapterName: 'Sustainable Management of Natural Resources', description: 'Concepts from Sustainable Management of Natural Resources' }
+      { chapterName: 'Heredity and Evolution', description: 'Origin of life, evidence, Darwin, Hardy-Weinberg, human evolution' },
+      { chapterName: 'Light – Reflection and Refraction', description: 'Laws of reflection, regular and diffuse reflection, human eye, Braille' },
+      { chapterName: 'The Human Eye and the Colourful World', description: 'Eye defects, atmospheric refraction, dispersion, scattering' },
+      { chapterName: 'Electricity', description: 'Electric cell, circuits, conductors, insulators' },
+      { chapterName: 'Magnetic Effects of Electric Current', description: 'Explore concepts and exercises from Magnetic Effects of Electric Current' },
+      { chapterName: 'Our Environment', description: 'Ecosystem, food chains and webs, ozone depletion, waste management' },
+      { chapterName: 'Sustainable Management of Natural Resources', description: 'Geography — types of resources, conservation, sustainable development' }
     ]
   });
 
@@ -858,32 +858,32 @@ async function seedAll() {
     subjectName: 'English', std: 10, board: BOARD,
     chapters: [
       { chapterName: 'A Letter to God', description: 'Story — Gregorio Lopez, unshakeable faith' },
-      { chapterName: 'Nelson Mandela Long Walk to Freedom', description: 'Autobiography — apartheid, courage, inauguration' },
-      { chapterName: 'Two Stories about Flying', description: 'Diary — WWII, adolescence, hiding' },
-      { chapterName: 'From the Diary of Anne Frank', description: 'A Baker from Goa, Coorg, Tea from Assam' },
-      { chapterName: 'The Hundred Dresses I', description: 'Story — Gavin Maxwell, unusual pet, travel' },
-      { chapterName: 'The Hundred Dresses II', description: 'Story — Valliammai, curiosity, first bus ride' },
-      { chapterName: 'Glimpses of India', description: 'Story — Buddha, suffering, acceptance' },
-      { chapterName: 'Mijbil the Otter', description: 'Play — Anton Chekhov, comedy, marriage proposal' },
-      { chapterName: 'Madam Rides the Bus', description: 'Supplementary — James Herriot, pampered dog' },
-      { chapterName: 'The Sermon at Benares', description: 'Supplementary — H.G. Wells, invisible man' },
-      { chapterName: 'The Proposal', description: 'Supplementary — Richard Ebright, curiosity, research' }
+      { chapterName: 'Nelson Mandela Long Walk to Freedom', description: 'Explore concepts and exercises from Nelson Mandela Long Walk to Freedom' },
+      { chapterName: 'Two Stories about Flying', description: 'Explore concepts and exercises from Two Stories about Flying' },
+      { chapterName: 'From the Diary of Anne Frank', description: 'Diary — WWII, adolescence, hiding' },
+      { chapterName: 'The Hundred Dresses I', description: 'Explore concepts and exercises from The Hundred Dresses I' },
+      { chapterName: 'The Hundred Dresses II', description: 'Explore concepts and exercises from The Hundred Dresses II' },
+      { chapterName: 'Glimpses of India', description: 'A Baker from Goa, Coorg, Tea from Assam' },
+      { chapterName: 'Mijbil the Otter', description: 'Story — Gavin Maxwell, unusual pet, travel' },
+      { chapterName: 'Madam Rides the Bus', description: 'Story — Valliammai, curiosity, first bus ride' },
+      { chapterName: 'The Sermon at Benares', description: 'Story — Buddha, suffering, acceptance' },
+      { chapterName: 'The Proposal', description: 'Play — Anton Chekhov, comedy, marriage proposal' }
     ]
   });
 
   await upsertCurriculum({
     subjectName: 'Hindi', std: 10, board: BOARD,
     chapters: [
-      { chapterName: 'Soor Das', description: 'कविता — कृष्ण भक्ति, विनय, वात्सल्य' },
-      { chapterName: 'Tulsidas', description: 'कविता — तुलसीदास, वीर रस' },
-      { chapterName: 'Dev', description: 'कविता — जयशंकर प्रसाद, आत्मावलोकन' },
-      { chapterName: 'Jaishankar Prasad', description: 'कविता — निराला, बादल, बसंत' },
-      { chapterName: 'Suryakant Tripathi Nirala', description: 'कविता — नागार्जुन, बाल सौंदर्य, कृषि' },
-      { chapterName: 'Nagraj Manushyachar', description: 'कविता — गिरिजाकुमार माथुर, यथार्थ' },
-      { chapterName: 'Girijakumar Mathur', description: 'कहानी — देशभक्ति, सम्मान' },
-      { chapterName: 'Rambriksh Benipuri', description: 'कहानी — सादा जीवन, भक्ति' },
-      { chapterName: 'Manglesh Dabral', description: 'कहानी — नवाबी शैली, व्यंग्य' },
-      { chapterName: 'Swaroopanand', description: 'आत्मकथा — मन्नू भंडारी, संघर्ष' }
+      { chapterName: 'Soor Das', description: 'Explore concepts and exercises from Soor Das' },
+      { chapterName: 'Tulsidas', description: 'Explore concepts and exercises from Tulsidas' },
+      { chapterName: 'Dev', description: 'Geography — types of resources, resource planning, land degradation' },
+      { chapterName: 'Jaishankar Prasad', description: 'Explore concepts and exercises from Jaishankar Prasad' },
+      { chapterName: 'Suryakant Tripathi Nirala', description: 'Explore concepts and exercises from Suryakant Tripathi Nirala' },
+      { chapterName: 'Nagraj Manushyachar', description: 'Explore concepts and exercises from Nagraj Manushyachar' },
+      { chapterName: 'Girijakumar Mathur', description: 'Explore concepts and exercises from Girijakumar Mathur' },
+      { chapterName: 'Rambriksh Benipuri', description: 'Explore concepts and exercises from Rambriksh Benipuri' },
+      { chapterName: 'Manglesh Dabral', description: 'Explore concepts and exercises from Manglesh Dabral' },
+      { chapterName: 'Swaroopanand', description: 'Explore concepts and exercises from Swaroopanand' }
     ]
   });
 
@@ -1194,7 +1194,7 @@ async function seedAll() {
     { q: 'Which insect uses antennae to sense?', options: ['Spider', 'Ant', 'Frog', 'Fish'], ans: 1 },
     { q: 'Dolphins communicate using ___', options: ['Light', 'Sound', 'Smell', 'Touch'], ans: 1 }
   ]});
-  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Seeds and Seeds', questions: [
+  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Every Drop Counts', questions: [
     { q: 'Rainwater harvesting means ___', options: ['Wasting rain', 'Collecting rain for use', 'Drinking rain directly', 'Playing in rain'], ans: 1 },
     { q: 'Which uses the MOST water?', options: ['Brushing teeth', 'Washing a car', 'Filling a swimming pool', 'Drinking a glass'], ans: 2 },
     { q: 'A dripping tap wastes ___', options: ['No water', 'Very little water', 'A lot of water over time', 'Only cold water'], ans: 2 },
@@ -1316,14 +1316,14 @@ async function seedAll() {
     { q: 'The value of 64^(1/3) is:', options: ['2', '4', '8', '16'], ans: 1 },
     { q: 'Which represents a rational number?', options: ['π', '√3', '0.333...', '√5'], ans: 2 }
   ]});
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Real Numbers', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Polynomials', questions: [
     { q: 'The degree of 5x³ + 4x² - 7 is:', options: ['1', '2', '3', '5'], ans: 2 },
     { q: 'A polynomial of degree 2 is called:', options: ['Linear', 'Quadratic', 'Cubic', 'Constant'], ans: 1 },
     { q: 'The zero of p(x) = 2x - 6 is:', options: ['2', '3', '6', '-3'], ans: 1 },
     { q: 'If x = 1 is a zero of p(x), then:', options: ['p(0) = 0', 'p(1) = 0', 'p(-1) = 0', 'p(2) = 0'], ans: 1 },
     { q: 'How many zeroes can a cubic polynomial have at most?', options: ['1', '2', '3', '4'], ans: 2 }
   ]});
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Arithmetic Progressions', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Triangles', questions: [
     { q: 'If two triangles are congruent, they have:', options: ['Same area only', 'Same shape only', 'Same shape and size', 'Different sizes'], ans: 2 },
     { q: 'SAS congruence means:', options: ['Side-Angle-Side', 'Side-Area-Side', 'Sum-Angle-Sum', 'Straight-Angle-Side'], ans: 0 },
     { q: 'The sum of angles of a triangle is:', options: ['90°', '180°', '270°', '360°'], ans: 1 },
@@ -1346,7 +1346,7 @@ async function seedAll() {
     { q: 'Atomic mass of carbon is:', options: ['6 u', '12 u', '14 u', '16 u'], ans: 1 },
     { q: 'The valency of oxygen is:', options: ['1', '2', '3', '4'], ans: 1 }
   ]});
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Diversity in Living Organisms', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'Motion', questions: [
     { q: 'SI unit of velocity is:', options: ['m/s²', 'm/s', 'km/h', 'm'], ans: 1 },
     { q: 'Acceleration due to gravity on Earth is approximately:', options: ['8.9 m/s²', '9.8 m/s²', '10.8 m/s²', '6.8 m/s²'], ans: 1 },
     { q: 'A body at rest has speed equal to:', options: ['1 m/s', '-1 m/s', '0 m/s', 'Infinity'], ans: 2 },
@@ -1389,7 +1389,7 @@ async function seedAll() {
     { q: 'HCF × LCM of two numbers equals:', options: ['Sum of numbers', 'Difference', 'Product of numbers', 'Quotient'], ans: 2 },
     { q: 'The decimal expansion of 17/8 is:', options: ['Terminating', 'Non-terminating repeating', 'Non-terminating non-repeating', 'None'], ans: 0 }
   ]});
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Pair of Linear Equations in Two Variables', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Quadratic Equations', questions: [
     { q: 'The roots of x² - 5x + 6 = 0 are:', options: ['2, 3', '1, 6', '-2, -3', '-1, -6'], ans: 0 },
     { q: 'The discriminant of ax² + bx + c = 0 is:', options: ['b² - 4ac', 'b² + 4ac', '4ac - b²', '2b - ac'], ans: 0 },
     { q: 'If discriminant = 0, the equation has:', options: ['No real roots', 'Two distinct roots', 'Two equal roots', 'Infinite roots'], ans: 2 },
@@ -1403,7 +1403,7 @@ async function seedAll() {
     { q: 'sin²θ + cos²θ = ?', options: ['0', '1', '2', 'sinθ'], ans: 1 },
     { q: 'The value of sec 60° is:', options: ['1', '√2', '2', '1/2'], ans: 2 }
   ]});
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Statistics', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Probability', questions: [
     { q: 'Probability of getting a head when tossing a coin is:', options: ['0', '1/4', '1/2', '1'], ans: 2 },
     { q: 'The probability of an impossible event is:', options: ['0', '1/2', '1', '-1'], ans: 0 },
     { q: 'A die is thrown. P(getting 6) = ?', options: ['1/2', '1/3', '1/6', '6'], ans: 2 },
@@ -1441,7 +1441,7 @@ async function seedAll() {
     { q: '1 kWh = ?', options: ['3.6 × 10⁶ J', '3600 J', '360 J', '36 J'], ans: 0 },
     { q: 'The resistance of a conductor ___ with increase in temperature', options: ['Decreases', 'Increases', 'Remains same', 'Becomes zero'], ans: 1 }
   ]});
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Heredity and Evolution', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'Light – Reflection and Refraction', questions: [
     { q: 'The angle of incidence equals the angle of reflection. This is:', options: ['Snell\'s law', 'Law of reflection', 'Law of refraction', 'Hooke\'s law'], ans: 1 },
     { q: 'A concave mirror converges light at its:', options: ['Centre', 'Pole', 'Focus', 'Radius'], ans: 2 },
     { q: 'The refractive index of glass is about:', options: ['1.0', '1.3', '1.5', '2.0'], ans: 2 },
@@ -1580,7 +1580,7 @@ async function seedAll() {
     { q: 'If f(x) = x² and g(x) = √x, then (gof)(4) = ?', options: ['2', '4', '16', '8'], ans: 1 },
     { q: 'An injective function is also called:', options: ['Onto', 'One-one', 'Bijective', 'Surjective'], ans: 1 }
   ]});
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Statistics', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Probability', questions: [
     { q: 'If P(A) = 0.4 and P(B) = 0.5 and A, B are independent, then P(A∩B) = ?', options: ['0.2', '0.9', '0.1', '0.45'], ans: 0 },
     { q: 'Bayes\' theorem is used when:', options: ['Events are impossible', 'Prior probabilities are known', 'All events are independent', 'Only one event exists'], ans: 1 },
     { q: 'For a binomial distribution, the mean is:', options: ['np', 'npq', '√npq', 'n/p'], ans: 0 },
@@ -1697,7 +1697,7 @@ async function seedAll() {
   ]});
 
   // Class 4
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Carts and Wheels', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Halves and Quarters', questions: [
     { q: 'Half of 20 is:', options: ['5', '10', '15', '20'], ans: 1 },
     { q: 'One quarter of 24 is:', options: ['4', '6', '8', '12'], ans: 1 },
     { q: 'Which is greater: 1/2 or 1/4?', options: ['1/2', '1/4', 'Both equal', 'Cannot tell'], ans: 0 },
@@ -1743,7 +1743,7 @@ async function seedAll() {
     { q: 'All even numbers have ___ as a factor', options: ['1', '2', '3', '5'], ans: 1 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Boxes and Sketches', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Tenths and Hundredths', questions: [
     { q: '0.5 is the same as:', options: ['1/2', '1/5', '5/100', '1/50'], ans: 0 },
     { q: 'Rs 3.50 means:', options: ['3 rupees 5 paise', '3 rupees 50 paise', '35 rupees', '350 paise'], ans: 1 },
     { q: 'Which is greater: 0.7 or 0.65?', options: ['0.7', '0.65', 'Both equal', 'Cannot compare'], ans: 0 },
@@ -1752,7 +1752,7 @@ async function seedAll() {
     { q: '3.2 + 1.5 = ?', options: ['4.5', '4.7', '5.2', '5.7'], ans: 1 }
   ]});
 
-  await upsertQuiz({ subjectName: 'EVS', chapterName: 'A Snake Charmers Story', questions: [
+  await upsertQuiz({ subjectName: 'EVS', chapterName: 'From Tasting to Digesting', questions: [
     { q: 'Digestion begins in the ___', options: ['Stomach', 'Mouth', 'Intestine', 'Liver'], ans: 1 },
     { q: 'Which helps us taste food?', options: ['Teeth', 'Tongue', 'Lips', 'Throat'], ans: 1 },
     { q: 'How many types of teeth do we have?', options: ['1', '2', '3', '4'], ans: 2 },
@@ -1761,7 +1761,7 @@ async function seedAll() {
     { q: 'Spicy food makes our ___ feel hot', options: ['Eyes', 'Ears', 'Tongue', 'Nose'], ans: 2 }
   ]});
 
-  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Mangoes Round the Year', questions: [
+  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Seeds and Seeds', questions: [
     { q: 'Seeds need ___ to grow', options: ['Darkness and cold', 'Water, air and warmth', 'Only sunlight', 'Only soil'], ans: 1 },
     { q: 'The process of a seed growing into a plant is called ___', options: ['Pollination', 'Germination', 'Fertilization', 'Photosynthesis'], ans: 1 },
     { q: 'Coconut seeds are dispersed by ___', options: ['Wind', 'Water', 'Animals', 'Explosion'], ans: 1 },
@@ -1770,7 +1770,7 @@ async function seedAll() {
     { q: 'Seeds that stick to animal fur are dispersed by ___', options: ['Wind', 'Water', 'Animals', 'Explosion'], ans: 2 }
   ]});
 
-  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Walls Tell Stories', questions: [
+  await upsertQuiz({ subjectName: 'EVS', chapterName: 'Sunita in Space', questions: [
     { q: 'Sunita Williams went to ___', options: ['Moon', 'Mars', 'International Space Station', 'Jupiter'], ans: 2 },
     { q: 'In space, objects float because of ___', options: ['Wind', 'Microgravity', 'Air pressure', 'Magnetism'], ans: 1 },
     { q: 'Astronauts wear ___ in space', options: ['Regular clothes', 'Space suits', 'Raincoats', 'Uniforms'], ans: 1 },
@@ -1908,7 +1908,7 @@ async function seedAll() {
     { q: 'Magnetic force is a ___ force', options: ['Contact', 'Non-contact', 'Muscular', 'Frictional'], ans: 1 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Force and Laws of Motion', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'Sound', questions: [
     { q: 'Sound is produced by:', options: ['Light', 'Vibration', 'Heat', 'Colour'], ans: 1 },
     { q: 'Sound cannot travel through:', options: ['Air', 'Water', 'Vacuum', 'Steel'], ans: 2 },
     { q: 'The unit of frequency is:', options: ['Metre', 'Second', 'Hertz', 'Decibel'], ans: 2 },
@@ -1950,7 +1950,7 @@ async function seedAll() {
   // ═══════════════════════════════════════════════════════════
   console.log('📝 Seeding EXPANDED quizzes for Classes 9–10...');
 
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Triangles', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Coordinate Geometry', questions: [
     { q: 'The point (0, 0) is called the:', options: ['Vertex', 'Origin', 'Centre', 'Mid-point'], ans: 1 },
     { q: 'The point (3, -2) lies in quadrant:', options: ['I', 'II', 'III', 'IV'], ans: 3 },
     { q: 'The x-coordinate of a point on the y-axis is:', options: ['1', '-1', '0', 'Undefined'], ans: 2 },
@@ -1977,7 +1977,7 @@ async function seedAll() {
     { q: 'An equilateral triangle with side 6 cm has s = ?', options: ['6', '9', '12', '18'], ans: 1 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Atoms and Molecules', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'Structure of the Atom', questions: [
     { q: 'Who discovered the electron?', options: ['Rutherford', 'J.J. Thomson', 'Bohr', 'Chadwick'], ans: 1 },
     { q: 'Neutrons were discovered by:', options: ['Thomson', 'Rutherford', 'Chadwick', 'Bohr'], ans: 2 },
     { q: 'In Rutherford\'s gold foil experiment, most alpha particles:', options: ['Were deflected', 'Were absorbed', 'Passed through', 'Bounced back'], ans: 2 },
@@ -1988,7 +1988,7 @@ async function seedAll() {
     { q: 'The valency of sodium (Na, Z=11) is:', options: ['1', '2', '3', '8'], ans: 0 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Structure of the Atom', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'The Fundamental Unit of Life', questions: [
     { q: 'Who discovered cells?', options: ['Leeuwenhoek', 'Robert Hooke', 'Schleiden', 'Schwann'], ans: 1 },
     { q: 'The cell membrane is:', options: ['Fully permeable', 'Selectively permeable', 'Impermeable', 'Only found in plants'], ans: 1 },
     { q: 'The jelly-like substance inside the cell is:', options: ['Nucleus', 'Cytoplasm', 'Vacuole', 'Chloroplast'], ans: 1 },
@@ -2008,7 +2008,7 @@ async function seedAll() {
     { q: 'In free fall, all objects have ___ acceleration', options: ['Zero', 'Different', 'Same', 'Increasing'], ans: 2 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Science', chapterName: 'Motion', questions: [
+  await upsertQuiz({ subjectName: 'Science', chapterName: 'Work and Energy', questions: [
     { q: 'Work = Force × ___', options: ['Time', 'Mass', 'Displacement', 'Velocity'], ans: 2 },
     { q: 'The SI unit of work is:', options: ['Newton', 'Watt', 'Joule', 'Pascal'], ans: 2 },
     { q: 'Kinetic energy = ?', options: ['½mv', '½mv²', 'mgh', 'Fd'], ans: 1 },
@@ -2019,7 +2019,7 @@ async function seedAll() {
   ]});
 
   // Class 10 expanded
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Polynomials', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Pair of Linear Equations in Two Variables', questions: [
     { q: 'A pair of linear equations is consistent if it has:', options: ['No solution', 'At least one solution', 'Exactly two solutions', 'Infinite solutions only'], ans: 1 },
     { q: 'Parallel lines have ___ solution(s)', options: ['One', 'No', 'Infinite', 'Two'], ans: 1 },
     { q: 'Coincident lines have ___ solution(s)', options: ['One', 'No', 'Infinite', 'Two'], ans: 2 },
@@ -2028,7 +2028,7 @@ async function seedAll() {
     { q: 'Solve by elimination: x + y = 5 and x - y = 1. x = ?', options: ['2', '3', '4', '5'], ans: 1 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Quadratic Equations', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Arithmetic Progressions', questions: [
     { q: 'In the AP 2, 5, 8, 11..., the common difference is:', options: ['2', '3', '5', '8'], ans: 1 },
     { q: 'The 10th term of the AP 3, 7, 11, 15... is:', options: ['35', '39', '43', '47'], ans: 1 },
     { q: 'The formula for nth term is:', options: ['a + nd', 'a + (n-1)d', 'a × n × d', 'a × (n-1)d'], ans: 1 },
@@ -2038,7 +2038,7 @@ async function seedAll() {
     { q: 'If a = 5, d = 3, n = 20, then the 20th term is:', options: ['57', '60', '62', '65'], ans: 2 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Arithmetic Progressions', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Triangles', questions: [
     { q: 'If two triangles are similar, their corresponding angles are:', options: ['Different', 'Equal', 'Supplementary', 'Complementary'], ans: 1 },
     { q: 'BPT stands for:', options: ['Basic Proportionality Theorem', 'Base Point Theorem', 'Bisector Property Theorem', 'Basic Parallel Theorem'], ans: 0 },
     { q: 'In ΔABC, if DE ∥ BC and AD/DB = 2/3, then AE/EC = ?', options: ['3/2', '2/3', '2/5', '3/5'], ans: 1 },
@@ -2047,7 +2047,7 @@ async function seedAll() {
     { q: 'AA similarity criterion needs:', options: ['Two equal angles', 'Two equal sides', 'Three equal angles', 'One equal side'], ans: 0 }
   ]});
 
-  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Some Applications of Trigonometry', questions: [
+  await upsertQuiz({ subjectName: 'Mathematics', chapterName: 'Circles', questions: [
     { q: 'A tangent to a circle touches it at ___ point(s)', options: ['0', '1', '2', 'Infinite'], ans: 1 },
     { q: 'The tangent at any point is ___ to the radius at that point', options: ['Parallel', 'Perpendicular', 'Equal', 'Opposite'], ans: 1 },
     { q: 'From an external point, ___ tangent(s) can be drawn to a circle', options: ['0', '1', '2', '3'], ans: 2 },
