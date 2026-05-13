@@ -36,6 +36,7 @@ const ProfilePage = () => {
       a.download = `my-data-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      setTimeout(() => setExportData(null), 5000);
     } catch (err) {
       setExportError('Could not export data. Please try again.');
     }

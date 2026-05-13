@@ -21,6 +21,7 @@ const QuizPage = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [perfUpdate, setPerfUpdate] = useState(null);
   const [levelUpData, setLevelUpData] = useState(null);
+  const [toasts, setToasts] = useState([]);
   const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
@@ -181,8 +182,8 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] p-8">
         <div className="card-bub-solid max-w-lg w-full p-10 text-center relative overflow-hidden">
-          {toasts.length > 0 && (
-          <div className="fixed top-4 right-4 z-50 space-y-2">
+          {Array.isArray(toasts) && toasts.length > 0 && (
+            <div className="fixed top-20 right-4 z-50 space-y-2">
             {toasts.map((a, i) => (
               <div key={i} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-4 py-3 rounded-2xl shadow-lg animate-bounce">
                 🏆 {a.name} — {a.description}
