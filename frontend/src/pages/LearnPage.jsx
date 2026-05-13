@@ -165,7 +165,7 @@ const LearnPage = () => {
   const persistLinks = async (linksArray, source) => {
     const seen = new Set();
     const uniqueLinks = linksArray.filter((l) => {
-      if (!l.url || seen.has(l.url)) return false;
+      if (!l.url || !l.url.startsWith('http') || seen.has(l.url)) return false;
       seen.add(l.url);
       return true;
     });
@@ -174,6 +174,7 @@ const LearnPage = () => {
       uniqueLinks.map((link) =>
         authFetch(backendUrl('/api/links'), {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             url: link.url,
             title: link.title || (source === 'youtube' ? 'YouTube Resource' : 'Shaalaa Resource'),
@@ -431,32 +432,33 @@ const LearnPage = () => {
           <div className="h-24 bg-gray-200 border border-gray-200" />
         </div>
       )}
-      {images.map((img, i) => (
-         <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
-           <img src={img} alt="concept visual" className="card-bub-solid w-full object-cover max-h-48 hover:opacity-90 transition-opacity" onError={(e) => e.target.style.display='none'} />
-         </a>
-      ))}
-      {extraLinks.map((link, i) => (
-         <a key={i} href={link.url} target="_blank" rel="noreferrer" className={`block card-bub-solid p-4 font-bold text-sm text-black hover:underline break-words ${link.type === 'yt' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}>
-            {link.type === 'yt' ? '🎬 Watch Related Video' : '📚 Read Shaalaa Material'}
-         </a>
-      ))}
+          {images.filter(img => img && img.startsWith('http')).map((img, i) => (
+             <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
+               <img src={img} alt={`Visual for ${chapter}`} className="bg-white border border-gray-200 rounded-xl w-full object-cover max-h-48 hover:opacity-80 transition-opacity" onError={(e) => { e.target.style.display='none'; }} />
+             </a>
+          ))}
+          {extraLinks.filter(l => l.url && l.url.startsWith('http')).map((link, i) => (
+            <a key={i} href={link.url} target="_blank" rel="noreferrer" className="block bg-white border border-gray-200 rounded-xl p-4 font-bold text-sm hover:shadow-md transition-all break-words">
+              <span className="mr-2">{link.type === 'yt' ? '🎬' : '📚'}</span>
+              {link.title || (link.type === 'yt' ? 'Watch Video' : 'Read Material')}
+            </a>
+          ))}
       {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
          <div className="card-bub-solid bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
       )}
-      {chapterVideos.length > 0 && (
-        <div>
-          <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
-          <div className="space-y-2">
-            {chapterVideos.map((v, i) => (
-              <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block card-bub-solid bg-white p-3 hover:-translate-y-0.5 transition-all">
-                <p className="font-bold text-sm leading-tight">{v.title}</p>
-                {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+              {chapterVideos.length > 0 && (
+                <div>
+                  <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
+                  <div className="space-y-2">
+                    {chapterVideos.filter(v => v.youtubeUrl && v.youtubeUrl.startsWith('http')).map((v, i) => (
+                      <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block bg-white border border-gray-200 rounded-xl p-3 hover:-translate-y-0.5 hover:shadow-md transition-all">
+                        <p className="font-bold text-sm leading-tight">{v.title}</p>
+                        {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
     </>
   );
 
