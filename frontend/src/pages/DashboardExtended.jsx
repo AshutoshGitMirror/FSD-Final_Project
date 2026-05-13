@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import HomeHub from './HomeHub';
 import TopicPage from './TopicPage';
 import LearnPage from './LearnPage';
@@ -107,22 +108,26 @@ const DashboardExtended = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-        <Routes>
-          <Route path="/"                           element={<HomeHub />} />
-          <Route path="/home"                       element={<HomeHub />} />
-          <Route path="/topic"                      element={<TopicPage />} />
-          <Route path="/learn/:subject/:chapter"    element={<LearnPage />} />
-          <Route path="/quiz/:subject/:chapter"     element={<QuizPage />} />
-          <Route path="/progress"                   element={<ProgressPage />} />
-          <Route path="/saved-links"                element={<SavedLinksPage />} />
-          <Route path="/leaderboard"                element={<LeaderboardPage />} />
-          <Route path="/concept-map"                element={<KnowledgeGraphPage />} />
-          <Route path="/review"                     element={<SpacedRepetitionPage />} />
-          <Route path="/teacher"                    element={<TeacherDashboard />} />
-          <Route path="/profile"                    element={<ProfilePage />} />
-          <Route path="/achievements"              element={<AchievementsPage />} />
-          <Route path="/quick-quiz"                element={<QuickQuizPage />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <motion.div key={location.pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.12 }}>
+            <Routes location={location}>
+              <Route path="/"                           element={<HomeHub />} />
+              <Route path="/home"                       element={<HomeHub />} />
+              <Route path="/topic"                      element={<TopicPage />} />
+              <Route path="/learn/:subject/:chapter"    element={<LearnPage />} />
+              <Route path="/quiz/:subject/:chapter"     element={<QuizPage />} />
+              <Route path="/progress"                   element={<ProgressPage />} />
+              <Route path="/saved-links"                element={<SavedLinksPage />} />
+              <Route path="/leaderboard"                element={<LeaderboardPage />} />
+              <Route path="/concept-map"                element={<KnowledgeGraphPage />} />
+              <Route path="/review"                     element={<SpacedRepetitionPage />} />
+              <Route path="/teacher"                    element={<TeacherDashboard />} />
+              <Route path="/profile"                    element={<ProfilePage />} />
+              <Route path="/achievements"              element={<AchievementsPage />} />
+              <Route path="/quick-quiz"                element={<QuickQuizPage />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
       </main>
 
     </div>
