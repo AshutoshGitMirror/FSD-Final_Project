@@ -55,10 +55,10 @@ const BOOKS = [
     names:['Super Senses','A Snake Charmers Story','From Tasting to Digesting','Mangoes Round the Year','Seeds and Seeds','Every Drop Counts','Experiments with Water','A Treat for Mosquitoes','Up You Go','Walls Tell Stories'] },
 
   // ════════════════════════════════════════
-  // CLASS 6 (NEP 2020)
+  // CLASS 6 (NEP 2020 - Ganita Prakash)
   // ════════════════════════════════════════
-  { std:6, subject:'Mathematics', code:'fegp1', ch1:1, chN:10,
-    names:['Knowing Our Numbers','Whole Numbers','Playing with Numbers','Basic Geometrical Ideas','Understanding Elementary Shapes','Integers','Fractions','Decimals','Data Handling','Mensuration'] },
+  { std:6, subject:'Mathematics', code:'fegp1', ch1:1, chN:7,
+    names:['Patterns in Mathematics','Lines and Angles','Number Play','Data Handling and Presentation','Prime Time','Perimeter and Area','Fractions'] },
   { std:6, subject:'Science', code:'fecu1', ch1:1, chN:12,
     names:['Food: Where Does It Come From?','Components of Food','Fibre to Fabric','Sorting Materials into Groups','Separation of Substances','Changes Around Us','Getting to Know Plants','Body Movements','The Living Organisms and Their Surroundings','Motion and Measurement of Distances','Light Shadows and Reflections','Electricity and Circuits'] },
   { std:6, subject:'English', code:'fepr1', ch1:1, chN:10,
@@ -67,10 +67,10 @@ const BOOKS = [
     names:['Vasant Ch 1','Vasant Ch 2','Vasant Ch 3','Vasant Ch 4','Vasant Ch 5','Vasant Ch 6','Vasant Ch 7','Vasant Ch 8','Vasant Ch 9','Vasant Ch 10'] },
 
   // ════════════════════════════════════════
-  // CLASS 7 (NEP 2020)
+  // CLASS 7 (NEP 2020 - Ganita Prakash)
   // ════════════════════════════════════════
   { std:7, subject:'Mathematics', code:'gegp1', ch1:1, chN:8,
-    names:['Integers','Fractions','Data Handling','Simple Equations','Lines and Angles','The Triangle and Its Properties','Comparing Quantities','Rational Numbers'] },
+    names:['Large Numbers Around Us','Arithmetic Expressions','A Peek Beyond the Point','Expressions using Letter-Variables','Parallel and Intersecting Lines','Number Play','A Tale of Three Intersecting Lines','Working with Fractions'] },
   { std:7, subject:'Science', code:'gecu1', ch1:1, chN:12,
     names:['Nutrition in Plants','Nutrition in Animals','Fibre to Fabric','Heat','Acids Bases and Salts','Physical and Chemical Changes','Weather Climate and Adaptations','Winds Storms and Cyclones','Soil','Respiration in Organisms','Transportation in Animals and Plants','Reproduction in Plants'] },
   { std:7, subject:'English', code:'gepr1', ch1:1, chN:5,
@@ -83,10 +83,10 @@ const BOOKS = [
     names:['SST Ch 11','SST Ch 12','SST Ch 13','SST Ch 14','SST Ch 15','SST Ch 16','SST Ch 17','SST Ch 18'] },
 
   // ════════════════════════════════════════
-  // CLASS 8 (NEP 2020)
+  // CLASS 8 (NEP 2020 - Ganita Prakash)
   // ════════════════════════════════════════
   { std:8, subject:'Mathematics', code:'hegp1', ch1:1, chN:7,
-    names:['Rational Numbers','Linear Equations in One Variable','Understanding Quadrilaterals','Data Handling','Squares and Square Roots','Cubes and Cube Roots','Comparing Quantities'] },
+    names:['Rational Numbers','Power Play','A Story of Numbers','Quadrilaterals','Number Play','We Distribute, Yet Things...','Proportional Reasoning-1'] },
   { std:8, subject:'Science', code:'hecu1', ch1:1, chN:13,
     names:['Crop Production and Management','Microorganisms Friend and Foe','Coal and Petroleum','Combustion and Flame','Conservation of Plants and Animals','Reproduction in Animals','Reaching the Age of Adolescence','Force and Pressure','Friction','Sound','Chemical Effects of Electric Current','Some Natural Phenomena','Light'] },
   { std:8, subject:'English', code:'hepr1', ch1:1, chN:5,
@@ -95,10 +95,10 @@ const BOOKS = [
     names:['Malhar Ch 1','Malhar Ch 2','Malhar Ch 3','Malhar Ch 4','Malhar Ch 5','Malhar Ch 6','Malhar Ch 7','Malhar Ch 8','Malhar Ch 9','Malhar Ch 10'] },
 
   // ════════════════════════════════════════
-  // CLASS 9
+  // CLASS 9 (NEP 2020 - Ganita Manjari)
   // ════════════════════════════════════════
-  { std:9, subject:'Mathematics', code:'iemh1', ch1:1, chN:15,
-    names:['Number Systems','Polynomials','Coordinate Geometry','Linear Equations in Two Variables','Introduction to Euclids Geometry','Lines and Angles','Triangles','Quadrilaterals','Areas of Parallelograms and Triangles','Circles','Constructions','Herons Formula','Surface Areas and Volumes','Statistics','Probability'] },
+  { std:9, subject:'Mathematics', code:'iemh1', ch1:1, chN:8,
+    names:['Orienting Yourself: The Use of Coordinates','Introduction to Linear Polynomials','The World of Numbers','Exploring Algebraic Identities','I’m Up and Down, and Round and Round','Measuring Space: Perimeter and Area','The Mathematics of Maybe: Introduction to Probability','Predicting What Comes Next: Exploring Sequences'] },
   { std:9, subject:'Science', code:'iesc1', ch1:1, chN:15,
     names:['Matter in Our Surroundings','Is Matter Around Us Pure?','Atoms and Molecules','Structure of the Atom','The Fundamental Unit of Life','Tissues','Diversity in Living Organisms','Motion','Force and Laws of Motion','Gravitation','Work and Energy','Sound','Why Do We Fall Ill','Natural Resources','Improvement in Food Resources'] },
   { std:9, subject:'English', code:'iebe1', ch1:1, chN:11,

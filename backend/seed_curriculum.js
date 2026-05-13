@@ -422,16 +422,13 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 6, board: BOARD,
     chapters: [
-      { chapterName: 'Knowing Our Numbers', description: 'Comparing numbers, Indian and International place value, estimation' },
-      { chapterName: 'Whole Numbers', description: 'Natural numbers, whole numbers, number line, properties' },
-      { chapterName: 'Playing with Numbers', description: 'Divisibility rules, puzzles with numbers' },
-      { chapterName: 'Basic Geometrical Ideas', description: 'Points, lines, line segments, rays, curves, polygons' },
-      { chapterName: 'Understanding Elementary Shapes', description: 'Angles, triangles, quadrilaterals, 3D shapes' },
-      { chapterName: 'Integers', description: 'Properties of integers, multiplication and division of integers' },
-      { chapterName: 'Fractions', description: 'Types of fractions, comparison, addition, subtraction' },
-      { chapterName: 'Decimals', description: 'Place value, comparison, operations on decimals' },
-      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
-      { chapterName: 'Mensuration', description: 'Area of trapezium, polygon; surface area and volume of cube, cuboid, cylinder' }
+      { chapterName: 'Patterns in Mathematics', description: 'Explore mathematical patterns in numbers and shapes' },
+      { chapterName: 'Lines and Angles', description: 'Basic geometry of lines, segments, and angles' },
+      { chapterName: 'Number Play', description: 'Fun with large numbers and their properties' },
+      { chapterName: 'Data Handling and Presentation', description: 'Organizing and visualizing data effectively' },
+      { chapterName: 'Prime Time', description: 'Factors, multiples, and prime numbers' },
+      { chapterName: 'Perimeter and Area', description: 'Measuring the boundaries and surfaces of shapes' },
+      { chapterName: 'Fractions', description: 'Understanding parts of a whole' }
     ]
   });
 
@@ -512,14 +509,14 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 7, board: BOARD,
     chapters: [
-      { chapterName: 'Integers', description: 'Properties of integers, multiplication and division of integers' },
-      { chapterName: 'Fractions', description: 'Types of fractions, comparison, addition, subtraction' },
-      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
-      { chapterName: 'Simple Equations', description: 'Solving linear equations in one variable' },
-      { chapterName: 'Lines and Angles', description: 'Types of angles, parallel lines and transversal, angle sum' },
-      { chapterName: 'The Triangle and Its Properties', description: 'Medians, altitudes, angle sum, Pythagoras intro' },
-      { chapterName: 'Comparing Quantities', description: 'Ratios, percentages, compound interest, discount, tax' },
-      { chapterName: 'Rational Numbers', description: 'Properties of rational numbers, representation on number line' }
+      { chapterName: 'Large Numbers Around Us', description: 'Understanding place value and large numbers' },
+      { chapterName: 'Arithmetic Expressions', description: 'Solving and simplifying arithmetic operations' },
+      { chapterName: 'A Peek Beyond the Point', description: 'Exploring decimals and their applications' },
+      { chapterName: 'Expressions using Letter-Variables', description: 'Introduction to basic algebra' },
+      { chapterName: 'Parallel and Intersecting Lines', description: 'Understanding geometry of lines' },
+      { chapterName: 'Number Play', description: 'Advanced number properties and patterns' },
+      { chapterName: 'A Tale of Three Intersecting Lines', description: 'Exploring triangles and their properties' },
+      { chapterName: 'Working with Fractions', description: 'Operations and word problems with fractions' }
     ]
   });
 
@@ -597,13 +594,13 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 8, board: BOARD,
     chapters: [
-      { chapterName: 'Rational Numbers', description: 'Properties of rational numbers, representation on number line' },
-      { chapterName: 'Linear Equations in One Variable', description: 'Solving equations with variable on both sides' },
-      { chapterName: 'Understanding Quadrilaterals', description: 'Types of quadrilaterals, angle sum property' },
-      { chapterName: 'Data Handling', description: 'Organising data, pie charts, probability' },
-      { chapterName: 'Squares and Square Roots', description: 'Perfect squares, patterns, finding square roots' },
-      { chapterName: 'Cubes and Cube Roots', description: 'Perfect cubes, prime factorization method' },
-      { chapterName: 'Comparing Quantities', description: 'Ratios, percentages, compound interest, discount, tax' }
+      { chapterName: 'Rational Numbers', description: 'Properties and operations of rational numbers' },
+      { chapterName: 'Power Play', description: 'Exponents and powers in mathematics' },
+      { chapterName: 'A Story of Numbers', description: 'Square roots and cube roots' },
+      { chapterName: 'Quadrilaterals', description: 'Understanding four-sided polygons' },
+      { chapterName: 'Number Play', description: 'Multiples and divisibility explorations' },
+      { chapterName: 'We Distribute, Yet Things...', description: 'Introduction to algebraic distribution' },
+      { chapterName: 'Proportional Reasoning-1', description: 'Ratios and proportions' }
     ]
   });
 
@@ -682,21 +679,14 @@ async function seedAll() {
   await upsertCurriculum({
     subjectName: 'Mathematics', std: 9, board: BOARD,
     chapters: [
-      { chapterName: 'Number Systems', description: 'Rational and irrational numbers, real numbers, decimal expansions, number line' },
-      { chapterName: 'Polynomials', description: 'Zeroes of polynomials, relationship between zeroes and coefficients, division algorithm' },
-      { chapterName: 'Coordinate Geometry', description: 'Distance formula, section formula, area of triangle' },
-      { chapterName: 'Linear Equations in Two Variables', description: 'Equations, solutions, graph of linear equation' },
-      { chapterName: 'Introduction to Euclids Geometry', description: 'Explore concepts and exercises from Introduction to Euclids Geometry' },
-      { chapterName: 'Lines and Angles', description: 'Types of angles, parallel lines and transversal, angle sum' },
-      { chapterName: 'Triangles', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
-      { chapterName: 'Quadrilaterals', description: 'Properties, mid-point theorem, parallelogram theorems' },
-      { chapterName: 'Areas of Parallelograms and Triangles', description: 'Similarity, BPT, criteria for similarity, Pythagoras theorem' },
-      { chapterName: 'Circles', description: 'Tangent to a circle, number of tangents from a point, theorems' },
-      { chapterName: 'Constructions', description: 'Explore concepts and exercises from Constructions' },
-      { chapterName: 'Herons Formula', description: 'Explore concepts and exercises from Herons Formula' },
-      { chapterName: 'Surface Areas and Volumes', description: 'Combinations of solids, conversion of shapes, frustum' },
-      { chapterName: 'Statistics', description: 'Mean deviation, variance, standard deviation' },
-      { chapterName: 'Probability', description: 'Random experiments, events, axiomatic probability' }
+      { chapterName: 'Orienting Yourself: The Use of Coordinates', description: 'Introduction to coordinate geometry' },
+      { chapterName: 'Introduction to Linear Polynomials', description: 'Basic polynomial concepts' },
+      { chapterName: 'The World of Numbers', description: 'Exploring real number systems' },
+      { chapterName: 'Exploring Algebraic Identities', description: 'Key formulas and identities' },
+      { chapterName: 'I’m Up and Down, and Round and Round', description: 'Exploring circles and related shapes' },
+      { chapterName: 'Measuring Space: Perimeter and Area', description: 'Geometric measurements' },
+      { chapterName: 'The Mathematics of Maybe: Introduction to Probability', description: 'Basic probability theory' },
+      { chapterName: 'Predicting What Comes Next: Exploring Sequences', description: 'Introduction to mathematical sequences' }
     ]
   });
 

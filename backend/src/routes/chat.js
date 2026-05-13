@@ -123,92 +123,100 @@ async function runOllamaChatEndpoint({ prompt, systemContext, isThinking, wantsS
     `&session_id=${encodeURIComponent(sessionId)}` +
     `&deep_research=${isThinking ? 'true' : 'false'}`;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/x-ndjson'
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/x-ndjson'
+      },
+      signal: controller.signal
+    });
+
+    if (!response.ok || !response.body) {
+      throw new Error(`Ollama /chat HTTP ${response.status}`);
     }
-  });
 
-  if (!response.ok || !response.body) {
-    throw new Error(`Ollama /chat HTTP ${response.status}`);
-  }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let ndjson = '';
+    let full = '';
+    let fullThoughts = '';
+    let modelName = '';
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let ndjson = '';
-  let full = '';
-  let fullThoughts = '';
-  let modelName = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      ndjson += decoder.decode(value, { stream: true });
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    ndjson += decoder.decode(value, { stream: true });
+      let lineBreak = ndjson.indexOf('\n');
+      while (lineBreak !== -1) {
+        const line = ndjson.slice(0, lineBreak).trim();
+        ndjson = ndjson.slice(lineBreak + 1);
+        if (line) {
+          const parsed = JSON.parse(line);
+          if (parsed.error) throw new Error(parsed.error);
 
-    let lineBreak = ndjson.indexOf('\n');
-    while (lineBreak !== -1) {
-      const line = ndjson.slice(0, lineBreak).trim();
-      ndjson = ndjson.slice(lineBreak + 1);
-      if (line) {
-        const parsed = JSON.parse(line);
-        if (parsed.error) throw new Error(parsed.error);
+          if (!modelName && (parsed.model_name || parsed.model)) {
+            modelName = parsed.model_name || parsed.model;
+          }
 
-        if (!modelName && (parsed.model_name || parsed.model)) {
-          modelName = parsed.model_name || parsed.model;
-        }
+          const { text, thoughtText } = extractOllamaStreamParts(parsed);
 
-        const { text, thoughtText } = extractOllamaStreamParts(parsed);
+          if (thoughtText) {
+            fullThoughts += thoughtText;
+            if (wantsStream) {
+              writeSse(res, 'thought', { text: thoughtText });
+            }
+          }
 
-        if (thoughtText) {
-          fullThoughts += thoughtText;
-          if (wantsStream) {
-            writeSse(res, 'thought', { text: thoughtText });
+          if (text) {
+            full += text;
+            if (wantsStream) {
+              writeSse(res, 'token', { text });
+            }
           }
         }
+        lineBreak = ndjson.indexOf('\n');
+      }
+    }
 
-        if (text) {
-          full += text;
-          if (wantsStream) {
-            writeSse(res, 'token', { text });
-          }
+    ndjson += decoder.decode();
+    if (ndjson.trim()) {
+      const parsed = JSON.parse(ndjson.trim());
+      if (parsed.error) throw new Error(parsed.error);
+      if (!modelName && (parsed.model_name || parsed.model)) {
+        modelName = parsed.model_name || parsed.model;
+      }
+      const { text, thoughtText } = extractOllamaStreamParts(parsed);
+      if (thoughtText) {
+        fullThoughts += thoughtText;
+        if (wantsStream) {
+          writeSse(res, 'thought', { text: thoughtText });
         }
       }
-      lineBreak = ndjson.indexOf('\n');
-    }
-  }
-
-  ndjson += decoder.decode();
-  if (ndjson.trim()) {
-    const parsed = JSON.parse(ndjson.trim());
-    if (parsed.error) throw new Error(parsed.error);
-    if (!modelName && (parsed.model_name || parsed.model)) {
-      modelName = parsed.model_name || parsed.model;
-    }
-    const { text, thoughtText } = extractOllamaStreamParts(parsed);
-    if (thoughtText) {
-      fullThoughts += thoughtText;
-      if (wantsStream) {
-        writeSse(res, 'thought', { text: thoughtText });
+      if (text) {
+        full += text;
+        if (wantsStream) {
+          writeSse(res, 'token', { text });
+        }
       }
     }
-    if (text) {
-      full += text;
-      if (wantsStream) {
-        writeSse(res, 'token', { text });
-      }
+
+    if (!full.trim() && !fullThoughts.trim()) {
+      throw new Error('Ollama /chat returned empty output');
     }
-  }
 
-  if (!full.trim() && !fullThoughts.trim()) {
-    throw new Error('Ollama /chat returned empty output');
+    return {
+      reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
+      thoughts: fullThoughts.trim() || undefined,
+      model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b')
+    };
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return {
-    reply: full.trim() || (fullThoughts.trim() ? 'See thought process below.' : ''),
-    thoughts: fullThoughts.trim() || undefined,
-    model: modelName || (isThinking ? 'deepseek-r1:latest' : 'llama3.1:8b')
-  };
 }
 
 async function runOllamaGenerateFallback({ prompt, systemContext, isThinking, wantsStream, res }) {
