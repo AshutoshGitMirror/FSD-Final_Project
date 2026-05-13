@@ -15,6 +15,7 @@ import ProfilePage from './ProfilePage';
 import AchievementsPage from './AchievementsPage';
 import QuickQuizPage from './QuickQuizPage';
 import MobileNavigation from '../components/MobileNavigation';
+import ToastContainer from '../components/ToastContainer';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl } from '../config/api';
 
@@ -128,6 +129,7 @@ const DashboardExtended = () => {
             </Routes>
           </motion.div>
         </AnimatePresence>
+        <ToastContainer />
       </main>
 
     </div>

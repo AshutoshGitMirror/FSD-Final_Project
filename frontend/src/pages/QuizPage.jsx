@@ -4,6 +4,7 @@ import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
 import LevelUpCelebration from '../components/LevelUpCelebration';
+import { addToast } from '../components/ToastContainer';
 
 const QuizPage = () => {
   const { subject, chapter } = useParams();
@@ -21,7 +22,6 @@ const QuizPage = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [perfUpdate, setPerfUpdate] = useState(null);
   const [levelUpData, setLevelUpData] = useState(null);
-  const [toasts, setToasts] = useState([]);
   const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
@@ -127,7 +127,9 @@ const QuizPage = () => {
             if (gcRes.ok) {
               const gcData = await gcRes.json();
               if (gcData.newAchievements?.length) {
-                setToasts(gcData.newAchievements);
+                gcData.newAchievements.forEach(a => {
+                  addToast(`🏆 ${a.name} — ${a.desc}`, 'achievement', 4000);
+                });
               }
             }
           } catch (gcErr) {
@@ -182,16 +184,7 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] p-8">
         <div className="card-bub-solid max-w-lg w-full p-10 text-center relative overflow-hidden">
-          {Array.isArray(toasts) && toasts.length > 0 && (
-            <div className="fixed top-20 right-4 z-50 space-y-2">
-            {toasts.map((a, i) => (
-              <div key={i} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-4 py-3 rounded-2xl shadow-lg animate-bounce">
-                🏆 {a.name} — {a.description}
-              </div>
-            ))}
-          </div>
-        )}
-        <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
+          <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
           <span className="text-8xl block mb-4 pt-6 animate-bounce">{emoji}</span>
           <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Quiz Complete!</h1>
           <p className="font-bold text-lg text-gray-600 mb-6">{message}</p>
