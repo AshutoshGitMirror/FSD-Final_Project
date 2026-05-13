@@ -24,6 +24,15 @@ const DashboardExtended = () => {
   const user = getUser();
   const [sideStreak, setSideStreak] = useState(null);
 
+  // Redirect new users to onboarding
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('onboardingDone')) {
+        navigate('/onboarding', { replace: true });
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     authFetch(backendUrl('/api/gamification/dashboard'))
       .then(r => r.ok ? r.json() : {})
