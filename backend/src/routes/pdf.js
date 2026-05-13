@@ -4,14 +4,14 @@ const NcertPdf = require('../models/NcertPdf');
 
 router.get('/', async (req, res) => {
   try {
-    const { std, subject, chapter } = req.query;
+    const { std, subject, chapter, board } = req.query;
     if (!std || !subject || !chapter) {
       return res.status(400).json({ error: 'std, subject, and chapter are required' });
     }
 
     const pdf = await NcertPdf.findOne({
       std: Number(std),
-      board: 'CBSE',
+      board: board || 'CBSE',
       subjectName: { $regex: new RegExp('^' + subject.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
       chapterName: { $regex: new RegExp('^' + chapter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
     });
