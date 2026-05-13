@@ -57,8 +57,9 @@ const TopicPage = () => {
     fetch(backendUrl(`/api/curriculum?std=${std}&board=${board}`), { signal: controller.signal })
       .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
       .then(data => {
-        setCurriculum(data);
-        if (data.length > 0) setSelectedSubject(data[0].subjectName);
+        const arr = Array.isArray(data) ? data : [];
+        setCurriculum(arr);
+        if (arr.length > 0) setSelectedSubject(arr[0].subjectName);
         setLoading(false);
       })
       .catch(err => { if (err.name === 'AbortError') return; console.error(err); setError(err.message); setLoading(false); });
