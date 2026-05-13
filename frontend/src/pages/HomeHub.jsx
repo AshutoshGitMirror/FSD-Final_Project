@@ -87,30 +87,28 @@ const HomeHub = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Welcome Header */}
-      <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-8 border border-violet-200/50 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+      <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-6 border border-violet-200/50 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex-1">
-            <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
-            <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
+            <p className="text-gray-500 font-bold mt-0.5">Grade {user?.std} · {user?.board}</p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Mini streak */}
+          <div className="flex items-center gap-2">
             {gamification && (
-              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full px-4 py-2 border border-amber-200">
-                <span className="text-lg">{gamification.streak > 0 ? '🔥' : '💪'}</span>
-                <span className="font-bold text-sm">{gamification.streak}</span>
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full px-3 py-1.5 border border-amber-200">
+                <span className="text-base">{gamification.streak > 0 ? '🔥' : '💪'}</span>
+                <span className="font-bold text-xs">{gamification.streak}</span>
               </div>
             )}
-            {/* Mini achievements */}
             {gamification && (
-              <div className="flex items-center gap-1.5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-full px-4 py-2 border border-violet-200">
-                <span className="text-lg">🏆</span>
-                <span className="font-bold text-sm">{gamification.unlockedCount}/{gamification.totalCount}</span>
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-full px-3 py-1.5 border border-violet-200">
+                <span className="text-base">🏆</span>
+                <span className="font-bold text-xs">{gamification.unlockedCount}/{gamification.totalCount}</span>
               </div>
             )}
-            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl px-5 py-3 border border-amber-200">
-              <span className="text-2xl">🤖</span>
-              <p className="text-sm font-medium text-gray-600 italic">{mascotQuote}</p>
+            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-2xl px-4 py-2 border border-violet-200">
+              <span className="text-lg">🤖</span>
+              <p className="text-xs font-bold text-gray-600 italic max-w-[180px] truncate">{mascotQuote}</p>
             </div>
           </div>
         </div>
@@ -127,15 +125,19 @@ const HomeHub = () => {
               </h2>
               {lastChapter && (
                 <p className="text-violet-200 text-sm mt-2">
-                  {lastChapter.isCompleted ? '✅ Completed — pick another chapter!' : `📖 ${Math.round((lastChapter.quizScore / lastChapter.totalQuestions) * 100)}% mastered`}
+                  {lastChapter.isCompleted ? '📚 Completed · review to stay sharp!' : `📖 ${Math.round((lastChapter.quizScore / lastChapter.totalQuestions) * 100)}% mastered`}
                 </p>
               )}
             </div>
             <span className="text-6xl opacity-30">📚</span>
           </div>
-          <Link to={lastChapter ? `/dashboard/learn/${encodeURIComponent(lastChapter.subjectName)}/${encodeURIComponent(lastChapter.chapterName)}` : '/dashboard/topic'}
+          <Link to={lastChapter
+              ? (lastChapter.isCompleted
+                ? `/dashboard/quiz/${encodeURIComponent(lastChapter.subjectName)}/${encodeURIComponent(lastChapter.chapterName)}`
+                : `/dashboard/learn/${encodeURIComponent(lastChapter.subjectName)}/${encodeURIComponent(lastChapter.chapterName)}`)
+              : '/dashboard/topic'}
             className="inline-block mt-4 bg-white text-violet-700 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all active:scale-95">
-            {lastChapter ? '▶ Continue' : '🚀 Start Learning'}
+            {lastChapter ? (lastChapter.isCompleted ? '📝 Review Quiz' : '▶ Continue') : '🚀 Start Learning'}
           </Link>
         </div>
 
@@ -154,7 +156,7 @@ const HomeHub = () => {
               <span className="text-lg">{bestSubject ? STAR_LABELS[bestSubject.starLevel] || '🌱 Sprout' : '🌱 Sprout'}</span>
             </div>
             {bestSubject && (
-              <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full" style={{ width: `${Math.min(100, (bestSubject.averageScore || 0))}%` }} />
               </div>
             )}
@@ -162,25 +164,7 @@ const HomeHub = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <Link to="/dashboard/topic" className="bg-blue-50 rounded-2xl p-4 text-center hover:bg-blue-100 transition-all hover:-translate-y-1 hover:shadow-lg">
-          <span className="text-3xl block mb-1">📚</span>
-          <span className="font-bold text-sm">Curriculum</span>
-        </Link>
-        <Link to="/dashboard/leaderboard" className="bg-amber-50 rounded-2xl p-4 text-center hover:bg-amber-100 transition-all hover:-translate-y-1 hover:shadow-lg">
-          <span className="text-3xl block mb-1">🏆</span>
-          <span className="font-bold text-sm">Leaderboard</span>
-        </Link>
-        <Link to="/dashboard/review" className="bg-green-50 rounded-2xl p-4 text-center hover:bg-green-100 transition-all hover:-translate-y-1 hover:shadow-lg">
-          <span className="text-3xl block mb-1">🔄</span>
-          <span className="font-bold text-sm">Review</span>
-        </Link>
-        <Link to="/dashboard/concept-map" className="bg-purple-50 rounded-2xl p-4 text-center hover:bg-purple-100 transition-all hover:-translate-y-1 hover:shadow-lg">
-          <span className="text-3xl block mb-1">🧠</span>
-          <span className="font-bold text-sm">Concept Map</span>
-        </Link>
-      </div>
+
 
       {/* Subjects Grid */}
       <h2 className="font-black text-xl mb-4">Your Subjects</h2>
@@ -197,10 +181,10 @@ const HomeHub = () => {
               <span className="text-3xl block mb-2">{icon}</span>
               <h3 className="font-bold text-base">{subject.subjectName}</h3>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-xs font-bold text-gray-400">{completed}/{total} chapters</span>
+                <span className="text-xs font-bold text-gray-500">{completed}/{total} chapters</span>
                 <span className="text-xs font-bold">{perf ? STAR_LABELS[perf.starLevel]?.split(' ')[0] || '🌱' : '🌱'}</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+              <div className="w-full h-2.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full" style={{ width: `${total > 0 ? (completed / total) * 100 : 0}%` }} />
               </div>
             </Link>
@@ -239,8 +223,8 @@ const HomeHub = () => {
               <span className="font-bold">🏆 Achievements</span>
               <span className="font-black text-lg">{gamification.unlockedCount}/{gamification.totalCount}</span>
             </div>
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full" style={{ width: `${(gamification.unlockedCount / gamification.totalCount) * 100}%` }} />
+              <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-400 rounded-full" style={{ width: `${(gamification.unlockedCount / gamification.totalCount) * 100}%` }} />
             </div>
             {gamification.recentAchievements?.length > 0 && (
               <p className="text-xs font-bold text-gray-500 mt-2">

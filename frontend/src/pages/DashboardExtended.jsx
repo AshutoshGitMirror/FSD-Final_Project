@@ -68,7 +68,7 @@ const DashboardExtended = () => {
         </div>
         <nav className="flex-1 p-5 space-y-2 flex flex-col overflow-y-auto">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-2 mb-1">Learn</p>
-          <Link to="/dashboard"              className={getLinkClass('/home', 'from-amber-400 to-orange-400')}>🏠 Home</Link>
+          <Link to="/dashboard"              className={getLinkClass('/home', 'from-violet-500 to-fuchsia-600')}>🏠 Home</Link>
           <Link to="/dashboard/topic"        className={getLinkClass('/topic', 'from-blue-400 to-cyan-400')}>📚 Curriculum</Link>
           <Link to="/dashboard/review"       className={getLinkClass('/review', 'from-purple-400 to-violet-500 text-white')}>🧠 Daily Practice</Link>
           <Link to="/dashboard/quick-quiz"   className={getLinkClass('/quick-quiz', 'from-green-400 to-emerald-500 text-white')}>⚡ Quick Quiz</Link>
