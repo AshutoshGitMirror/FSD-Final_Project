@@ -68,7 +68,7 @@ const HomeHub = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Welcome Header */}
-      <div className="mb-8">
+      <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-8 border border-violet-200/50 shadow-sm">
         <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
         <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
       </div>

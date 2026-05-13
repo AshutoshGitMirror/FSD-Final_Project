@@ -19,6 +19,7 @@ const QuizPage = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [perfUpdate, setPerfUpdate] = useState(null);
+  const [toasts, setToasts] = useState([]);
   const hasSavedRef = useRef(false);
 
   // ── Fetch Quiz Data from DB ──────────────────────────────────
@@ -71,12 +72,11 @@ const QuizPage = () => {
     if (finished && quizBank.length > 0 && !hasSavedRef.current) {
       hasSavedRef.current = true;
       const pct = score / quizBank.length;
-      if (pct >= 0.5) {
-        confetti({ particleCount: pct >= 0.9 ? 200 : 80, spread: 120, origin: { y: 0.6 } });
-        if (pct >= 0.9) {
-          setTimeout(() => confetti({ particleCount: 100, spread: 160, origin: { y: 0.5, x: 0.3 } }), 300);
-          setTimeout(() => confetti({ particleCount: 100, spread: 160, origin: { y: 0.5, x: 0.7 } }), 500);
-        }
+      const cCount = pct >= 0.9 ? 80 : pct >= 0.5 ? 60 : 30;
+      confetti({ particleCount: cCount, spread: 100, origin: { y: 0.6 } });
+      if (pct >= 0.9) {
+        setTimeout(() => confetti({ particleCount: 50, spread: 140, origin: { y: 0.5, x: 0.3 } }), 300);
+        setTimeout(() => confetti({ particleCount: 50, spread: 140, origin: { y: 0.5, x: 0.7 } }), 500);
       }
       const saveResult = async () => {
         try {
@@ -106,6 +106,21 @@ const QuizPage = () => {
             console.log('Spaced repetition concepts initialized');
           } catch (srErr) {
             console.warn('SR init skipped:', srErr);
+          }
+
+          try {
+            const gcRes = await authFetch(backendUrl('/api/gamification/check'), {
+              method: 'POST',
+              body: JSON.stringify({ action: 'quiz_complete', metadata: { score: pct } })
+            });
+            if (gcRes.ok) {
+              const gcData = await gcRes.json();
+              if (gcData.newAchievements?.length) {
+                setToasts(gcData.newAchievements);
+              }
+            }
+          } catch (gcErr) {
+            console.warn('Gamification check skipped:', gcErr);
           }
         } catch (err) {
           console.error('Failed to save progress:', err);
@@ -156,7 +171,16 @@ const QuizPage = () => {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-80px)] p-8">
         <div className="card-bub-solid max-w-lg w-full p-10 text-center relative overflow-hidden">
-          <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
+          {toasts.length > 0 && (
+          <div className="fixed top-4 right-4 z-50 space-y-2">
+            {toasts.map((a, i) => (
+              <div key={i} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-4 py-3 rounded-2xl shadow-lg animate-bounce">
+                🏆 {a.name} — {a.description}
+              </div>
+            ))}
+          </div>
+        )}
+        <div className={`absolute top-0 left-0 w-full h-2 ${colorClass}`}></div>
           <span className="text-8xl block mb-4 pt-6 animate-bounce">{emoji}</span>
           <h1 className="text-4xl font-black uppercase mb-2 tracking-tighter">Quiz Complete!</h1>
           <p className="font-bold text-lg text-gray-600 mb-6">{message}</p>
