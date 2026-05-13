@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import HomeHub from './HomeHub';
 import TopicPage from './TopicPage';
@@ -13,13 +14,22 @@ import ProfilePage from './ProfilePage';
 import AchievementsPage from './AchievementsPage';
 import QuickQuizPage from './QuickQuizPage';
 import MobileNavigation from '../components/MobileNavigation';
-import { getUser } from '../utils/auth';
+import { authFetch, getUser } from '../utils/auth';
+import { backendUrl } from '../config/api';
 
 // ── Dashboard Extended ─────────────────────────────────────────
 const DashboardExtended = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = getUser();
+  const [sideStreak, setSideStreak] = useState(null);
+
+  useEffect(() => {
+    authFetch(backendUrl('/api/gamification/dashboard'))
+      .then(r => r.ok ? r.json() : {})
+      .then(d => { if (d.streak) setSideStreak(d.streak); })
+      .catch(() => {});
+  }, []);
 
   const getLinkClass = (path, colorGrad) => {
     const currentPath = location.pathname;
@@ -72,10 +82,16 @@ const DashboardExtended = () => {
             <div className="w-9 h-9 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold flex items-center justify-center text-sm flex-shrink-0">
               {user?.fullName?.[0]?.toUpperCase() || '?'}
             </div>
-            <div className="text-left overflow-hidden">
+            <div className="flex-1 text-left overflow-hidden">
               <p className="font-bold text-sm leading-none truncate">{user?.fullName || 'Scholar'}</p>
               <p className="text-xs text-gray-500 mt-0.5">Std {user?.std} · {user?.board}</p>
             </div>
+            {sideStreak > 0 && (
+              <div className="text-right">
+                <span className="text-sm">🔥</span>
+                <span className="font-bold text-xs">{sideStreak}</span>
+              </div>
+            )}
           </Link>
         </div>
       </aside>
