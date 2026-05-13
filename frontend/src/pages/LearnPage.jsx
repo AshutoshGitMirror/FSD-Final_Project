@@ -102,9 +102,9 @@ const LearnPage = () => {
   const [feedbacks, setFeedbacks] = useState({});
   const [diagrams, setDiagrams] = useState([]);
   const [loadingDiagrams, setLoadingDiagrams] = useState(false);
-  const [chapterVideos, setChapterVideos] = useState([]);
   const [isTeaching, setIsTeaching] = useState(false);
   const [showResourceDrawer, setShowResourceDrawer] = useState(false);
+  const [viewMode, setViewMode] = useState('chat'); // 'chat' | 'split' | 'resources'
   const [loadingMessage] = useState(() => {
     const msgs = [
       'Warming up the AI brain... 🧠',
@@ -214,14 +214,6 @@ const LearnPage = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, images, extraLinks]);
-
-  useEffect(() => {
-    if (!subject || !chapter) return;
-    fetch(backendUrl(`/api/video?std=${std}&subject=${encodeURIComponent(subject)}&chapter=${encodeURIComponent(chapter)}`))
-      .then(r => r.ok ? r.json() : [])
-      .then(data => setChapterVideos(Array.isArray(data) ? data : []))
-      .catch(() => {});
-  }, [std, subject, chapter]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -469,37 +461,25 @@ const LearnPage = () => {
               {link.title || (link.type === 'yt' ? 'Watch Video' : 'Read Material')}
             </a>
           ))}
-      {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
+      {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && !loadingDiagrams && (
          <div className="card-bub-solid bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
       )}
-              {chapterVideos.length > 0 && (
-                <div>
-                  <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
-                  <div className="space-y-2">
-                    {chapterVideos.filter(v => v.youtubeUrl && v.youtubeUrl.startsWith('http')).map((v, i) => (
-                      <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block bg-white border border-gray-200 rounded-xl p-3 hover:-translate-y-0.5 hover:shadow-md transition-all">
-                        <p className="font-bold text-sm leading-tight">{v.title}</p>
-                        {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
     </>
   );
 
   return (
     <div className="flex h-[calc(100vh-80px)] p-4 md:p-8 gap-4 md:gap-8">
-      {/* Visual / Links Sidebar (desktop) */}
-      <div className="hidden lg:flex lg:w-1/3 flex-col gap-6 overflow-y-auto pr-4">
-        <h2 className="text-lg font-bold bg-gray-100 text-gray-700 px-4 py-2 rounded-xl inline-block">Visuals & Links</h2>
-        <div className="space-y-4">
-          {renderResources()}
+      {/* Visual / Links Sidebar (desktop — only in split or resources mode) */}
+      {(viewMode === 'split' || viewMode === 'resources') && (
+        <div className={`${viewMode === 'resources' ? 'flex-1' : 'w-1/3'} hidden lg:flex flex-col gap-4 overflow-y-auto pr-2`}>
+          <h2 className="text-lg font-bold bg-gray-100 text-gray-700 px-4 py-2 rounded-xl">Visuals & Links</h2>
+          <div className="space-y-4">{renderResources()}</div>
         </div>
-      </div>
+      )}
 
-      {/* Main Chat Area */}
-      <div className="flex-1 card-bub-solid bg-white flex flex-col p-4 md:p-6 relative">
+      {/* Main Chat Area (only in chat or split mode) */}
+      {(viewMode === 'chat' || viewMode === 'split') && (
+      <div className={`${viewMode === 'chat' ? 'flex-1' : 'flex-1'} card-bub-solid bg-white flex flex-col p-4 md:p-6 relative`}>
         {/* Floating resource button (mobile) */}
         <button
           onClick={() => setShowResourceDrawer(true)}
@@ -516,6 +496,18 @@ const LearnPage = () => {
                <h1 className="text-lg md:text-xl font-black tracking-tight text-white">{chapter}</h1>
                <p className="font-bold text-xs text-white/70">{subject} • Session Active</p>
             </div>
+          </div>
+          {/* Layout toggle */}
+          <div className="hidden lg:flex items-center gap-1 bg-white/10 rounded-full p-0.5">
+            <button onClick={() => setViewMode('chat')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'chat' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+              💬 Chat
+            </button>
+            <button onClick={() => setViewMode('split')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'split' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+              ↔ Split
+            </button>
+            <button onClick={() => setViewMode('resources')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'resources' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+              📊 Resources
+            </button>
           </div>
         </div>
         
@@ -624,6 +616,7 @@ const LearnPage = () => {
            </div>
         </div>
       </div>
+      )}
 
       {/* Mobile Resource Drawer */}
       <ResourceDrawer open={showResourceDrawer} onClose={() => setShowResourceDrawer(false)}>
