@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getUser } from '../utils/auth';
 
 const TABS = [
-  { path: '/dashboard/topic', icon: '🏠', label: 'Home' },
+  { path: '/dashboard', icon: '🏠', label: 'Home' },
   { path: '/dashboard/topic', icon: '📚', label: 'Learn' },
   { path: '/dashboard/progress', icon: '⭐', label: 'Progress' },
   { path: '/dashboard/review', icon: '🔔', label: 'Review' },
@@ -13,6 +13,7 @@ const TABS = [
 
 const DRAWER_ITEMS = [
   { path: '/dashboard/concept-map', icon: '🧠', label: 'Concept Map' },
+  { path: '/dashboard/achievements', icon: '🏆', label: 'Achievements' },
   { path: '/dashboard/saved-links', icon: '🔗', label: 'Saved Links' },
   { path: '/dashboard/leaderboard', icon: '🏆', label: 'Leaderboard' },
 ];
