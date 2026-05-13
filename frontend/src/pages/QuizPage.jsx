@@ -298,6 +298,14 @@ const QuizPage = () => {
           />
         ))}
       </div>
+
+      <LevelUpCelebration
+        show={!!levelUpData}
+        starName={levelUpData?.starName || ''}
+        starLevel={levelUpData?.starLevel || 1}
+        subject={levelUpData?.subject || ''}
+        onClose={() => setLevelUpData(null)}
+      />
     </div>
   );
 };
