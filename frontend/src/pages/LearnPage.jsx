@@ -497,7 +497,7 @@ const LearnPage = () => {
         <div className="flex-1 overflow-y-auto space-y-4 md:space-y-6 pr-2 md:pr-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 font-medium leading-relaxed ${msg.role === 'user' ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm rounded-tl-none flex flex-col gap-3'}`}>
+              <div className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 font-medium leading-relaxed ${msg.role === 'user' ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white' : 'bg-white border border-gray-200 text-gray-900 shadow-sm rounded-tl-none flex flex-col gap-3'}`}>
                 {msg.thoughts && (
                   <blockquote className="bg-gray-200 border-l-4 border-gray-500 p-3 text-xs font-mono text-gray-700 rounded-sm">
                     <p className="font-black uppercase mb-1 flex items-center gap-1"><span>🧠</span> Thought Process</p>
@@ -512,10 +512,10 @@ const LearnPage = () => {
                     </div>
                   </blockquote>
                 )}
-                <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none text-sm md:text-base">
+                <div className="prose prose-p:my-1 prose-p:text-gray-900 prose-li:my-0 prose-li:text-gray-900 prose-strong:text-gray-900 prose-em:text-gray-900 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-pre:bg-gray-800 prose-pre:text-white max-w-none text-sm md:text-base">
                   {msg.role === 'ai' ? (
                     msg.isPlaceholder ? (
-                      <span className="italic opacity-70">{msg.text}</span>
+                      <span className="italic text-gray-700">{msg.text}</span>
                     ) : (
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm, remarkMath]}
