@@ -60,7 +60,14 @@ const QuickQuizPage = () => {
       setShowResult(false);
     } else {
       setFinished(true);
-      if (score >= 2) confetti({ particleCount: 100, spread: 120, origin: { y: 0.6 } });
+      const count = score >= 2 ? 80 : 30;
+      confetti({ particleCount: count, spread: 120, origin: { y: 0.6 } });
+      // Check for achievements
+      authFetch(backendUrl('/api/gamification/check'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'quiz_complete', metadata: { score: Math.round((score / questions.length) * 100) } })
+      }).catch(() => {});
     }
   };
 

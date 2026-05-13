@@ -17,12 +17,25 @@ const HomeHub = () => {
   const [gamification, setGamification] = useState(null);
   const [lastChapter, setLastChapter] = useState(null);
   const [greeting, setGreeting] = useState('');
+  const [mascotQuote, setMascotQuote] = useState('');
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good morning');
     else if (hour < 17) setGreeting('Good afternoon');
     else setGreeting('Good evening');
+
+    const quotes = [
+      'Every expert was once a beginner! 🌟',
+      'Mistakes are proof that you are trying! 💪',
+      'The more you learn, the more you grow! 🌱',
+      'You are smarter than you think! 🧠',
+      'Learning is an adventure! 🚀',
+      'Small steps lead to big results! 👣',
+      'Curiosity is the key to knowledge! 🔑',
+      'You\'ve got this, superstar! ⭐',
+    ];
+    setMascotQuote(quotes[Math.floor(Math.random() * quotes.length)]);
   }, []);
 
   useEffect(() => {
@@ -74,8 +87,16 @@ const HomeHub = () => {
     <div className="p-6 max-w-5xl mx-auto">
       {/* Welcome Header */}
       <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-8 border border-violet-200/50 shadow-sm">
-        <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
-        <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
+        <div className="flex items-start gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
+            <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
+          </div>
+          <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl px-5 py-3 border border-amber-200 ml-auto">
+            <span className="text-2xl">🤖</span>
+            <p className="text-sm font-medium text-gray-600 italic">{mascotQuote}</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-4 mb-8">
