@@ -10,6 +10,9 @@ const CurriculumSchema = new mongoose.Schema({
       description: { type: String }
     }
   ]
-});
+}, { timestamps: true });
+
+CurriculumSchema.index({ std: 1, board: 1 });
+CurriculumSchema.index({ std: 1, board: 1, subjectName: 1 }, { unique: true });
 
 module.exports = mongoose.model('Curriculum', CurriculumSchema);
