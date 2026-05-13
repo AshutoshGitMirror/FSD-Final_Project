@@ -1,4 +1,5 @@
 import { Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import HomeHub from './HomeHub';
 import TopicPage from './TopicPage';
 import LearnPage from './LearnPage';
 import QuizPage from './QuizPage';
@@ -7,7 +8,6 @@ import SavedLinksPage from './SavedLinksPage';
 import LeaderboardPage from './LeaderboardPage';
 import KnowledgeGraphPage from './KnowledgeGraphPage';
 import SpacedRepetitionPage from './SpacedRepetitionPage';
-import FeynmanPage from './FeynmanPage';
 import TeacherDashboard from './TeacherDashboard';
 import ProfilePage from './ProfilePage';
 import MobileNavigation from '../components/MobileNavigation';
@@ -42,6 +42,7 @@ const DashboardExtended = () => {
           <Link to="/" className="font-black text-3xl tracking-tighter block hover:underline ">AI TUTOR</Link>
         </div>
         <nav className="flex-1 p-6 space-y-4 flex flex-col overflow-y-auto">
+          <Link to="/dashboard"              className={getLinkClass('/home', 'bg-gradient-to-r from-amber-400 to-orange-400')}>🏠 Home</Link>
           <Link to="/dashboard/topic"        className={getLinkClass('/topic',        'bg-gradient-to-r from-blue-400 to-cyan-400')}>📚 Curriculum</Link>
           <Link to="/dashboard/concept-map"  className={getLinkClass('/concept-map',  'bg-green-400')}>🧠 Concept Map</Link>
           <Link to="/dashboard/review"       className={getLinkClass('/review',       'bg-purple-400 text-white')}>🔄 Review Hub</Link>
@@ -74,7 +75,8 @@ const DashboardExtended = () => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
         <Routes>
-          <Route path="/"                           element={<Navigate to="/dashboard/topic" replace />} />
+          <Route path="/"                           element={<HomeHub />} />
+          <Route path="/home"                       element={<HomeHub />} />
           <Route path="/topic"                      element={<TopicPage />} />
           <Route path="/learn/:subject/:chapter"    element={<LearnPage />} />
           <Route path="/quiz/:subject/:chapter"     element={<QuizPage />} />
@@ -83,7 +85,6 @@ const DashboardExtended = () => {
           <Route path="/leaderboard"                element={<LeaderboardPage />} />
           <Route path="/concept-map"                element={<KnowledgeGraphPage />} />
           <Route path="/review"                     element={<SpacedRepetitionPage />} />
-          <Route path="/feynman"                    element={<FeynmanPage />} />
           <Route path="/teacher"                    element={<TeacherDashboard />} />
           <Route path="/profile"                    element={<ProfilePage />} />
         </Routes>
