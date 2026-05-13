@@ -96,7 +96,7 @@ const LoginPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block font-black text-sm uppercase">🔒 Password</label>
-                <span className="font-bold text-xs text-gray-400 uppercase cursor-not-allowed">Forgot? (coming soon)</span>
+                
               </div>
               <input 
                 type="password" 

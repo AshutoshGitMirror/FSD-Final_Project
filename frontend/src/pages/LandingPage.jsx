@@ -7,7 +7,7 @@ const LandingPage = () => {
         <div className="font-black text-2xl tracking-tighter">AI TUTOR</div>
         <div className="space-x-6 font-bold text-sm">
           <a href="#features" className="hover:underline">FEATURES</a>
-          <Link to="/login" className="hover:underline">PRICING</Link> {/* TODO: Add pricing page */}
+
           <Link to="/login" className="hover:underline">LOGIN</Link>
           <Link to="/signup" className="btn-bub-primary px-4 py-2 text-xs">SIGNUP</Link>
         </div>
