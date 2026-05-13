@@ -468,7 +468,30 @@ const LearnPage = () => {
   );
 
   return (
-    <div className="flex h-[calc(100vh-80px)] p-4 md:p-8 gap-4 md:gap-8">
+    <div className="flex flex-col h-[calc(100vh-80px)] p-4 md:p-8 gap-4">
+      <div className="flex items-center justify-between bg-gradient-to-r from-violet-600 to-fuchsia-700 rounded-xl p-3 md:p-4 shadow-md">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/dashboard/topic')} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full text-white text-lg font-bold transition-all" aria-label="Back to topics">←</button>
+          <div>
+            <h1 className="text-lg md:text-xl font-black tracking-tight text-white">{chapter}</h1>
+            <p className="font-bold text-xs text-white/70">{subject} • Session Active</p>
+          </div>
+        </div>
+        {/* Layout toggle */}
+        <div className="hidden lg:flex items-center gap-1 bg-white/10 rounded-full p-0.5">
+          <button onClick={() => setViewMode('chat')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'chat' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+            💬 Chat
+          </button>
+          <button onClick={() => setViewMode('split')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'split' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+            ↔ Split
+          </button>
+          <button onClick={() => setViewMode('resources')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'resources' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
+            📊 Resources
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0 gap-4 md:gap-8">
       {/* Visual / Links Sidebar (desktop — only in split or resources mode) */}
       {(viewMode === 'split' || viewMode === 'resources') && (
         <div className={`${viewMode === 'resources' ? 'flex-1' : 'w-1/3'} hidden lg:flex flex-col gap-4 overflow-y-auto pr-2`}>
@@ -489,28 +512,6 @@ const LearnPage = () => {
           📎
         </button>
 
-        <div className="mb-4 flex items-center justify-between bg-gradient-to-r from-violet-600 to-fuchsia-700 rounded-xl p-3 md:p-4 shadow-md">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/dashboard/topic')} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full text-white text-lg font-bold transition-all" aria-label="Back to topics">←</button>
-            <div>
-               <h1 className="text-lg md:text-xl font-black tracking-tight text-white">{chapter}</h1>
-               <p className="font-bold text-xs text-white/70">{subject} • Session Active</p>
-            </div>
-          </div>
-          {/* Layout toggle */}
-          <div className="hidden lg:flex items-center gap-1 bg-white/10 rounded-full p-0.5">
-            <button onClick={() => setViewMode('chat')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'chat' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
-              💬 Chat
-            </button>
-            <button onClick={() => setViewMode('split')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'split' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
-              ↔ Split
-            </button>
-            <button onClick={() => setViewMode('resources')} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${viewMode === 'resources' ? 'bg-white text-violet-700' : 'text-white/70 hover:text-white'}`}>
-              📊 Resources
-            </button>
-          </div>
-        </div>
-        
         {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-4 md:space-y-6 pr-2 md:pr-4">
           {messages.map((msg, i) => (
@@ -617,6 +618,8 @@ const LearnPage = () => {
         </div>
       </div>
       )}
+
+      </div>
 
       {/* Mobile Resource Drawer */}
       <ResourceDrawer open={showResourceDrawer} onClose={() => setShowResourceDrawer(false)}>
