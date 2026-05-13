@@ -50,7 +50,7 @@ const SignupPage = () => {
       } else {
         setError('');
         localStorage.setItem('token', data.token);
-        navigate('/dashboard');
+        navigate('/onboarding');
       }
     } catch (err) {
       console.error('Signup error:', err);
