@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { authFetch, getUser } from '../utils/auth';
 import { backendUrl, linksUrl } from '../config/api';
 import ReactMarkdown from 'react-markdown';
@@ -86,6 +86,7 @@ const markdownComponents = {
 
 const LearnPage = () => {
   const { subject, chapter } = useParams();
+  const navigate = useNavigate();
   const user = getUser();
   const std = user?.std || 10;
   const board = user?.board || 'CBSE';
@@ -481,9 +482,12 @@ const LearnPage = () => {
         </button>
 
         <div className="border-b-4 border-black pb-4 mb-4 flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-400 p-3 md:p-4 transform rotate-1 rounded-sm shadow-lg">
-          <div>
-             <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight">{chapter}</h1>
-             <p className="font-bold text-xs md:text-sm">{subject} • Session Active</p>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/dashboard/topic')} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/30 hover:bg-white/50 border-2 border-black rounded-sm text-xl font-black transition-colors" aria-label="Back to topics">←</button>
+            <div>
+               <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight">{chapter}</h1>
+               <p className="font-bold text-xs md:text-sm">{subject} • Session Active</p>
+            </div>
           </div>
           <span className="text-3xl md:text-4xl text-white">🤖</span>
         </div>

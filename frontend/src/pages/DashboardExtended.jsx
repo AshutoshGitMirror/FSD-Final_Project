@@ -10,6 +10,7 @@ import KnowledgeGraphPage from './KnowledgeGraphPage';
 import SpacedRepetitionPage from './SpacedRepetitionPage';
 import TeacherDashboard from './TeacherDashboard';
 import ProfilePage from './ProfilePage';
+import AchievementsPage from './AchievementsPage';
 import MobileNavigation from '../components/MobileNavigation';
 import { getUser } from '../utils/auth';
 
@@ -50,6 +51,7 @@ const DashboardExtended = () => {
           <Link to="/dashboard/progress"     className={getLinkClass('/progress',     'bg-gradient-to-r from-pink-500 to-rose-500 text-white')}>📈 Progress</Link>
           <Link to="/dashboard/saved-links"  className={getLinkClass('/saved-links',  'bg-gradient-to-r from-amber-400 to-orange-400')}>🔗 Saved Links</Link>
           <Link to="/dashboard/leaderboard"  className={getLinkClass('/leaderboard',  'bg-gray-800 text-white')}>🏆 Leaderboard</Link>
+          <Link to="/dashboard/achievements" className={getLinkClass('/achievements','bg-gradient-to-r from-yellow-400 to-amber-500')}>🏆 Achievements</Link>
           {(user?.role === 'teacher' || user?.role === 'admin') && (
             <Link to="/dashboard/teacher"    className={getLinkClass('/teacher', 'bg-red-400 text-white')}>🏫 Teacher Dashboard</Link>
           )}
@@ -87,6 +89,7 @@ const DashboardExtended = () => {
           <Route path="/review"                     element={<SpacedRepetitionPage />} />
           <Route path="/teacher"                    element={<TeacherDashboard />} />
           <Route path="/profile"                    element={<ProfilePage />} />
+          <Route path="/achievements"              element={<AchievementsPage />} />
         </Routes>
       </main>
 
