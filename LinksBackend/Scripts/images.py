@@ -3,20 +3,18 @@ from ddgs import DDGS
 
 def ddgs_images(query: str):
     results_list = []
-    print(f"Searching for: {query}...")
     try:
         with DDGS() as ddgs:
             results = ddgs.images(
-                query=f"{query} labeled diagram for students",
-                region="wt-wt",
-                type_image="clipart",
+                query=f"{query} diagram illustration",
                 safesearch="moderate",
-                max_results=5
+                max_results=10
             )
             for res in results:
-                if "image" in res:
-                    results_list.append(res["image"])
-        return results_list
+                url = res.get("image") or res.get("thumbnail") or res.get("url")
+                if url:
+                    results_list.append(url)
+        return results_list[:5]
     except Exception as e:
-        logging.error(f"Error during DDGS image search for '{query}': {e}", exc_info=True)
+        logging.error(f"DDGS image search error for '{query}': {e}")
         return []
