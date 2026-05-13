@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { backendUrl } from '../config/api';
 import confetti from 'canvas-confetti';
+import { addToast } from '../components/ToastContainer';
 
 const EMOJIS = ['😊', '🙂', '😅', '🔥'];
 
@@ -62,6 +63,7 @@ const QuickQuizPage = () => {
       setFinished(true);
       const count = score >= 2 ? 80 : 30;
       confetti({ particleCount: count, spread: 120, origin: { y: 0.6 } });
+      addToast(`⚡ Quick review complete! ${score}/${questions.length} correct`, 'success', 3000);
       // Check for achievements
       authFetch(backendUrl('/api/gamification/check'), {
         method: 'POST',
