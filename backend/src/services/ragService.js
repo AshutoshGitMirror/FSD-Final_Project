@@ -10,7 +10,17 @@ async function buildContext({ std, board, subject, chapter }) {
   if (chapter) query.chapterName = { $regex: new RegExp('^' + chapter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') };
 
   try {
-    const ncert = await NcertContent.findOne(query);
+    let ncert = await NcertContent.findOne(query);
+    if (!ncert && chapter) {
+      const fallback = { std: query.std, board: query.board };
+      fallback.chapterName = query.chapterName;
+      ncert = await NcertContent.findOne(fallback);
+    }
+    if (!ncert && subject) {
+      const fallback = { std: query.std, board: query.board };
+      fallback.subjectName = query.subjectName;
+      ncert = await NcertContent.findOne(fallback);
+    }
     if (!ncert || !ncert.content) return null;
 
     const context = `Here is the NCERT textbook content for ${ncert.subjectName} - ${ncert.chapterName}:\n\n${ncert.content}`;
