@@ -35,11 +35,11 @@ const LeaderboardPage = () => {
   }, [std, board]);
 
   return (
-    <div className="p-8 pb-20 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
       <div className="text-center mb-12 relative">
         <span className="absolute -top-10 left-10 text-6xl transform -rotate-12 ">👑</span>
         <span className="absolute top-0 right-10 text-4xl transform rotate-12">✨</span>
-        <h1 className="text-5xl font-black uppercase inline-block  p-4 bg-gradient-to-r from-amber-400 to-orange-400  transform -rotate-1">
+        <h1 className="text-3xl md:text-5xl font-black uppercase inline-block p-3 md:p-4 bg-gradient-to-r from-amber-400 to-orange-400 transform -rotate-1">
           {std ? `Grade ${std} Leaderboard` : 'Global Leaderboard'}
         </h1>
         <p className="font-bold text-gray-700 mt-6 text-xl">Top Scholars — {board || 'Global'}</p>

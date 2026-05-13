@@ -9,6 +9,7 @@ import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConceptDiagram from '../components/ConceptDiagram';
+import ResourceDrawer from '../components/ResourceDrawer';
 
 const splitThoughtAndReply = (rawText = '') => {
   const source = String(rawText || '')
@@ -102,6 +103,7 @@ const LearnPage = () => {
   const [loadingDiagrams, setLoadingDiagrams] = useState(false);
   const [chapterVideos, setChapterVideos] = useState([]);
   const [isTeaching, setIsTeaching] = useState(false);
+  const [showResourceDrawer, setShowResourceDrawer] = useState(false);
   const [loadingMessage] = useState(() => {
     const msgs = [
       'Warming up the AI brain... 🧠',
@@ -406,76 +408,91 @@ const LearnPage = () => {
     }
   };
 
+  const renderResources = () => (
+    <>
+      <AnimatePresence>
+        {diagrams.map((d, i) => (
+          <motion.div
+            key={d.conceptName}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <ConceptDiagram
+              definition={d.mermaidDefinition}
+              caption={d.caption}
+            />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+      {loadingDiagrams && (
+        <div className="card-bub-solid bg-white p-4 animate-pulse">
+          <div className="h-24 bg-gray-200 border border-gray-200" />
+        </div>
+      )}
+      {images.map((img, i) => (
+         <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
+           <img src={img} alt="concept visual" className="card-bub-solid w-full object-cover max-h-48 hover:opacity-90 transition-opacity" onError={(e) => e.target.style.display='none'} />
+         </a>
+      ))}
+      {extraLinks.map((link, i) => (
+         <a key={i} href={link.url} target="_blank" rel="noreferrer" className={`block card-bub-solid p-4 font-bold text-sm text-black hover:underline break-words ${link.type === 'yt' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}>
+            {link.type === 'yt' ? '🎬 Watch Related Video' : '📚 Read Shaalaa Material'}
+         </a>
+      ))}
+      {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
+         <div className="card-bub-solid bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
+      )}
+      {chapterVideos.length > 0 && (
+        <div>
+          <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
+          <div className="space-y-2">
+            {chapterVideos.map((v, i) => (
+              <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block card-bub-solid bg-white p-3 hover:-translate-y-0.5 transition-all">
+                <p className="font-bold text-sm leading-tight">{v.title}</p>
+                {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
+  );
+
   return (
-    <div className="flex h-[calc(100vh-80px)] p-8 gap-8">
-      {/* Visual / Links Sidebar */}
-      <div className="w-1/3 flex flex-col gap-6 overflow-y-auto pr-4 hidden lg:flex">
+    <div className="flex h-[calc(100vh-80px)] p-4 md:p-8 gap-4 md:gap-8">
+      {/* Visual / Links Sidebar (desktop) */}
+      <div className="hidden lg:flex lg:w-1/3 flex-col gap-6 overflow-y-auto pr-4">
         <h2 className="text-2xl font-black uppercase bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2  inline-block">Visuals & Links</h2>
         <div className="space-y-4">
-          <AnimatePresence>
-            {diagrams.map((d, i) => (
-              <motion.div
-                key={d.conceptName}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1, duration: 0.4 }}
-              >
-                <ConceptDiagram
-                  definition={d.mermaidDefinition}
-                  caption={d.caption}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {loadingDiagrams && (
-            <div className="card-bub-solid bg-white p-4 animate-pulse">
-              <div className="h-24 bg-gray-200 border border-gray-200" />
-            </div>
-          )}
-          {images.map((img, i) => (
-             <a key={i} href={img} target="_blank" rel="noreferrer" className="block">
-               <img src={img} alt="concept visual" className="card-bub-solid w-full object-cover max-h-48 hover:opacity-90 transition-opacity" onError={(e) => e.target.style.display='none'} />
-             </a>
-          ))}
-          {extraLinks.map((link, i) => (
-             <a key={i} href={link.url} target="_blank" rel="noreferrer" className={`block card-bub-solid p-4 font-bold text-sm text-black hover:underline break-words ${link.type === 'yt' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-amber-400 to-orange-400'}`}>
-                {link.type === 'yt' ? '🎬 Watch Related Video' : '📚 Read Shaalaa Material'}
-             </a>
-          ))}
-          {images.length === 0 && extraLinks.length === 0 && diagrams.length === 0 && chapterVideos.length === 0 && !loadingDiagrams && (
-             <div className="card-bub-solid bg-gray-100 p-6 text-center font-bold text-gray-500">Ask a question to load resources!</div>
-          )}
-          {chapterVideos.length > 0 && (
-            <div>
-              <h3 className="font-black uppercase text-xs mb-2 text-gray-500">📺 Related Videos</h3>
-              <div className="space-y-2">
-                {chapterVideos.map((v, i) => (
-                  <a key={i} href={v.youtubeUrl} target="_blank" rel="noreferrer" className="block card-bub-solid bg-white p-3 hover:-translate-y-0.5 transition-all">
-                    <p className="font-bold text-sm leading-tight">{v.title}</p>
-                    {v.duration && <p className="text-xs font-bold text-gray-400 mt-1">⏱ {v.duration}</p>}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
+          {renderResources()}
         </div>
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 card-bub-solid bg-white flex flex-col p-6">
-        <div className="border-b-4 border-black pb-4 mb-4 flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-400 p-4 transform rotate-1 rounded-sm shadow-lg">
+      <div className="flex-1 card-bub-solid bg-white flex flex-col p-4 md:p-6 relative">
+        {/* Floating resource button (mobile) */}
+        <button
+          onClick={() => setShowResourceDrawer(true)}
+          className="lg:hidden fixed bottom-24 right-4 z-30 min-w-[48px] min-h-[48px] bg-gradient-to-r from-amber-400 to-orange-400 border-2 border-black shadow-lg flex items-center justify-center text-xl font-black"
+          aria-label="Show resources"
+        >
+          📎
+        </button>
+
+        <div className="border-b-4 border-black pb-4 mb-4 flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-400 p-3 md:p-4 transform rotate-1 rounded-sm shadow-lg">
           <div>
-             <h1 className="text-2xl font-black uppercase tracking-tight">{chapter}</h1>
-             <p className="font-bold text-sm">{subject} • Session Active</p>
+             <h1 className="text-xl md:text-2xl font-black uppercase tracking-tight">{chapter}</h1>
+             <p className="font-bold text-xs md:text-sm">{subject} • Session Active</p>
           </div>
-          <span className="text-4xl text-white ">🤖</span>
+          <span className="text-3xl md:text-4xl text-white">🤖</span>
         </div>
         
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto space-y-6 pr-4">
+        <div className="flex-1 overflow-y-auto space-y-4 md:space-y-6 pr-2 md:pr-4">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-4  font-medium leading-relaxed ${msg.role === 'user' ? 'bg-gradient-to-r from-blue-400 to-cyan-400 ' : 'bg-gray-100  rounded-tl-none flex flex-col gap-3'}`}>
+              <div className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4  font-medium leading-relaxed ${msg.role === 'user' ? 'bg-gradient-to-r from-blue-400 to-cyan-400 ' : 'bg-gray-100  rounded-tl-none flex flex-col gap-3'}`}>
                 {msg.thoughts && (
                   <blockquote className="bg-gray-200 border-l-4 border-gray-500 p-3 text-xs font-mono text-gray-700 rounded-sm">
                     <p className="font-black uppercase mb-1 flex items-center gap-1"><span>🧠</span> Thought Process</p>
@@ -490,7 +507,7 @@ const LearnPage = () => {
                     </div>
                   </blockquote>
                 )}
-                <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none">
+                <div className="prose prose-p:my-1 prose-h1:text-xl prose-h2:text-lg prose-ul:my-1 prose-li:my-0 prose-pre:bg-gray-800 prose-pre:text-white max-w-none text-sm md:text-base">
                   {msg.role === 'ai' ? (
                     msg.isPlaceholder ? (
                       <span className="italic opacity-70">{msg.text}</span>
@@ -511,14 +528,14 @@ const LearnPage = () => {
                   <div className="flex items-center gap-2 border-t-2 border-gray-300 pt-2 mt-1">
                     <button
                       onClick={() => handleFeedback(`msg-${i}`, 1)}
-                      className={`text-sm px-2 py-1 border border-gray-200 font-bold hover:bg-green-200 transition-colors ${feedbacks[`msg-${i}`] === 1 ? 'bg-green-400' : 'bg-white'}`}
+                      className="min-w-[44px] min-h-[44px] flex items-center justify-center text-sm border border-gray-200 font-bold hover:bg-green-200 transition-colors bg-white"
                       title="Helpful"
                     >
                       👍
                     </button>
                     <button
                       onClick={() => handleFeedback(`msg-${i}`, -1)}
-                      className={`text-sm px-2 py-1 border border-gray-200 font-bold hover:bg-red-200 transition-colors ${feedbacks[`msg-${i}`] === -1 ? 'bg-red-400' : 'bg-white'}`}
+                      className="min-w-[44px] min-h-[44px] flex items-center justify-center text-sm border border-gray-200 font-bold hover:bg-red-200 transition-colors bg-white"
                       title="Not helpful"
                     >
                       👎
@@ -541,40 +558,45 @@ const LearnPage = () => {
         </div>
 
         {/* Custom Input Box */}
-        <div className="mt-6  p-4 bg-amber-50 flex flex-col gap-4">
+        <div className="mt-4 md:mt-6 p-3 md:p-4 bg-amber-50 flex flex-col gap-3 md:gap-4">
            {/* Toggles */}
-           <div className="flex gap-4 pb-4">
-               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
+           <div className="flex flex-wrap gap-2 md:gap-4 pb-2 md:pb-4">
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-xs md:text-sm min-h-[44px]">
                   <input type="checkbox" className="w-5 h-5 accent-violet-500 border border-gray-200 rounded" checked={isThinking} onChange={e => setIsThinking(e.target.checked)} disabled={isLoading || isTeaching} />
                   🧠 Deep Thinking
                </label>
-               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm">
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-xs md:text-sm min-h-[44px]">
                   <input type="checkbox" className="w-5 h-5 accent-sky-500 border border-gray-200 rounded" checked={showLinks} onChange={e => setShowLinks(e.target.checked)} disabled={isLoading} />
                   🔗 Fetch Links
                </label>
-               <label className="flex items-center gap-2 cursor-pointer font-bold text-sm ml-auto">
+               <label className="flex items-center gap-2 cursor-pointer font-bold text-xs md:text-sm min-h-[44px]">
                   <input type="checkbox" className="w-5 h-5 accent-green-500 border border-gray-200 rounded" checked={isTeaching} onChange={e => { setIsTeaching(e.target.checked); setMessages([{ role: 'ai', text: `👋 Hi! I'm a student. Teach me about "${chapter}" like I'm your classmate!` }]); }} disabled={isLoading} />
                   🧑‍🏫 Teach Mode
                </label>
             </div>
            
            <div className="flex gap-2">
-             <button className="bg-red-200 border border-gray-200 p-3 hover:bg-red-300 font-bold disabled:opacity-50" title="Speech to text (Mocked)" disabled={isLoading}>🎤</button>
+             <button className="bg-red-200 border border-gray-200 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-300 font-bold disabled:opacity-50 text-lg" title="Speech to text" disabled={isLoading}>🎤</button>
              <input 
                type="text" 
-               className="flex-1 input-bub disabled:opacity-50 disabled:bg-gray-100" 
+               className="flex-1 input-bub disabled:opacity-50 disabled:bg-gray-100 min-h-[44px]" 
                placeholder={isLoading ? "Waiting for AI..." : "Type your question..."}
                value={input}
                onChange={e => setInput(e.target.value)}
                onKeyDown={e => e.key === 'Enter' && handleSend()}
                disabled={isLoading}
              />
-             <button className="btn-bub-primary px-6 disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleSend} disabled={isLoading || !input.trim()}>
+             <button className="btn-bub-primary px-4 md:px-6 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base" onClick={handleSend} disabled={isLoading || !input.trim()}>
                 SEND 🚀
              </button>
            </div>
         </div>
       </div>
+
+      {/* Mobile Resource Drawer */}
+      <ResourceDrawer open={showResourceDrawer} onClose={() => setShowResourceDrawer(false)}>
+        {renderResources()}
+      </ResourceDrawer>
     </div>
   );
 };

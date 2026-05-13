@@ -53,11 +53,11 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tight">🏫 Teacher Dashboard</h1>
-          <p className="font-bold text-gray-500 text-sm">Review flagged content and monitor AI interactions</p>
+          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight">🏫 Teacher Dashboard</h1>
+          <p className="font-bold text-gray-500 text-xs md:text-sm">Review flagged content and monitor AI interactions</p>
         </div>
         {stats && (
           <div className="flex gap-3">

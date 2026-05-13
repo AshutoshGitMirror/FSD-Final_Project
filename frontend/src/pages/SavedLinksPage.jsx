@@ -28,8 +28,8 @@ const SavedLinksPage = () => {
   }, []);
 
   return (
-    <div className="p-8 pb-20 max-w-5xl mx-auto">
-      <h1 className="text-4xl font-black uppercase mb-8 border-b-2 border-gray-200 pb-4 inline-block bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4">Saved Links</h1>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+      <h1 className="text-2xl md:text-4xl font-black uppercase mb-6 md:mb-8 border-b-2 border-gray-200 pb-4 inline-block bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4">Saved Links</h1>
       <p className="font-bold text-gray-700 mb-8 max-w-xl">
         All the external links and materials that our AI fetched for you are stored here for your quick revision!
       </p>

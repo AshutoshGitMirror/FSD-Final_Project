@@ -10,6 +10,7 @@ import SpacedRepetitionPage from './SpacedRepetitionPage';
 import FeynmanPage from './FeynmanPage';
 import TeacherDashboard from './TeacherDashboard';
 import ProfilePage from './ProfilePage';
+import MobileNavigation from '../components/MobileNavigation';
 import { getUser } from '../utils/auth';
 
 // ── Dashboard Extended ─────────────────────────────────────────
@@ -32,8 +33,11 @@ const DashboardExtended = () => {
 
   return (
     <div className="h-screen flex font-sans bg-amber-50 overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-72 border-r-4 border-black bg-white flex flex-col z-20 relative">
+      {/* Mobile Navigation (visible < lg) */}
+      <MobileNavigation />
+
+      {/* Sidebar (hidden on mobile) */}
+      <aside className="hidden lg:flex lg:flex-col w-72 border-r-4 border-black bg-white z-20 relative">
         <div className="p-8 border-b-4 border-black bg-gradient-to-r from-pink-500 to-rose-500 text-white">
           <Link to="/" className="font-black text-3xl tracking-tighter block hover:underline ">AI TUTOR</Link>
         </div>
@@ -68,7 +72,7 @@ const DashboardExtended = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
         <Routes>
           <Route path="/"                           element={<Navigate to="/dashboard/topic" replace />} />
           <Route path="/topic"                      element={<TopicPage />} />

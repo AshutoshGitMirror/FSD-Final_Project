@@ -104,23 +104,23 @@ const KnowledgeGraphPage = () => {
   }
 
   return (
-    <div className="p-8 h-[calc(100vh)] flex flex-col">
+    <div className="p-4 md:p-8 pb-24 lg:pb-8 h-[calc(100dvh-56px)] lg:h-[calc(100vh)] flex flex-col">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-black uppercase tracking-tight mb-2">🧠 Concept Map</h1>
-        <p className="font-bold text-gray-500 text-sm">Std {std} · {board} — Visualize prerequisite chains and find your weak spots</p>
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tight mb-2">🧠 Concept Map</h1>
+        <p className="font-bold text-gray-500 text-xs md:text-sm">Std {std} · {board} — Visualize prerequisite chains and find your weak spots</p>
       </div>
 
       {/* Subject Selector */}
-      <div className="flex flex-wrap gap-3 mb-6 border-b-4 border-black pb-6">
+      <div className="flex gap-2 md:gap-3 mb-6 border-b-4 border-black pb-6 overflow-x-auto scrollbar-hide -mx-4 md:mx-0 px-4 md:px-0">
         {subjects.map((subj, idx) => (
           <button
             key={subj}
             onClick={() => setSelectedSubject(subj)}
-            className={` font-black text-base px-6 py-3 transition-all active:translate-y-1 ${
+            className={`font-black text-sm md:text-base px-4 md:px-6 py-3 min-h-[44px] shrink-0 transition-all active:translate-y-0.5 ${
               subj === selectedSubject
-                ? `${SUBJECT_COLORS[idx % SUBJECT_COLORS.length]}  -translate-y-0.5`
-                : 'bg-white hover:bg-gray-100'
+                ? `${SUBJECT_COLORS[idx % SUBJECT_COLORS.length]} -translate-y-0.5`
+                : 'bg-white hover:bg-gray-100 border-2 border-transparent'
             }`}
           >
             {subj}
@@ -131,16 +131,16 @@ const KnowledgeGraphPage = () => {
         <button
           onClick={runGapAnalysis}
           disabled={loadingGaps}
-          className="ml-auto  font-black text-base px-6 py-3 bg-red-400 text-white hover:bg-red-500 shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
+          className="lg:ml-auto font-black text-sm md:text-base px-4 md:px-6 py-3 min-h-[44px] shrink-0 bg-red-400 text-white hover:bg-red-500 shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
         >
-          {loadingGaps ? '⏳ Analyzing...' : '🔍 AI Gap Analysis'}
+          {loadingGaps ? '⏳ Analyzing...' : '🔍 Gap Analysis'}
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex gap-6 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 min-h-0">
         {/* Graph Area */}
-        <div className="flex-1 card-bub-solid bg-white p-2 relative" style={{ minHeight: '500px' }}>
+        <div className="flex-1 card-bub-solid bg-white p-2 relative" style={{ minHeight: '400px' }}>
           {graphData?.nodes?.length > 0 ? (
             <>
               <ConceptMapCanvas
@@ -170,7 +170,7 @@ const KnowledgeGraphPage = () => {
         </div>
 
         {/* Side Panel */}
-        <div className="w-80 flex-shrink-0 space-y-4 overflow-y-auto">
+        <div className="w-full lg:w-80 flex-shrink-0 space-y-4 overflow-y-auto">
           {/* Selected Node Info */}
           {selectedNode && (
             <div className="card-bub-solid bg-white p-5">

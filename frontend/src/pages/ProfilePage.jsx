@@ -67,9 +67,9 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
-      <h1 className="text-4xl font-black uppercase mb-2 tracking-tight">👤 My Profile</h1>
-      <p className="font-bold text-gray-600 mb-8">Manage your account and data</p>
+    <div className="p-4 md:p-8 max-w-2xl mx-auto">
+      <h1 className="text-2xl md:text-4xl font-black uppercase mb-2 tracking-tight">👤 My Profile</h1>
+      <p className="font-bold text-gray-600 mb-6 md:mb-8">Manage your account and data</p>
 
       <div className="card-bub-solid bg-white p-8 mb-8">
         <div className="space-y-4">
