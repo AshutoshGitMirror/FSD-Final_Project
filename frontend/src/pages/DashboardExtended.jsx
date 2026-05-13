@@ -11,6 +11,7 @@ import SpacedRepetitionPage from './SpacedRepetitionPage';
 import TeacherDashboard from './TeacherDashboard';
 import ProfilePage from './ProfilePage';
 import AchievementsPage from './AchievementsPage';
+import QuickQuizPage from './QuickQuizPage';
 import MobileNavigation from '../components/MobileNavigation';
 import { getUser } from '../utils/auth';
 
@@ -44,6 +45,7 @@ const DashboardExtended = () => {
         </div>
         <nav className="flex-1 p-6 space-y-4 flex flex-col overflow-y-auto">
           <Link to="/dashboard"              className={getLinkClass('/home', 'bg-gradient-to-r from-amber-400 to-orange-400')}>🏠 Home</Link>
+          <Link to="/dashboard/quick-quiz"   className={getLinkClass('/quick-quiz', 'bg-green-400')}>⚡ Quick Quiz</Link>
           <Link to="/dashboard/topic"        className={getLinkClass('/topic',        'bg-gradient-to-r from-blue-400 to-cyan-400')}>📚 Curriculum</Link>
           <Link to="/dashboard/concept-map"  className={getLinkClass('/concept-map',  'bg-green-400')}>🧠 Concept Map</Link>
           <Link to="/dashboard/review"       className={getLinkClass('/review',       'bg-purple-400 text-white')}>🔄 Review Hub</Link>
@@ -90,6 +92,7 @@ const DashboardExtended = () => {
           <Route path="/teacher"                    element={<TeacherDashboard />} />
           <Route path="/profile"                    element={<ProfilePage />} />
           <Route path="/achievements"              element={<AchievementsPage />} />
+          <Route path="/quick-quiz"                element={<QuickQuizPage />} />
         </Routes>
       </main>
 

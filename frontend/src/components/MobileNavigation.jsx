@@ -12,6 +12,7 @@ const TABS = [
 ];
 
 const DRAWER_ITEMS = [
+  { path: '/dashboard/quick-quiz', icon: '⚡', label: 'Quick Quiz' },
   { path: '/dashboard/concept-map', icon: '🧠', label: 'Concept Map' },
   { path: '/dashboard/achievements', icon: '🏆', label: 'Achievements' },
   { path: '/dashboard/saved-links', icon: '🔗', label: 'Saved Links' },
