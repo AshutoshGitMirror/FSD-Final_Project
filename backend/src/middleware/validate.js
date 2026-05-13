@@ -24,8 +24,8 @@ const registerSchema = z.object({
   body: z.object({
     fullName: z.string().min(1, 'Full name is required'),
     email: z.string().email('Invalid email format'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    std: z.number().int().min(1).max(10, 'Standard must be between 1 and 10'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    std: z.number().int().min(1).max(12, 'Standard must be between 1 and 12'),
     board: z.enum(['CBSE', 'ICSE', 'IB', 'State Board'], 'Invalid board')
   })
 });
@@ -87,6 +87,16 @@ const srReviewSchema = z.object({
   })
 });
 
+const progressSchema = z.object({
+  body: z.object({
+    subjectName: z.string().min(1),
+    chapterName: z.string().min(1),
+    quizScore: z.number().int().min(0).max(1000),
+    totalQuestions: z.number().int().min(1).max(200),
+    isCompleted: z.boolean()
+  })
+});
+
 module.exports = {
   validate,
   schemas: {
@@ -97,6 +107,7 @@ module.exports = {
     feedbackSchema,
     linkSaveSchema,
     srInitSchema,
-    srReviewSchema
+    srReviewSchema,
+    progressSchema
   }
 };

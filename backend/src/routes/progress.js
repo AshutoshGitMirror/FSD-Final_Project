@@ -4,6 +4,8 @@ const Progress = require('../models/Progress');
 const Leaderboard = require('../models/Leaderboard');
 const authMiddleware = require('../middleware/auth');
 const { updateAfterQuiz } = require('../services/performanceService');
+const { checkAndAward } = require('../services/gamificationService');
+const { validate, schemas } = require('../middleware/validate');
 
 // All progress routes require valid JWT
 router.use(authMiddleware);
@@ -20,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST new progress entry + UPDATE Leaderboard
-router.post('/', async (req, res) => {
+router.post('/', validate(schemas.progressSchema), async (req, res) => {
   try {
     const { subjectName, chapterName, quizScore, totalQuestions, isCompleted } = req.body;
     const userId = req.user.userId;
@@ -48,6 +50,9 @@ router.post('/', async (req, res) => {
     let perfUpdate = null;
     try {
       perfUpdate = await updateAfterQuiz(userId, subjectName, quizScore, totalQuestions);
+      if (perfUpdate?.starLevel >= 3) {
+        checkAndAward(userId, 'all_subjects').catch(() => {});
+      }
     } catch (perfErr) {
       console.warn('Performance level update skipped:', perfErr.message);
     }

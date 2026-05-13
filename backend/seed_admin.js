@@ -29,10 +29,10 @@ async function seedAdmin() {
     role: 'admin'
   });
 
-  console.log(`✅ Admin account created:`);
-  console.log(`   Email: ${adminEmail}`);
-  console.log(`   Password: ${adminPassword}`);
-  console.log(`   ⚠️  Change this password after first login!`);
+  console.log(`✅ Admin account created: ${adminEmail}`);
+  if (!process.env.ADMIN_PASSWORD) {
+    console.log(`   ⚠️  Using default password (admin123) — set ADMIN_PASSWORD env var for production!`);
+  }
 
   await mongoose.disconnect();
 }

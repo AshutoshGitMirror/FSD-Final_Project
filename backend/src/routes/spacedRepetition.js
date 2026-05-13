@@ -316,7 +316,7 @@ The question should be clear, age-appropriate for Class ${std}, and test genuine
         const ai = new GoogleGenAI({ apiKey: currentKey });
 
         const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-3.0-flash-preview",
           contents: prompt
         });
 

@@ -96,7 +96,7 @@ INSTRUCTIONS:
         const ai = new GoogleGenAI({ apiKey: currentKey });
 
         const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-3.0-flash-preview",
           contents: contents,
           config: { systemInstruction: systemPrompt }
         });
@@ -108,7 +108,7 @@ INSTRUCTIONS:
         try {
           const { GoogleGenerativeAI } = require('@google/generative-ai');
           const genAI = new GoogleGenerativeAI(currentKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+          const model = genAI.getGenerativeModel({ model: "gemini-3.0-flash-preview" });
 
           const result = await model.generateContent(
             `${systemPrompt}\n\n${messages.map(m => `${m.role === 'assistant' ? 'Student peer' : 'User'}: ${m.content}`).join('\n')}`

@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { getToken } from './utils/auth';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -18,7 +19,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/onboarding" element={<OnboardingWizard />} />
         <Route path="/ethics" element={<EthicsPage />} />
-        <Route path="/dashboard/*" element={<DashboardExtended />} />
+        <Route path="/dashboard/*" element={getToken() ? <DashboardExtended /> : <Navigate to="/login" replace />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </ErrorBoundary>

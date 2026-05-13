@@ -44,9 +44,9 @@ async function checkAndAward(userId, action, metadata = {}) {
     await updateProgress(userId, 'genius', (metadata.starLevel || 0) >= 5, 5, newAchievements, earned);
   }
 
-  if (action === 'pdf_view') {
+  if (action === 'view_video') {
     const count = await SavedLinks.countDocuments({ userId, source: 'youtube' });
-    await updateProgress(userId, 'bookworm', Math.min(count + 1, 10), 10, newAchievements, earned);
+    await updateProgress(userId, 'bookworm', Math.min(count, 10), 10, newAchievements, earned);
   }
 
   if (action === 'teach_mode') {
@@ -80,7 +80,14 @@ async function updateProgress(userId, achievementId, condition, maxProgress, ach
   const ach = await ensureAchievement(userId, achievementId);
   if (ach.unlockedAt) return;
 
-  const newProgress = condition ? Math.min(maxProgress, maxProgress) : ach.progress;
+  let newProgress;
+  if (typeof condition === 'number') {
+    newProgress = Math.min(condition, maxProgress);
+  } else if (condition) {
+    newProgress = maxProgress;
+  } else {
+    newProgress = ach.progress;
+  }
   ach.progress = newProgress;
   ach.maxProgress = maxProgress;
 
