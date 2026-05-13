@@ -187,32 +187,34 @@ const SpacedRepetitionPage = () => {
         <div>
           {dueData?.totalDue > 0 ? (
             <div>
-              <div className="card-bub-solid bg-gradient-to-r from-amber-400 to-orange-400 p-6 mb-8 transform -rotate-1">
-                <span className="text-4xl mr-3">⏰</span>
-                <span className="font-black text-xl">You have {dueData.totalDue} concept{dueData.totalDue > 1 ? 's' : ''} due for review!</span>
+              <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl p-6 mb-6 text-white shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-4xl mr-3">🧠</span>
+                    <span className="font-black text-xl">You have {dueData.totalDue} concept{dueData.totalDue > 1 ? 's' : ''} to review!</span>
+                    <p className="text-amber-100 text-sm mt-1">Each review earns +10 XP 🔥</p>
+                  </div>
+                  <button onClick={() => { const all = Object.values(dueData.bySubject || {}).flat(); if (all.length > 0) startReview(all[0]); }}
+                    className="bg-white text-amber-700 font-bold px-6 py-3 rounded-full hover:shadow-xl transition-all active:scale-95">
+                    ▶ Start Session
+                  </button>
+                </div>
               </div>
 
               {Object.entries(dueData.bySubject || {}).map(([subject, items]) => (
-                <div key={subject} className="mb-8">
-                  <h3 className="font-black text-xl uppercase mb-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 inline-block ">
-                    {subject}
-                  </h3>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div key={subject} className="mb-6">
+                  <h3 className="font-bold text-lg mb-3 text-gray-700">{subject}</h3>
+                  <div className="space-y-2">
                     {items.map((item) => {
-                      const urgency = item.interval <= 1 ? 'border-red-500 bg-red-50' : item.interval <= 3 ? 'border-orange-400 bg-orange-50' : 'border-black bg-white';
+                      const urgencyColor = item.interval <= 1 ? 'border-l-red-400 bg-red-50' : item.interval <= 3 ? 'border-l-amber-400 bg-amber-50' : 'border-l-green-400 bg-green-50';
                       return (
-                        <div key={item._id} className={`card-bub-solid ${urgency} p-5 hover:-translate-y-1 transition-all cursor-pointer`} onClick={() => startReview(item)}>
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <h4 className="font-black text-base leading-tight">{item.concept}</h4>
-                              <p className="font-bold text-xs text-gray-500 mt-1">{item.chapterName}</p>
+                        <div key={item._id} className={`rounded-xl border border-gray-200 border-l-4 ${urgencyColor} p-4 hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer`} onClick={() => startReview(item)}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-bold text-base">{item.concept}</h4>
+                              <p className="text-xs text-gray-500 mt-0.5">{item.chapterName}</p>
                             </div>
-                            <span className="text-2xl">{item.interval <= 1 ? '🔴' : item.interval <= 3 ? '🟡' : '🟢'}</span>
-                          </div>
-                          <div className="flex justify-between items-center border-t-2 border-black pt-2 mt-2">
-                            <span className="text-xs font-bold text-gray-500">Rep: {item.repetitions}</span>
-                            <span className="text-xs font-bold text-gray-500">EF: {item.easeFactor?.toFixed(1)}</span>
-                            <button className="bg-gradient-to-r from-blue-400 to-cyan-400 border border-gray-200 px-3 py-1 font-black text-xs uppercase hover:shadow-lg">
+                            <button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white px-4 py-2 rounded-full text-xs font-bold hover:shadow-lg transition-all">
                               Review →
                             </button>
                           </div>
