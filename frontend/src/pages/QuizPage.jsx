@@ -209,14 +209,10 @@ const QuizPage = () => {
             </div>
           )}
 
-          <div className="flex gap-3 justify-center">
-            <Link to="/dashboard/progress">
-              <button className="card-bub-solid px-6 py-4 bg-gradient-to-r from-blue-400 to-cyan-400  font-black uppercase hover:bg-blue-400 text-sm">📈 Progress</button>
-            </Link>
-            <Link to={`/dashboard/learn/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`}>
-              <button className="card-bub-solid px-6 py-4 bg-green-300  font-black uppercase hover:bg-green-400 text-sm">🤖 Review with AI</button>
-            </Link>
-            <button onClick={() => window.location.reload()} className="btn-bub-primary px-6 py-4 text-sm uppercase font-black">🔄 Retake</button>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link to={`/dashboard/topic`} className="bg-gray-100 font-bold px-5 py-3 rounded-full hover:bg-gray-200 transition-all text-sm">📚 Back to Topics</Link>
+            <Link to={`/dashboard/learn/${encodeURIComponent(subject)}/${encodeURIComponent(chapter)}`} className="bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-bold px-5 py-3 rounded-full hover:shadow-lg transition-all text-sm">🤖 Learn</Link>
+            <button onClick={() => { setCurrentQuestion(0); setScore(0); setFinished(false); setTimeLeft(30); setSelectedIdx(null); setShowFeedback(false); setIsLocked(false); setPerfUpdate(null); hasSavedRef.current = false; }} className="bg-gradient-to-r from-amber-400 to-orange-400 text-white font-bold px-5 py-3 rounded-full hover:shadow-lg transition-all text-sm">🔄 Retake Quiz</button>
           </div>
         </div>
       </div>
