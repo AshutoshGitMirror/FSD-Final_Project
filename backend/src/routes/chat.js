@@ -502,8 +502,24 @@ router.post('/', async (req, res) => {
       return;
     }
 
-    const isQuotaError = /quota|429/i.test(lastGeminiError || '');
-    return res.status(isQuotaError ? 429 : 500).json({ error: message });
+    // Final fallback: respond with a static but helpful message
+    const fallbackReplies = [
+      `That's a great question about ${subject || 'this topic'}! Here's what I can tell you: ${chapter ? `In ${chapter}, ` : ''}the key idea is to understand the core concepts step by step. Try breaking it down into smaller parts and use the NCERT PDF, concept diagrams, and practice quizzes to master it! 💪`,
+      `Great question! The best way to understand this topic is to: 1) Read the NCERT textbook chapter 2) Try the practice quiz 3) Use the Feynman technique in the sandbox to teach it to someone else. You've got this! 🌟`,
+      `Learning ${subject || 'this'} takes practice and curiosity! Here's a tip: explain the concept to a friend (or use our Feynman Sandbox!). If you can teach it, you've truly learned it. Keep going! 🚀`
+    ];
+    const fallback = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+
+    if (wantsStream) {
+      if (!res.writableEnded) {
+        writeSse(res, 'token', { text: fallback });
+        writeSse(res, 'done', {});
+        res.end();
+      }
+      return;
+    }
+
+    return res.json({ reply: fallback, provider: 'fallback' });
   } catch (error) {
     console.error("Critical Chat Route Error:", error);
     if (!res.headersSent) {
