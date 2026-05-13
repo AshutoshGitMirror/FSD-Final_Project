@@ -88,14 +88,30 @@ const HomeHub = () => {
     <div className="p-6 max-w-5xl mx-auto">
       {/* Welcome Header */}
       <div className="mb-8 bg-gradient-to-r from-violet-100 via-fuchsia-50 to-amber-50 rounded-3xl p-8 border border-violet-200/50 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+          <div className="flex-1">
             <h1 className="text-3xl font-black tracking-tight">{greeting}, {user?.fullName?.split(' ')[0] || 'Scholar'}! ✨</h1>
             <p className="text-gray-500 font-medium mt-1">Grade {user?.std} · {user?.board}</p>
           </div>
-          <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl px-5 py-3 border border-amber-200 ml-auto">
-            <span className="text-2xl">🤖</span>
-            <p className="text-sm font-medium text-gray-600 italic">{mascotQuote}</p>
+          <div className="flex items-center gap-3">
+            {/* Mini streak */}
+            {gamification && (
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full px-4 py-2 border border-amber-200">
+                <span className="text-lg">{gamification.streak > 0 ? '🔥' : '💪'}</span>
+                <span className="font-bold text-sm">{gamification.streak}</span>
+              </div>
+            )}
+            {/* Mini achievements */}
+            {gamification && (
+              <div className="flex items-center gap-1.5 bg-gradient-to-r from-violet-50 to-fuchsia-50 rounded-full px-4 py-2 border border-violet-200">
+                <span className="text-lg">🏆</span>
+                <span className="font-bold text-sm">{gamification.unlockedCount}/{gamification.totalCount}</span>
+              </div>
+            )}
+            <div className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl px-5 py-3 border border-amber-200">
+              <span className="text-2xl">🤖</span>
+              <p className="text-sm font-medium text-gray-600 italic">{mascotQuote}</p>
+            </div>
           </div>
         </div>
       </div>
