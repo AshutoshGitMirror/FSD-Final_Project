@@ -115,6 +115,10 @@
 }
 
 /* ── Body ──────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 50%, #ECFDF5 100%);
   color: var(--color-bub-text);
