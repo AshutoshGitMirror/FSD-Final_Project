@@ -79,7 +79,7 @@ const KnowledgeGraphPage = () => {
     if (!user?.userId) return;
     setLoadingGaps(true);
     try {
-      const res = await authFetch(backendUrl(`/api/knowledge-graph/gaps/${user.userId}?subject=${encodeURIComponent(selectedSubject)}`));
+      const res = await authFetch(backendUrl(`/api/knowledge-graph/gaps?subject=${encodeURIComponent(selectedSubject)}`));
       const data = await res.json();
       setGapAnalysis(data);
     } catch (err) {
